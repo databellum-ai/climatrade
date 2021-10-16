@@ -1,6 +1,13 @@
 # ================================
 # Extract stock data
 # ================================
+
+# PTE:
+#-REvisar el warning
+tq_get_options()
+tq_get("AAPL")
+
+
 prices <- tq_get(chosenTickers,
                  from = startingDateTicker,
                  to = endDateTicker,

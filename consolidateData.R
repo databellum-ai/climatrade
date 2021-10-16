@@ -6,6 +6,7 @@ head(prices)
 head(searches_iot) # Hits over time for the concepts requested
 head(searches_aggrHits) # Hits over time aggregating concepts
 head(searches_related) # Search terms related with concepts requested
+head(historicalRankingFIFA) # FIFA historical ranking
 
 
 
