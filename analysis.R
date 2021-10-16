@@ -6,7 +6,7 @@ if(!require(corrplot)) install.packages("corrplot", repos = "http://cran.us.r-pr
 
 library(tidyverse)
 library(ggplot2)
-library(tidyquant) # To get sotck data
+library(tidyquant) # To get stock data
 library(gtrendsR) # To get GoogleTrends data
 library(corrplot) # To show correlograms
 
@@ -16,7 +16,7 @@ library(corrplot) # To show correlograms
 # ================================
 # Prices parameters:
 chosenTickers = c("AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
-endDateTicker = today
+endDateTicker = as.Date(today())
 startingDateTicker = endDateTicker - 365 # also as... "2021-01-01"
 # Searches parameters:
 search_concept_gral <- "Banks"
@@ -81,9 +81,9 @@ searches_aggrHits %>%
 # Extract dataframe containing related searches
 searches_related <- queryTrends %>% .$related_queries
 head(searches_related)
-queryTrends$related_queries %>% filter(keyword == search_concept[1]) %>% pull(value)
-queryTrends$related_queries %>% filter(keyword == search_concept[2]) %>% pull(value)
-queryTrends$related_queries %>% filter(keyword == search_concept[3]) %>% pull(value)
+queryTrends$related_queries %>% filter(keyword == search_concepts[1]) %>% pull(value)
+queryTrends$related_queries %>% filter(keyword == search_concepts[2]) %>% pull(value)
+queryTrends$related_queries %>% filter(keyword == search_concepts[3]) %>% pull(value)
 
 # ===============================================
 # Consolidation
