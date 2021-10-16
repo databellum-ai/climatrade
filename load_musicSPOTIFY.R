@@ -1,11 +1,10 @@
 # https://developer.spotify.com/documentation/web-api/reference/
 # https://rdrr.io/cran/spotifyr/man/get_my_top_artists_or_tracks.html
 # https://msmith7161.github.io/what-is-speechiness/
-#
-# For certain functions and applications, you’ll need to log in as a Spotify user. To do this, your Spotify Developer application needs to have a callback url. You can set this to whatever you want that will work with your application, but a good default option is http://localhost:1410/ (see image below). For more information on authorization, visit the offical Spotify Developer Guide. (https://www.rcharlie.com/spotifyr/)
-install.packages("spotifyr")
 
-library(spotifyr)
+# PTE:
+# -Separar por país
+# -Nivel canción y sus características (BPM, etc.)
 
 Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
 Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
@@ -17,15 +16,25 @@ access_token <- get_spotify_access_token()
 # https://stackoverflow.com/questions/42130591/most-popular-tracks-list-using-the-spotify-api
 tmpCategories <- get_categories()$id
 
-get_category_playlists(
+tmpPlaylists <- get_category_playlists(
   category_id = "toplists",
   country = NULL,
   limit = 50
 )
+tmpPlaylists <- tmpPlaylists %>% 
+  filter(id =="37i9dQZF1DXcBWIGoYBM5M" | 
+           id =="37i9dQZEVXbMDoHDwVN2tF" | 
+           id =="37i9dQZEVXbLiRSasKsNU9") %>% 
+  select(id, name, description)
+
+tmpPlaylists
+nrow(tmpPlaylists)
 
 
 
 
+
+# -----------------------------------------------------------------------
 
 beatles <- get_artist_audio_features('the beatles')
 class(beatles)

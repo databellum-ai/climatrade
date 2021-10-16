@@ -1,11 +1,7 @@
 # Web visible: https://www.fifa.com/fifa-world-ranking/men
 # Datos JSON: https://www.fifa.com/api/ranking-overview?locale=en&dateId=id13407
 
-if(!require(rvest)) install.packages("rvest", repos = "http://cran.us.r-project.org")
-if(!require(jsonlite)) install.packages("jsonlite", repos = "http://cran.us.r-project.org")
 
-library(rvest)
-library(jsonlite)
 
 # Let's obtain available dates with their associated ids for URL
 fifa_teams <- read_html("https://www.fifa.com/fifa-world-ranking/men")
