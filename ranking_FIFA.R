@@ -1,6 +1,6 @@
 
 
-# Data downloaded 25/July/2021
+# Data downloaded 25/July/2021 (https://www.kaggle.com/cashncarry/fifaworldranking/version/8)
 rankingFIFA <- read.csv("fifa_ranking.csv")
 class(rankingFIFA)
 head(rankingFIFA)
