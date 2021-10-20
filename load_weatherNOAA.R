@@ -5,8 +5,6 @@
 
 # 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
 # https://www.math.u-bordeaux.fr/~arichou/site/tutorials/rnoaa_tutorial.html
-# Email:	jes@databellum-ai.com
-# Token:	fECFMxqLfSEuoVkfmRkUCGMALcIRvQey
 
 
 if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
