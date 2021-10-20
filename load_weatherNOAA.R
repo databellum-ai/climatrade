@@ -17,24 +17,37 @@ source("clavesAPI_noaa.R")
 ncdc_datasets()
 # Get data category data and metadata
 ncdc_datacats(stationid='GHCND:SP000003195')
-# Get data category data and metadata
-ncdc_datacats(stationid='GHCND:SP000003195')
-# Fetch list of city locations in descending order
-ncdc_locs(locationcategoryid='CITY', sortfield='name', sortorder='asc')
 
 
-# Get info on a station by specifcying a dataset, locationtype, location, and station
-ncdc_stations(datasetid='GHCND', locationid='FIPS:12017', stationid='GHCND:USC00084289')
-# Search for data
-ncdc(datasetid='GHCND', stationid='GHCND:SP000003195', datatypeid='TMAX', startdate = '2010-01-01', enddate = '2010-01-31', limit=500)
+# Search for data in Station in Year
+stationsFinanceCapitals <- c("SP000003195", "SPE00119828")
+stationsData <- data.frame()
+for (i_station in stationsFinanceCapitals) {
+  print(i_station)
+  tmpStationTMIN <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMIN', startdate = '2010-01-01', enddate = '2010-12-31', sortfield = 'date', limit=366)
+  tmpStationTMAX <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMAX', startdate = '2010-01-01', enddate = '2010-12-31', sortfield = 'date', limit=366)
+  tmpStationPRCP <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='PRCP', startdate = '2010-01-01', enddate = '2010-12-31', sortfield = 'date', limit=366)
+  tmpStationData <- rbind(tmpStationTMIN$data, tmpStationTMAX$data, tmpStationPRCP$data)
+  tmpStationData <- tmpStationData %>% 
+    group_by(date, datatype, station) %>% summarize(value) %>% 
+    spread(key = datatype, value = value) %>% select(date, station, TMIN, TMAX, PRCP)
+  stationsData <- rbind(stationsData, tmpStationData)
+}
+#FALTA: meter todas la Stations + Loop por año + Convertir a Fahrenheit + Unidades PRCP? + salvar&carga incremental
+
+head(stationsData)
+count(stationsData)
+unique(stationsData$date)
+unique(stationsData$station)
 
 
-# # Specify datasetid, locationidtype, locationid, and station
-ncdc_stations(datasetid='GHCND', locationid='FIPS:12017', stationid='GHCND:USC00084289')
-ncdc_stations(datasetid='GHCND', stationid='GHCND:SP000003195') # Madrid-Retiro
-ncdc_stations(datasetid='GHCND', stationid='GHCND:SPE00119828') # Oviedo
 
 
+
+tmpStationTMAX <- tmpStationTMAX$data %>% mutate(TMAX = value) %>% select(station, date, TMAX)
+
+
+head(tmplocationData)
 
 
 # ==================================================

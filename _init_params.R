@@ -9,6 +9,7 @@ if(!require(spotifyr)) install.packages("spotifyr", repos = "http://cran.us.r-pr
 library(tidyquant)
 library(tidyverse)
 library(lubridate)
+library(lubridate)
 library(ggplot2)
 library(tidyquant) # To get stock data
 library(gtrendsR) # To get GoogleTrends data
