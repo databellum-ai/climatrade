@@ -12,7 +12,8 @@ stationsNames <- c("NewYork", "Paris", "HongKong", "Chicago", "London", "LosAnge
 # stationsIds <- c("GME00122362", "JA000047662", "KSM00047108", "SNM00048698", "AEM00041194", "SPE00120278", "SP000008280", "SPE00119828")
 # stationsNames <- c("Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai", "Madrid", "Albacete", "Oviedo")
 
-
+stationsIds <- c("JA000047662")
+stationsNames <- c("Tokyo")
 
 year_from <- 1989
 
@@ -65,7 +66,7 @@ summary(allStationsData$date)
 # https://docs.opendata.aws/noaa-ghcn-pds/readme.html
 # https://www.math.u-bordeaux.fr/~arichou/site/tutorials/rnoaa_tutorial.html
 
-options(noaakey = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+options(noaakey = "fECFMxqLfSEuoVkfmRkUCGMALcIRvQey")
 source("clavesAPI_noaa.R")
 
 historicalData <- readRDS("./data/weatherNOAA.rds") # previously loaded data (STEP 1)
@@ -82,12 +83,14 @@ stationsData <- data.frame()
 for (i_station in stationsIds) {
   print(i_station)
   tmpStationTMIN <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMIN', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
+  print(tmpStationTMIN)
   tmpStationTMAX <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMAX', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
   tmpStationPRCP <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='PRCP', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
   tmpStationData <- rbind(tmpStationTMIN$data, tmpStationTMAX$data, tmpStationPRCP$data)
-  tmpStationData <- tmpStationData %>% 
-    group_by(date, datatype, station) %>% summarize(value) %>% 
+  tmpStationData <- tmpStationData %>%
+    group_by(date, datatype, station) %>% summarize(value) %>%
     spread(key = datatype, value = value) %>% select(date, station, TMIN, TMAX, PRCP)
+
   stationsData <- rbind(stationsData, tmpStationData)
 }
 #FALTA: arreglar fallo por no datos + sustituir estaciones fallidas + incremental fusionar con carga histórica
