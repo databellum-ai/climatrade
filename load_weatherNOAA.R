@@ -7,6 +7,39 @@
 # https://www.math.u-bordeaux.fr/~arichou/site/tutorials/rnoaa_tutorial.html
 
 
+# ---------------------------
+# ---------------------------
+# LEYENDO DE LAS ESTACIONES DIRECTAMENTE
+# https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/
+# https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/
+
+# AEM00041194	DUBAI INTL
+# CHM00054511	BEIJING
+# FRM00007156	PARIS-MONTSOURIS
+# GME00122362	FRANKFURT/MAIN-WESTEND
+# JA000047662	TOKYO
+# KSM00047108	SEOUL CITY
+# MCM00045011	MACAU INTL
+# NLE00152485	SCHIPHOL
+# SNM00048698	SINGAPORE CHANGI INTL
+# SP000008280	ALBACETE LOS LLANOS
+# SPE00119828	OVIEDO
+# SPE00120278	MADRID/BARAJAS
+# UKM00003772	HEATHROW
+# USC00111577	CHICAGO MIDWAY AP 3SW
+# USW00014732	NEW YORK LAGUARDIA AP
+# USW00093134	LOS ANGELES DWTN USC CAMPUS
+# USW00094728	NEW YORK CNTRL PK TWR
+# USW00094846	CHICAGO OHARE INTL AP
+
+
+
+stationData <- read_csv(file = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/AGM00060387.csv.gz")
+
+
+# ---------------------------
+# ---------------------------
+
 if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
 
 library('rnoaa')
