@@ -1,44 +1,60 @@
+# PTE:
+# -Repasar fiabilidad/regularidad de datos de cada estación y reeemplazar si es necesario
+# -Probar RNOAA para extracción incremental de fechas muy recientes (chequear el delay de los .CSV)
+
+
+
+# 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
+stationsIds <- c("USW00094728", "FRM00007156", "GME00122362", "JA000047662", "KSM00047108", "MCM00045011", "USW00094846", "SNM00048698", "UKM00003772", "USW00093134", "CHM00054511", "NLE00152485", "AEM00041194", "SPE00120278", "SP000008280", "SPE00119828")
+stationsNames <- c("NewYork", "Paris", "Frankfurt", "Tokyo", "Seoul", "HongKong", "Chicago", "Singapore", "London", "LosAngeles", "Beijng", "Amsterdam", "Dubai", "Madrid", "Albacete", "Oviedo")
+
+year_from <- 1989
+
+# ---------------------------
+# ---------------------------
+# MÉTODO 1 DE ACCESO: leyendo cada .csv histórico
+baseURL <- 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/'
+allStationsData <- data.frame()
+for (i_station in 1:length(stationsIds)) {
+  currentURL <- paste(baseURL, stationsIds[i_station],".csv.gz", sep="")
+  print(currentURL)
+  tmpStationData <- read_csv(
+    file = currentURL, 
+    col_names=FALSE)
+  tmpStationData <- tmpStationData %>% 
+    mutate(date = ymd(X2), 
+           stationPlace = stationsNames[i_station]) %>% 
+    filter(year(date) >= year_from) %>% 
+    filter(X3 %in% c("TMIN", "TMAX", "PRCP")) %>% 
+    select(date, stationPlace, indicator = X3, value = X4)
+  allStationsData <- rbind(allStationsData, tmpStationData)
+}
+head(allStationsData)
+# Separate columns per indicator and transform temperature de celsius
+allStationsData <- allStationsData %>% 
+  spread(key = indicator, value = value) %>% 
+  mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0) )
+
+
+# Create columns combining indicator and place  
+# https://stackoverflow.com/questions/53849240/tidyrspread-with-multiple-keys-and-values
+allStationsData <- allStationsData %>%
+  pivot_wider(names_from = stationPlace, values_from = c("TMIN", "TMAX", "PRCP"), names_sep="_")
+head(allStationsData)
+
+# Save to RDS
+saveRDS(allStationsData, "./data/weatherNOAA.rds")
+# write.csv(allStationsData, "./data/weatherNOAA.csv", row.names=TRUE)
+
+
+# ---------------------------
+# ---------------------------
+# MÉTODO 2 DE ACCESO: mediante el paquete RNOAA
 # API de NOAA.gov
 # https://www.rdocumentation.org/packages/rnoaa/versions/0.2.0
 # Locations list: https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt
 # https://docs.opendata.aws/noaa-ghcn-pds/readme.html
-
-# 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
 # https://www.math.u-bordeaux.fr/~arichou/site/tutorials/rnoaa_tutorial.html
-
-
-# ---------------------------
-# ---------------------------
-# LEYENDO DE LAS ESTACIONES DIRECTAMENTE
-# https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/
-# https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/
-
-# AEM00041194	DUBAI INTL
-# CHM00054511	BEIJING
-# FRM00007156	PARIS-MONTSOURIS
-# GME00122362	FRANKFURT/MAIN-WESTEND
-# JA000047662	TOKYO
-# KSM00047108	SEOUL CITY
-# MCM00045011	MACAU INTL
-# NLE00152485	SCHIPHOL
-# SNM00048698	SINGAPORE CHANGI INTL
-# SP000008280	ALBACETE LOS LLANOS
-# SPE00119828	OVIEDO
-# SPE00120278	MADRID/BARAJAS
-# UKM00003772	HEATHROW
-# USC00111577	CHICAGO MIDWAY AP 3SW
-# USW00014732	NEW YORK LAGUARDIA AP
-# USW00093134	LOS ANGELES DWTN USC CAMPUS
-# USW00094728	NEW YORK CNTRL PK TWR
-# USW00094846	CHICAGO OHARE INTL AP
-
-
-
-stationData <- read_csv(file = "https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/AGM00060387.csv.gz")
-
-
-# ---------------------------
-# ---------------------------
 
 if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
 
@@ -50,7 +66,6 @@ source("clavesAPI_noaa.R")
 ncdc_datasets()
 # Get data category data and metadata
 ncdc_datacats(stationid='GHCND:SP000003195')
-
 
 # Search for data in Station in Year
 stationsFinanceCapitals <- c("SP000003195", "SPE00119828")
@@ -73,17 +88,6 @@ count(stationsData)
 unique(stationsData$date)
 unique(stationsData$station)
 
-
-
-
-
 tmpStationTMAX <- tmpStationTMAX$data %>% mutate(TMAX = value) %>% select(station, date, TMAX)
 
-
 head(tmplocationData)
-
-
-# ==================================================
-
-
-# https://www.ncei.noaa.gov/access/search/dataset-search?observationTypes=Land%20Surface&startDate=2010-01-01T00:00:00&endDate=2021-01-01T23:59:59

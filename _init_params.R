@@ -9,7 +9,6 @@ if(!require(spotifyr)) install.packages("spotifyr", repos = "http://cran.us.r-pr
 library(tidyquant)
 library(tidyverse)
 library(lubridate)
-library(lubridate)
 library(ggplot2)
 library(tidyquant) # To get stock data
 library(gtrendsR) # To get GoogleTrends data
@@ -17,6 +16,11 @@ library(ggthemes)
 library(rvest)
 library(jsonlite)
 library(spotifyr)# For certain functions and applications, you’ll need to log in as a Spotify user. To do this, your Spotify Developer application needs to have a callback url. You can set this to whatever you want that will work with your application, but a good default option is http://localhost:1410/ (see image below). For more information on authorization, visit the offical Spotify Developer Guide. (https://www.rcharlie.com/spotifyr/)
+library(readr)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(stringr)
 
 
 # ================================
