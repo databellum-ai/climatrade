@@ -5,6 +5,8 @@ if(!require(ggthemes)) install.packages("ggthemes", repos = "http://cran.us.r-pr
 if(!require(rvest)) install.packages("rvest", repos = "http://cran.us.r-project.org")
 if(!require(jsonlite)) install.packages("jsonlite", repos = "http://cran.us.r-project.org")
 if(!require(spotifyr)) install.packages("spotifyr", repos = "http://cran.us.r-project.org")
+if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
+
 
 library(tidyquant)
 library(tidyverse)
@@ -21,7 +23,7 @@ library(data.table)
 library(dplyr)
 library(tidyr)
 library(stringr)
-
+library(rnoaa)
 
 # ================================
 # Parameters

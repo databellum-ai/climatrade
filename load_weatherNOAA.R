@@ -5,14 +5,20 @@
 
 
 # 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
-stationsIds <- c("USW00094728", "FRM00007156", "GME00122362", "JA000047662", "KSM00047108", "MCM00045011", "USW00094846", "SNM00048698", "UKM00003772", "USW00093134", "CHM00054511", "NLE00152485", "AEM00041194", "SPE00120278", "SP000008280", "SPE00119828")
-stationsNames <- c("NewYork", "Paris", "Frankfurt", "Tokyo", "Seoul", "HongKong", "Chicago", "Singapore", "London", "LosAngeles", "Beijng", "Amsterdam", "Dubai", "Madrid", "Albacete", "Oviedo")
+stationsIds <- c("USW00094728", "FRM00007156", "MCM00045011", "USW00094846", "UKM00003772", "USW00093134", "CHM00054511", "SPE00120278", "SP000008280", "SPE00119828")
+stationsNames <- c("NewYork", "Paris", "HongKong", "Chicago", "London", "LosAngeles", "Beijng", "Madrid", "Albacete", "Oviedo")
+
+# FALLIDA:
+# stationsIds <- c("GME00122362", "JA000047662", "KSM00047108", "SNM00048698", "AEM00041194", "SPE00120278", "SP000008280", "SPE00119828")
+# stationsNames <- c("Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai", "Madrid", "Albacete", "Oviedo")
+
+
 
 year_from <- 1989
 
 # ---------------------------
 # ---------------------------
-# MÉTODO 1 DE ACCESO: leyendo cada .csv histórico
+# STEP 1 (historical): leyendo cada .csv histórico
 baseURL <- 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/'
 allStationsData <- data.frame()
 for (i_station in 1:length(stationsIds)) {
@@ -47,44 +53,46 @@ saveRDS(allStationsData, "./data/weatherNOAA.rds")
 # write.csv(allStationsData, "./data/weatherNOAA.csv", row.names=TRUE)
 
 
+summary(allStationsData$date)
+
+
 # ---------------------------
 # ---------------------------
-# MÉTODO 2 DE ACCESO: mediante el paquete RNOAA
+# STEP 2 (incremental): mediante el paquete RNOAA
 # API de NOAA.gov
 # https://www.rdocumentation.org/packages/rnoaa/versions/0.2.0
 # Locations list: https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt
 # https://docs.opendata.aws/noaa-ghcn-pds/readme.html
 # https://www.math.u-bordeaux.fr/~arichou/site/tutorials/rnoaa_tutorial.html
 
-if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
-
-library('rnoaa')
 options(noaakey = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 source("clavesAPI_noaa.R")
 
-# Get table of all datasets
-ncdc_datasets()
-# Get data category data and metadata
-ncdc_datacats(stationid='GHCND:SP000003195')
+historicalData <- readRDS("./data/weatherNOAA.rds") # previously loaded data (STEP 1)
+
+# Get data only since last historic load
+loadDate <- as.character(Sys.Date()) # today
+firstDateUnavailable <- as.character(max(historicalData$date)+1) # use preloaded data to get incrementally
+
+#!!!!! OJO: ESTOY DUPLICANDO POR LEER DESDE TAN ATRÁS PARA QUE NO FALLE
+firstDateUnavailable <- as.character(Sys.Date()-180)
 
 # Search for data in Station in Year
-stationsFinanceCapitals <- c("SP000003195", "SPE00119828")
 stationsData <- data.frame()
-for (i_station in stationsFinanceCapitals) {
+for (i_station in stationsIds) {
   print(i_station)
-  tmpStationTMIN <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMIN', startdate = '2010-01-01', enddate = '2010-12-31', sortfield = 'date', limit=366)
-  tmpStationTMAX <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMAX', startdate = '2010-01-01', enddate = '2010-12-31', sortfield = 'date', limit=366)
-  tmpStationPRCP <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='PRCP', startdate = '2010-01-01', enddate = '2010-12-31', sortfield = 'date', limit=366)
+  tmpStationTMIN <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMIN', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
+  tmpStationTMAX <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMAX', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
+  tmpStationPRCP <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='PRCP', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
   tmpStationData <- rbind(tmpStationTMIN$data, tmpStationTMAX$data, tmpStationPRCP$data)
   tmpStationData <- tmpStationData %>% 
     group_by(date, datatype, station) %>% summarize(value) %>% 
     spread(key = datatype, value = value) %>% select(date, station, TMIN, TMAX, PRCP)
   stationsData <- rbind(stationsData, tmpStationData)
 }
-#FALTA: meter todas la Stations + Loop por año + Convertir a Fahrenheit + Unidades PRCP? + salvar&carga incremental
+#FALTA: arreglar fallo por no datos + sustituir estaciones fallidas + incremental fusionar con carga histórica
 
 head(stationsData)
-count(stationsData)
 unique(stationsData$date)
 unique(stationsData$station)
 
