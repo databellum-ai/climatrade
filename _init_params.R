@@ -18,12 +18,17 @@ library(ggthemes)
 library(rvest)
 library(jsonlite)
 library(spotifyr)# For certain functions and applications, you’ll need to log in as a Spotify user. To do this, your Spotify Developer application needs to have a callback url. You can set this to whatever you want that will work with your application, but a good default option is http://localhost:1410/ (see image below). For more information on authorization, visit the offical Spotify Developer Guide. (https://www.rcharlie.com/spotifyr/)
+  Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+  Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+  # source("clavesAPI_spotify.R")
 library(readr)
 library(data.table)
 library(dplyr)
 library(tidyr)
 library(stringr)
 library(rnoaa)
+  options(noaakey = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+  # source("clavesAPI_noaa.R")
 
 # ================================
 # Parameters

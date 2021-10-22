@@ -85,12 +85,7 @@ numStreams[1:numTopTracks]
 # -Separar por país
 # -Nivel canción y sus características (BPM, etc.)
 
-Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-source("clavesAPI_spotify.R")
-
 access_token <- get_spotify_access_token()
-
 
 # https://stackoverflow.com/questions/42130591/most-popular-tracks-list-using-the-spotify-api
 tmpCategories <- get_categories()$id
