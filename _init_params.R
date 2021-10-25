@@ -6,7 +6,7 @@ if(!require(rvest)) install.packages("rvest", repos = "http://cran.us.r-project.
 if(!require(jsonlite)) install.packages("jsonlite", repos = "http://cran.us.r-project.org")
 if(!require(spotifyr)) install.packages("spotifyr", repos = "http://cran.us.r-project.org")
 if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
-
+if(!require(OECD)) install.packages("OECD", repos = "http://cran.us.r-project.org")
 
 library(tidyquant)
 library(tidyverse)
@@ -29,6 +29,7 @@ library(stringr)
 library(rnoaa)
   options(noaakey = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
   # source("clavesAPI_noaa.R")
+library(OECD) # To get OECD.org indicators
 
 # ================================
 # Parameters
