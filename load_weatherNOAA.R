@@ -1,4 +1,11 @@
-# PTE:
+
+# https://rdrr.io/cran/rnoaa/man/isd_stations_search.html
+# https://rdrr.io/cran/rnoaa/man/meteo_nearby_stations.html
+
+# ////////////////////////////////////////
+# ////////////////////////////////////////
+
+  # PTE:
 # -Repasar fiabilidad/regularidad de datos de cada estación y reeemplazar si es necesario
 # -Probar RNOAA para extracción incremental de fechas muy recientes (chequear el delay de los .CSV)
 #-FALTA: arreglar fallo por no datos + sustituir estaciones fallidas + incremental fusionar con carga histórica
