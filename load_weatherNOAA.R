@@ -1,33 +1,24 @@
+# PTE: Revisar datos y mirar un chart
+# PTE: Parámetro para cargar la historia (STEP 1 de los CSV.GZ) de .RDS o recalcularla
+# PTE: Obtener estaciones a partir de coordenadas de ciudades: https://rdrr.io/cran/rnoaa/man/isd_stations_search.html | https://rdrr.io/cran/rnoaa/man/meteo_nearby_stations.html
 
-# https://rdrr.io/cran/rnoaa/man/isd_stations_search.html
-# https://rdrr.io/cran/rnoaa/man/meteo_nearby_stations.html
 
-# ////////////////////////////////////////
-# ////////////////////////////////////////
+year_from_NOAA <- 1989
 
-  # PTE:
-# -Repasar fiabilidad/regularidad de datos de cada estación y reeemplazar si es necesario
-# -Probar RNOAA para extracción incremental de fechas muy recientes (chequear el delay de los .CSV)
-#-FALTA: arreglar fallo por no datos + sustituir estaciones fallidas + incremental fusionar con carga histórica
 
 # 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
-stationsIds <- c("USW00094728", "FRM00007156", "MCM00045011", "USW00094846", "UKM00003772", "USW00093134", "CHM00054511", "SPE00120278", "SP000008280", "SPE00119828")
-stationsNames <- c("NewYork", "Paris", "HongKong", "Chicago", "London", "LosAngeles", "Beijng", "Madrid", "Albacete", "Oviedo")
-
-# FALLIDAS:
-# stationsIds <- c("GME00122362", "JA000047662", "KSM00047108", "SNM00048698", "AEM00041194", "SPE00120278", "SP000008280", "SPE00119828")
-# stationsNames <- c("Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai", "Madrid", "Albacete", "Oviedo")
-
-year_from <- 1989
+stationsIds <- c("USW00094728", "FRM00007156", "MCM00045011", "USW00094846", "UKM00003772", "USW00093134", "CHM00054511", "SPE00120278", "SP000008280", "SPE00119828", "GME00122362", "JA000047662", "KSM00047108", "SNM00048698", "AEM00041194")
+stationsNames <- c("NewYork", "Paris", "HongKong", "Chicago", "London", "LosAngeles", "Beijng", "Madrid", "Albacete", "Oviedo", "Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai")
 
 # ---------------------------
 # ---------------------------
 # STEP 1 (historical): leyendo cada .csv histórico
 baseURL <- 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/'
-allStationsData <- data.frame()
+historicStationsData <- data.frame()
 for (i_station in 1:length(stationsIds)) {
   currentURL <- paste(baseURL, stationsIds[i_station],".csv.gz", sep="")
   print(currentURL)
+  print(paste(stationsIds[i_station],stationsNames[i_station], sep=" - "))
   tmpStationData <- read_csv(
     file = currentURL, 
     col_names=FALSE)
@@ -35,12 +26,15 @@ for (i_station in 1:length(stationsIds)) {
     mutate(date = ymd(X2), 
            station = paste('GHCND:',stationsIds[i_station],sep=""), 
            stationPlace = stationsNames[i_station]) %>% 
-    filter(year(date) >= year_from) %>% 
+    filter(year(date) >= year_from_NOAA) %>% 
     filter(X3 %in% c("TMIN", "TMAX", "PRCP")) %>% 
     select(date, station, stationPlace, indicator = X3, value = X4)
-  allStationsData <- rbind(allStationsData, tmpStationData)
+  historicStationsData <- rbind(historicStationsData, tmpStationData)
 }
-head(allStationsData)
+head(historicStationsData)
+# ---------------------------
+# ---------------------------
+
 
 # ---------------------------
 # ---------------------------
@@ -54,70 +48,56 @@ head(allStationsData)
 
 # Get data only since last available load
 loadDate <- as.character(Sys.Date()) # today
-firstDateUnavailable <- as.character(max(allStationsData$date)+1) # use preloaded data to get incrementally
-# In case we prefer to read from RDS:
-  # historicalData <- readRDS("./data/weatherNOAA.rds") # previously loaded data (STEP 1)
-  # firstDateUnavailable <- as.character(max(historicalData$date)+1) # use preloaded data to get incrementally
-
-
-# Search for data in Station in Year
-deltaStationsData <- allStationsData[FALSE,]  # create an empty dataframe with same columns to load incremental data
+firstDateUnavailable <- as.character(max(historicStationsData$date)+1) # use preloaded data to get incrementally
+# Search for recent/new data
 for (i_station in stationsIds) {
-  print(i_station)
-  tmpStationTMIN <- ncdc(datasetid='GHCND', 
+  print(paste(i_station,stationsNames[which(stationsIds == i_station)], sep=" - "))
+  recentStationTMIN <- ncdc(datasetid='GHCND', 
                          stationid=paste('GHCND:',i_station,sep=""), 
                          datatypeid='TMIN', 
                          startdate = firstDateUnavailable, enddate = loadDate, 
                          sortfield = 'date', 
                          limit=366)
-  tmpStationTMAX <- ncdc(datasetid='GHCND', 
+  recentStationTMAX <- ncdc(datasetid='GHCND', 
                          stationid=paste('GHCND:',i_station,sep=""), 
                          datatypeid='TMAX', 
                          startdate = firstDateUnavailable, enddate = loadDate, 
                          sortfield = 'date', 
                          limit=366)
-  tmpStationPRCP <- ncdc(datasetid='GHCND', 
+  recentStationPRCP <- ncdc(datasetid='GHCND', 
                          stationid=paste('GHCND:',i_station,sep=""), 
                          datatypeid='PRCP', 
                          startdate = firstDateUnavailable, enddate = loadDate, 
                          sortfield = 'date', 
                          limit=366)
-  tmpStationData <- rbind(tmpStationTMIN$data, tmpStationTMAX$data, tmpStationPRCP$data)
-  tmpStationData <- tmpStationData %>% 
-    mutate(date = date(date), 
-           stationId=station, 
-           stationPlace = stationsNames[which(stationsIds == i_station)], 
-           indicator=datatype) %>% 
-  select(date, stationId, stationPlace, indicator, value)
-  deltaStationsData <- rbind(deltaStationsData, tmpStationData)
+  recentStationData <- rbind(recentStationTMIN$data, recentStationTMAX$data, recentStationPRCP$data)
+  if (nrow(recentStationData) == 0) {
+    recentStationData <- historicStationsData[FALSE,]  # create an empty dataframe with same columns to append
+  } else {
+    recentStationData <- recentStationData %>% 
+      mutate(date = date(date), 
+             stationPlace = stationsNames[which(stationsIds == i_station)], 
+             indicator=datatype) %>% 
+      select(date, station, stationPlace, indicator, value)
+  }
+  allStationsData <- rbind(historicStationsData, recentStationData)
 }
-
-
 head(allStationsData)
-head(deltaStationsData)
 
-ncdc(datasetid='GHCND', stationid='GHCND:USW00014895',
-     startdate = '2013-10-01', enddate = '2013-12-01')
-
-# ----------------------------------------------
-# ----------------------------------------------
-# ----------------------------------------------
-# Spread TMIN, TMAX, PRCP 
-tmpStationData <- tmpStationData %>%
-  group_by(date, datatype, station) %>% summarize(value) %>%
-  spread(key = datatype, value = value) %>% select(date, station, TMIN, TMAX, PRCP)
-
-# Separate columns per indicator and transform temperature de integer celsius degrees
-allStationsData <- allStationsData %>% 
+# Average by date/city/indicator (in case multiple stations in a city), Spread columns per indicator, and transform temperature to integer celsius degrees
+allStationsData <- allStationsData %>%
+  group_by(date, stationPlace, indicator) %>% 
+  summarize(value = mean(value)) %>% 
   spread(key = indicator, value = value) %>% 
   mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0))
+head(allStationsData)
+
 # Create columns combining indicator and place  
 # https://stackoverflow.com/questions/53849240/tidyrspread-with-multiple-keys-and-values
 allStationsData <- allStationsData %>%
-  pivot_wider(names_from = stationPlace, values_from = c("TMIN", "TMAX", "PRCP"), names_sep="_")
+  pivot_wider(names_from = stationPlace, values_from = c("TMIN", "TMAX", "PRCP"), names_sep=".")
 head(allStationsData)
-summary(allStationsData$date)
+names(allStationsData)
 
 # Save to RDS
-saveRDS(allStationsData, "./data/weatherNOAA.rds")
-# write.csv(allStationsData, "./data/weatherNOAA.csv", row.names=TRUE)
+saveRDS(allStationsData, "./data/data_NOAA.rds")
