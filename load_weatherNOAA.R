@@ -1,3 +1,27 @@
+
+
+
+
+# station_data <- ghcnd_stations() # Takes a while to run
+# saveRDS(station_data, "./data/stations_NOAA.rds") # Save to RDS
+station_data <- readRDS("./data/stations_NOAA.rds")
+
+# Get all stations within 50 kilometers and limited to the closest 10 monitors
+oviedo <- data.frame(id = "oviedo", latitude = 43.3620683921967, longitude = -5.84817121485434)
+meteo_nearby_stations(lat_lon_df = oviedo, 
+                      station_data = station_data,
+                      radius = 50, 
+                      limit = 10, 
+                      var = c("PRCP", "TMIN", "TMAX"),
+                      year_min = 1989, 
+                      year_max = 2021)
+
+
+
+
+# ===========================================================
+# ===========================================================
+# ===========================================================
 # PTE: Revisar datos y mirar un chart
 # PTE: Parámetro para cargar la historia (STEP 1 de los CSV.GZ) de .RDS o recalcularla
 # PTE: Obtener estaciones a partir de coordenadas de ciudades: https://rdrr.io/cran/rnoaa/man/isd_stations_search.html | https://rdrr.io/cran/rnoaa/man/meteo_nearby_stations.html
@@ -93,7 +117,6 @@ allStationsData <- allStationsData %>%
 head(allStationsData)
 
 # Create columns combining indicator and place  
-# https://stackoverflow.com/questions/53849240/tidyrspread-with-multiple-keys-and-values
 allStationsData <- allStationsData %>%
   pivot_wider(names_from = stationPlace, values_from = c("TMIN", "TMAX", "PRCP"), names_sep=".")
 head(allStationsData)
