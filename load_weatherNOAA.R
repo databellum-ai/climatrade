@@ -33,11 +33,11 @@ for (i_station in 1:length(stationsIds)) {
     col_names=FALSE)
   tmpStationData <- tmpStationData %>% 
     mutate(date = ymd(X2), 
-           stationId = paste('GHCND:',stationsIds[i_station],sep=""), 
+           station = paste('GHCND:',stationsIds[i_station],sep=""), 
            stationPlace = stationsNames[i_station]) %>% 
     filter(year(date) >= year_from) %>% 
     filter(X3 %in% c("TMIN", "TMAX", "PRCP")) %>% 
-    select(date, stationId, stationPlace, indicator = X3, value = X4)
+    select(date, station, stationPlace, indicator = X3, value = X4)
   allStationsData <- rbind(allStationsData, tmpStationData)
 }
 head(allStationsData)
@@ -52,7 +52,6 @@ head(allStationsData)
 # https://www.math.u-bordeaux.fr/~arichou/site/tutorials/rnoaa_tutorial.html
 
 
-
 # Get data only since last available load
 loadDate <- as.character(Sys.Date()) # today
 firstDateUnavailable <- as.character(max(allStationsData$date)+1) # use preloaded data to get incrementally
@@ -60,19 +59,35 @@ firstDateUnavailable <- as.character(max(allStationsData$date)+1) # use preloade
   # historicalData <- readRDS("./data/weatherNOAA.rds") # previously loaded data (STEP 1)
   # firstDateUnavailable <- as.character(max(historicalData$date)+1) # use preloaded data to get incrementally
 
+
 # Search for data in Station in Year
-deltaStationsData <- data.frame()
+deltaStationsData <- allStationsData[FALSE,]  # create an empty dataframe with same columns to load incremental data
 for (i_station in stationsIds) {
   print(i_station)
-  tmpStationTMIN <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMIN', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
-  print(tmpStationTMIN)
-  tmpStationTMAX <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='TMAX', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
-  tmpStationPRCP <- ncdc(datasetid='GHCND', stationid=paste('GHCND:',i_station,sep=""), datatypeid='PRCP', startdate = firstDateUnavailable, enddate = loadDate, sortfield = 'date', limit=366)
+  tmpStationTMIN <- ncdc(datasetid='GHCND', 
+                         stationid=paste('GHCND:',i_station,sep=""), 
+                         datatypeid='TMIN', 
+                         startdate = firstDateUnavailable, enddate = loadDate, 
+                         sortfield = 'date', 
+                         limit=366)
+  tmpStationTMAX <- ncdc(datasetid='GHCND', 
+                         stationid=paste('GHCND:',i_station,sep=""), 
+                         datatypeid='TMAX', 
+                         startdate = firstDateUnavailable, enddate = loadDate, 
+                         sortfield = 'date', 
+                         limit=366)
+  tmpStationPRCP <- ncdc(datasetid='GHCND', 
+                         stationid=paste('GHCND:',i_station,sep=""), 
+                         datatypeid='PRCP', 
+                         startdate = firstDateUnavailable, enddate = loadDate, 
+                         sortfield = 'date', 
+                         limit=366)
   tmpStationData <- rbind(tmpStationTMIN$data, tmpStationTMAX$data, tmpStationPRCP$data)
   tmpStationData <- tmpStationData %>% 
-  mutate(date = date(date), 
-         stationId=station, 
-         stationPlace = stationsNames[which(stationsIds == i_station)], indicator=datatype) %>% 
+    mutate(date = date(date), 
+           stationId=station, 
+           stationPlace = stationsNames[which(stationsIds == i_station)], 
+           indicator=datatype) %>% 
   select(date, stationId, stationPlace, indicator, value)
   deltaStationsData <- rbind(deltaStationsData, tmpStationData)
 }
@@ -81,7 +96,8 @@ for (i_station in stationsIds) {
 head(allStationsData)
 head(deltaStationsData)
 
-
+ncdc(datasetid='GHCND', stationid='GHCND:USW00014895',
+     startdate = '2013-10-01', enddate = '2013-12-01')
 
 # ----------------------------------------------
 # ----------------------------------------------
