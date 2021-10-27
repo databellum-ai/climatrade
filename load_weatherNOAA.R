@@ -1,42 +1,86 @@
-
-
-
-
-# station_data <- ghcnd_stations() # Takes a while to run
-# saveRDS(station_data, "./data/stations_NOAA.rds") # Save to RDS
-station_data <- readRDS("./data/stations_NOAA.rds")
-
-# Get all stations within 50 kilometers and limited to the closest 10 monitors
-oviedo <- data.frame(id = "oviedo", latitude = 43.3620683921967, longitude = -5.84817121485434)
-meteo_nearby_stations(lat_lon_df = oviedo, 
-                      station_data = station_data,
-                      radius = 50, 
-                      limit = 10, 
-                      var = c("PRCP", "TMIN", "TMAX"),
-                      year_min = 1989, 
-                      year_max = 2021)
-
-
-
-
 # ===========================================================
 # ===========================================================
 # ===========================================================
+# PTE: Obtener estaciones a partir de coordenadas de ciudades: https://rdrr.io/cran/rnoaa/man/isd_stations_search.html | https://rdrr.io/cran/rnoaa/man/meteo_nearby_stations.html
 # PTE: Revisar datos y mirar un chart
 # PTE: Parámetro para cargar la historia (STEP 1 de los CSV.GZ) de .RDS o recalcularla
-# PTE: Obtener estaciones a partir de coordenadas de ciudades: https://rdrr.io/cran/rnoaa/man/isd_stations_search.html | https://rdrr.io/cran/rnoaa/man/meteo_nearby_stations.html
 
 
 year_from_NOAA <- 1989
-
-
-# 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
-stationsIds <- c("USW00094728", "FRM00007156", "MCM00045011", "USW00094846", "UKM00003772", "USW00093134", "CHM00054511", "SPE00120278", "SP000008280", "SPE00119828", "GME00122362", "JA000047662", "KSM00047108", "SNM00048698", "AEM00041194")
-stationsNames <- c("NewYork", "Paris", "HongKong", "Chicago", "London", "LosAngeles", "Beijng", "Madrid", "Albacete", "Oviedo", "Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai")
+refreshAlsoHistory <- FALSE
 
 # ---------------------------
 # ---------------------------
-# STEP 1 (historical): leyendo cada .csv histórico
+# STEP 1: get locations near relevent cities
+
+# Read available stations
+station_data <- readRDS("./data/stations_NOAA.rds")
+# station_data <- ghcnd_stations() # Takes a while to run
+# saveRDS(station_data, "./data/stations_NOAA.rds") # Save to RDS
+
+
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+# https://rdrr.io/cran/rnoaa/man/
+tmp2 <- isd_stations(refresh = FALSE)
+
+tmp2
+
+isd_stations_search(lat = 38.4, lon = -123, radius = 250)
+
+monitors <- c("ASN00095063", "ASN00024025", "ASN00040112", "ASN00041023",
+              "ASN00009998", "ASN00066078", "ASN00003069", "ASN00090162",
+              "ASN00040126", "ASN00058161")
+obs <- meteo_pull_monitors(monitors)
+obs_covr <- meteo_coverage(obs)
+obs_covr
+
+meteo_distance(station_data, -33, 151, radius = 10, limit = 10)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+# Define our target cities (to look for near stations near them)
+  # 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
+relevantCities <- data.frame(
+  id = c("NewYork", "Oviedo", "Amsterdam", "Paris", "HongKong", "Chicago", "London", "LosAngeles", "Beijng", "Madrid", "Albacete", "Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai"),
+  latitude = c(40.70623940806975, 43.3620683921967, 52.37288021193839, 48.8613182352403, 22.32029644568666, 41.88632188372439, 51.50702741724013, 34.05084926622552, 39.905384001792335, 40.425619645599916, 39.267266932791685, 50.12095925753092, 35.687667406759765, 37.568428507484775, 1.2929342653888358, 25.214919588761404), 
+  longitude = c(-74.00883633105707, -5.84817121485434, 4.896615844580131, 2.3003412809927495, 114.19091287611904, -87.67086062661967, -0.12701173276875632, -118.25389861960555, 116.37699181234836, -3.7025627487487984, -1.5500112927257998, 8.637929689001126, 139.76554769212072, 126.9780904050825, 103.84642630591777, 55.2762538818061))
+relevantCities
+
+# Obtain stations near our cities (<50km and up to 5 per city)
+tmpStations <- meteo_nearby_stations(lat_lon_df = relevantCities, 
+                                     station_data = station_data,
+                                     radius = 50, 
+                                     limit = 5, 
+                                     var = c("PRCP", "TMIN", "TMAX"),
+                                     year_min = 1989, 
+                                     year_max = 2021)
+class(tmpStations)
+names(tmpStations)
+
+# Prepare lists of Cities and Stations to use later
+stationsNames <- NULL
+stationsIds <- NULL
+for (tmpCity in relevantCities$id) {
+  stationsNames <- c(stationsNames, rep(tmpCity, length(tmpStations[[tmpCity]]$id)))
+  stationsIds <- c(stationsIds,tmpStations[[tmpCity]]$id)
+}
+stationsNames
+stationsIds
+# ---------------------------
+# ---------------------------
+
+
+# ---------------------------
+# ---------------------------
+# STEP 2 (historical): leyendo cada .csv histórico
 baseURL <- 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/'
 historicStationsData <- data.frame()
 for (i_station in 1:length(stationsIds)) {
@@ -62,7 +106,7 @@ head(historicStationsData)
 
 # ---------------------------
 # ---------------------------
-# STEP 2 (incremental): mediante el paquete RNOAA
+# STEP 3 (incremental): mediante el paquete RNOAA
 # API de NOAA.gov
 # https://www.rdocumentation.org/packages/rnoaa/versions/0.2.0
 # Locations list: https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt
@@ -113,7 +157,7 @@ allStationsData <- allStationsData %>%
   group_by(date, stationPlace, indicator) %>% 
   summarize(value = mean(value)) %>% 
   spread(key = indicator, value = value) %>% 
-  mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0))
+  mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0), PRCP=round(PRCP,0))
 head(allStationsData)
 
 # Create columns combining indicator and place  
@@ -124,3 +168,6 @@ names(allStationsData)
 
 # Save to RDS
 saveRDS(allStationsData, "./data/data_NOAA.rds")
+write.csv(allStationsData, "./data/tmpNOAA.csv")
+
+
