@@ -46,8 +46,6 @@ to_y <- as.character(year(Sys.Date())) # current year
 # >>>>>>> LOOP CITY
 i <- 1
 i_city <- relevantCities$id[i]
-i_lat <- relevantCities$latitude[i]
-i_lon <- relevantCities$longitude[i]
 
 c_radius <- 50
 c_limit <- 10
@@ -84,7 +82,7 @@ tmpYearsCoveredPerNearbyStation
 # calculate all combinations of locations we might use
 nAvailStations <- nrow(tmpYearsCoveredPerNearbyStation)
 nUsedStations <- 4
-assessCombs_df <- combinations(n = nStations, r = nUsedStations, tmpYearsCoveredPerNearbyStation$id, repeats=FALSE)
+assessCombs_df <- combinations(n = nAvailStations, r = nUsedStations, tmpYearsCoveredPerNearbyStation$id, repeats=FALSE)
 assessCombs_df
 dim(assessCombs_df)
 nCombinations <- nrow(assessCombs_df)
@@ -102,42 +100,26 @@ for (j in 1:nCombinations) {
   tmpCoveredPercentageLast5Years <- mean(tail(tmpYearlyAvailability, n=5))
   o_allPeriod <- c(o_allPeriod, tmpCoveredPercentageAllPeriod)   
   o_5years <- c(o_5years, tmpCoveredPercentageLast5Years)
-  o_combination <- c(o_combination, assessCombs_df[j,1])
+  o_combination <- c(o_combination, j)
 }
+
+
+
+cityResults <- data.frame(o_allPeriod, o_5years) %>% 
+  mutate(ord = o_combination, StationId = assessCombs_df[o_combination,]) %>% 
+  arrange(desc(o_5years), desc(o_allPeriod)) 
+cityResults
+# # TEST
+# assessCombs_df[61,]
+# tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[61,]) %>% select(2:28)
+# tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[61,]) %>% select(29:34)
+
+print(i_city)
+print(cityResults[1,] %>% select(-1,-2,-3))
 
 # >>>>END LOOP CITY
 # >>>>>>>>>>>>>>>>>
 
-
-length(o_combination)
-length(o_allPeriod)
-length(o_5years)
-
-cityResults <- data.frame(o_combination, o_allPeriod, o_5years)
-cityResults %>% arrange(desc(o_5years), desc(o_allPeriod)) %>% head()
-
-
-
-
-
-
-
-
-
-
-tmpAroundStations <- isd_stations_search(lat = i_lat, lon = i_lon, radius = c_radius)
-
-beginDates <- ymd(as.character(tmpAroundStations$begin))
-endDates <- ymd(as.character(tmpAroundStations$end))
-
-monitors <- c("ASN00095063", "ASN00024025", "ASN00040112", "ASN00041023",
-              "ASN00009998", "ASN00066078", "ASN00003069", "ASN00090162",
-              "ASN00040126", "ASN00058161")
-obs <- meteo_pull_monitors(monitors)
-obs_covr <- meteo_coverage(obs)
-obs_covr
-
-meteo_distance(station_data, -33, 151, radius = 10, limit = 10)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 
