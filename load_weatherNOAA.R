@@ -42,8 +42,8 @@ stationsPeriods
 from_y <- year_from_NOAA # initial year (parameter)
 to_y <- as.character(year(Sys.Date())) # current year
 
-# >>>>>>>>>>>>
-# >>>>>>> LOOP
+# >>>>>>>>>>>>>>>>>
+# >>>>>>> LOOP CITY
 i <- 1
 i_city <- relevantCities$id[i]
 i_lat <- relevantCities$latitude[i]
@@ -79,8 +79,7 @@ tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>%
   group_by(id) %>% 
   summarise_all(sum)
 
-
-
+tmpYearsCoveredPerNearbyStation
 
 # calculate all combinations of locations we might use
 nAvailStations <- nrow(tmpYearsCoveredPerNearbyStation)
@@ -88,15 +87,34 @@ nUsedStations <- 4
 assessCombs_df <- combinations(n = nStations, r = nUsedStations, tmpYearsCoveredPerNearbyStation$id, repeats=FALSE)
 assessCombs_df
 dim(assessCombs_df)
+nCombinations <- nrow(assessCombs_df)
+nCombinations
 
-
-j <- 10
 # for each combination we extract how many years are covered
-tmpGroup <- tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[j,]) %>% select(-id)
-tmpGroup
-# Years covered
-sum(ifelse(colSums(tmpGroup)>0, TRUE, FALSE))
-mean(ifelse(colSums(tmpGroup)>0, TRUE, FALSE))
+o_allPeriod<- NULL
+o_5years <- NULL
+o_combination <- NULL
+for (j in 1:nCombinations) {
+  tmpGroup <- tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[j,]) %>% select(-id)
+  # Years covered
+  tmpYearlyAvailability <- ifelse(colSums(tmpGroup)>0, TRUE, FALSE)
+  tmpCoveredPercentageAllPeriod <- mean(tmpYearlyAvailability)
+  tmpCoveredPercentageLast5Years <- mean(tail(tmpYearlyAvailability, n=5))
+  o_allPeriod <- c(o_allPeriod, tmpCoveredPercentageAllPeriod)   
+  o_5years <- c(o_5years, tmpCoveredPercentageLast5Years)
+  o_combination <- c(o_combination, assessCombs_df[j,1])
+}
+
+# >>>>END LOOP CITY
+# >>>>>>>>>>>>>>>>>
+
+
+length(o_combination)
+length(o_allPeriod)
+length(o_5years)
+
+cityResults <- data.frame(o_combination, o_allPeriod, o_5years)
+cityResults %>% arrange(desc(o_5years), desc(o_allPeriod)) %>% head()
 
 
 
