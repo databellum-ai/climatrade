@@ -33,10 +33,6 @@ relevantCities
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-# https://rdrr.io/cran/rnoaa/man/
-# tmp2 <- isd_stations(refresh = FALSE)
-# tmp2
-
 
 station_data
 stationsPeriods <- station_data %>% 
@@ -82,24 +78,26 @@ tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>%
 tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>% 
   group_by(id) %>% 
   summarise_all(sum)
-# make data binary
-tmpYearsCoveredPerNearbyStation[yr_columns] <- ifelse(tmpYearsCoveredPerNearbyStation[yr_columns]>0, TRUE, FALSE)
 
 
 
-tmpYearsCoveredPerNearbyStation[1:10,2:5]
-tmpYearsCoveredPerNearbyStation[1,2:5] & tmpYearsCoveredPerNearbyStation[1,2:5]
 
-
+# calculate all combinations of locations we might use
 nAvailStations <- nrow(tmpYearsCoveredPerNearbyStation)
-nUsedStations <- 3
+nUsedStations <- 4
 assessCombs_df <- combinations(n = nStations, r = nUsedStations, tmpYearsCoveredPerNearbyStation$id, repeats=FALSE)
 assessCombs_df
 dim(assessCombs_df)
 
 
-j <- 1
-tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[j,]) %>% select(-id)
+j <- 10
+# for each combination we extract how many years are covered
+tmpGroup <- tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[j,]) %>% select(-id)
+tmpGroup
+# Years covered
+sum(ifelse(colSums(tmpGroup)>0, TRUE, FALSE))
+mean(ifelse(colSums(tmpGroup)>0, TRUE, FALSE))
+
 
 
 
