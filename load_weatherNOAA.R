@@ -34,50 +34,74 @@ relevantCities
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # https://rdrr.io/cran/rnoaa/man/
-tmp2 <- isd_stations(refresh = FALSE)
-tmp2
-
+# tmp2 <- isd_stations(refresh = FALSE)
+# tmp2
 
 
 station_data
-stationsPeriods <- station_data %>% group_by(id, first_year, last_year) %>% summarise()
-from_y <- 1989
-to_y <- 2021
- 
-relevantCities[i,]
-c_radius <- 100
-vec[from_y:to_y] <- FALSE
+stationsPeriods <- station_data %>% 
+  filter(element %in% c("TMAX", "TMIN", "PRCP")) %>% 
+  group_by(id, first_year, last_year) %>% summarise()
+stationsPeriods
+from_y <- year_from_NOAA # initial year (parameter)
+to_y <- as.character(year(Sys.Date())) # current year
 
+# >>>>>>>>>>>>
+# >>>>>>> LOOP
 i <- 1
 i_city <- relevantCities$id[i]
 i_lat <- relevantCities$latitude[i]
 i_lon <- relevantCities$longitude[i]
 
-
+c_radius <- 50
+c_limit <- 10
 tmpAroundStations <- meteo_nearby_stations(lat_lon_df = relevantCities[i,], 
                                      station_data = station_data,
-                                     radius = 50, 
-                                     limit = 10, 
+                                     radius = c_radius, 
+                                     limit = c_limit, 
                                      var = c("PRCP", "TMIN", "TMAX"),
                                      year_min = from_y, 
                                      year_max = to_y)
-
-stationsPeriods
-tmpAroundStations <- as.tibble(tmpAroundStations[[1]]$id) %>% setnames("value", "id")
+tmpAroundStations <- as.tibble(tmpAroundStations[[1]]$id) %>% rename(id = value)
 tmpAroundStations
-tmpYearsCoveredPerNearbyStation <- 
-  tmpAroundStations %>% 
+stationsPeriods
+# add availability years for stations hereby
+tmpYearsCoveredPerNearbyStation <- tmpAroundStations %>% 
   left_join(stationsPeriods)
-tmpYearsCoveredPerNearbyStation
+# add columns to data frame to contain each year's data availability
+yr_columns <- as.character(c(from_y:to_y))
+tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>% 
+  cbind(setNames( lapply(yr_columns, function(x) x=FALSE), yr_columns) ) 
+# fill TRUE/FALSE depending on stations's data availability each year
+tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>%
+  mutate(across(yr_columns, ~ ifelse( (cur_column() >= first_year & cur_column() <= last_year), TRUE , FALSE)))
+# keep only location and availabilities 
+tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>% 
+  select(-first_year,-last_year)
+# sum all available periods within each station
+tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>% 
+  group_by(id) %>% 
+  summarise_all(sum)
+# make data binary
+tmpYearsCoveredPerNearbyStation[yr_columns] <- ifelse(tmpYearsCoveredPerNearbyStation[yr_columns]>0, TRUE, FALSE)
 
-vec <- c(1:((to_y-from_y)+1))
-names(vec) <- c(from_y:to_y)
-vec[1:length(vec)] <- FALSE
-vec
-vec[1:length(vec)] <- FALSE
-vec["1990"] 
-vec
-sum(vec)
+
+
+tmpYearsCoveredPerNearbyStation[1:10,2:5]
+tmpYearsCoveredPerNearbyStation[1,2:5] & tmpYearsCoveredPerNearbyStation[1,2:5]
+
+
+nAvailStations <- nrow(tmpYearsCoveredPerNearbyStation)
+nUsedStations <- 3
+assessCombs_df <- combinations(n = nStations, r = nUsedStations, tmpYearsCoveredPerNearbyStation$id, repeats=FALSE)
+assessCombs_df
+dim(assessCombs_df)
+
+
+j <- 1
+tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[j,]) %>% select(-id)
+
+
 
 
 
