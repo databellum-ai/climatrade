@@ -33,9 +33,9 @@ relevantCities
 c_radius <- 80 # radius where stations must be around city
 c_limit <- 10 # max. num. of stations considered
 nUsedStations <- 3 # max. num. stations we'll consider per city
-# measureTypes <- c("TMAX", "TMIN", "PRCP") # indicators we want to read
+measureTypes <- c("TMAX", "TMIN", "PRCP") # indicators we want to read
 # measureTypes <- c("TMAX", "TMIN") # indicators we want to read
-measureTypes <- c("PRCP") # indicators we want to read
+# measureTypes <- c("PRCP") # indicators we want to read
 
 # Read available stations
 station_data <- readRDS("./data/stations_NOAA.rds")

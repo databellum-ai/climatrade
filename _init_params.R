@@ -28,7 +28,7 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(rnoaa)
-  options(noaakey = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+  options(noaakey = "fECFMxqLfSEuoVkfmRkUCGMALcIRvQey")
   # source("clavesAPI_noaa.R")
 library(OECD) # To get OECD.org indicators
 library(gtools)
