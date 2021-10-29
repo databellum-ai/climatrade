@@ -44,9 +44,8 @@ to_y <- as.character(year(Sys.Date())) # current year
 
 # >>>>>>>>>>>>>>>>>
 # >>>>>>> LOOP CITY
-i <- 4
-# for (i in c(1:4)) {
-# for (i in c(1:nrow(relevantCities))) {
+# i <- 4
+for (i in c(1:nrow(relevantCities))) {
 i_city <- relevantCities$id[i]
 
 c_radius <- 50
@@ -83,7 +82,7 @@ tmpYearsCoveredPerNearbyStation
 
 # calculate all combinations of locations we might use
 nAvailStations <- nrow(tmpYearsCoveredPerNearbyStation)
-nUsedStations <- 4
+nUsedStations <- 5
 if (nAvailStations < nUsedStations) {
   nUsedStations <- nAvailStations
 }
@@ -111,19 +110,35 @@ for (j in 1:nCombinations) {
 
 
 cityResults <- data.frame(o_allPeriod, o_5years) %>% 
-  mutate(ord = o_combination, StationId = assessCombs_df[o_combination,]) %>% 
+  mutate(ord = o_combination) %>% 
   arrange(desc(o_5years), desc(o_allPeriod)) 
 cityResults
+# cityResults <- data.frame(o_allPeriod, o_5years) %>% 
+#   mutate(ord = o_combination, StationId = assessCombs_df[o_combination,]) %>% 
+#   arrange(desc(o_5years), desc(o_allPeriod)) 
+# cityResults
+
+#DEBUG
+# nrow(tmpGroup)
+# assessCombs_df
+# assessCombs_df[1,]
+# data.frame(o_allPeriod, o_5years) %>% 
+#   mutate(StationId = assessCombs_df[1,])
+#!DEBUG
+
 # # TEST
 # assessCombs_df[61,]
 # tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[61,]) %>% select(2:28)
 # tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[61,]) %>% select(29:34)
 
+print("---------------")
 print(i_city)
-# print(cityResults[1,] %>% select(-1,-2,-3))
 print(cityResults[1,])
-
-# }
+print(nrow(assessCombs_df))
+chosenId <- cityResults[1,]$ord
+print(assessCombs_df[chosenId,])
+print(".")
+}
 # >>>>END LOOP CITY
 # >>>>>>>>>>>>>>>>>
 
