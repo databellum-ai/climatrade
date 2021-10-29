@@ -51,3 +51,4 @@ search_period <- "today 12-m" # Examples: "all" for all (since 1jan2004 monthly)
 # Parameters OECD (leading indicators):
 selected_initial_year_OECD <- "2021"
 selected_end_year_OECD <-as.character(year(Sys.Date()))
+
