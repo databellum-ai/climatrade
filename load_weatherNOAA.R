@@ -9,17 +9,8 @@
 year_from_NOAA <- 1989
 refreshAlsoHistory <- FALSE
 
-# ---------------------------
-# ---------------------------
-# STEP 1: get locations near relevent cities
-
-# Read available stations
-station_data <- readRDS("./data/stations_NOAA.rds")
-# station_data <- ghcnd_stations() # Takes a while to run
-# saveRDS(station_data, "./data/stations_NOAA.rds") # Save to RDS
-
-
-
+from_y <- year_from_NOAA # initial year (parameter)
+to_y <- as.character(year(Sys.Date())) # current year
 
 # Define our target cities (to look for near stations near them)
   # 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
@@ -30,30 +21,46 @@ relevantCities <- data.frame(
 relevantCities
 
 
-
+# ---------------------------
+# ---------------------------
+# STEP 1: get locations near relevent cities
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 
+# station_data %>% filter(id=="MCM00045011")
+
+
+c_radius <- 80 # radius where stations must be around city
+c_limit <- 10 # max. num. of stations considered
+nUsedStations <- 3 # max. num. stations we'll consider per city
+# measureTypes <- c("TMAX", "TMIN", "PRCP") # indicators we want to read
+# measureTypes <- c("TMAX", "TMIN") # indicators we want to read
+measureTypes <- c("PRCP") # indicators we want to read
+
+# Read available stations
+station_data <- readRDS("./data/stations_NOAA.rds")
+# station_data <- ghcnd_stations() # Takes a while to run
+# saveRDS(station_data, "./data/stations_NOAA.rds") # Save to RDS
+
 station_data
 stationsPeriods <- station_data %>% 
-  filter(element %in% c("TMAX", "TMIN", "PRCP")) %>% 
+  filter(element %in% measureTypes) %>% 
   group_by(id, first_year, last_year) %>% summarise()
 stationsPeriods
-from_y <- year_from_NOAA # initial year (parameter)
-to_y <- as.character(year(Sys.Date())) # current year
 
+
+stationsNames <- NULL
+stationsIds <- NULL
 # >>>>>>>>>>>>>>>>>
 # >>>>>>> LOOP CITY
-i <- 1
+for (i in c(1:nrow(relevantCities))) {
 i_city <- relevantCities$id[i]
 
-c_radius <- 50
-c_limit <- 10
 tmpAroundStations <- meteo_nearby_stations(lat_lon_df = relevantCities[i,], 
                                      station_data = station_data,
                                      radius = c_radius, 
                                      limit = c_limit, 
-                                     var = c("PRCP", "TMIN", "TMAX"),
+                                     var = measureTypes,
                                      year_min = from_y, 
                                      year_max = to_y)
 tmpAroundStations <- as.tibble(tmpAroundStations[[1]]$id) %>% rename(id = value)
@@ -76,13 +83,13 @@ tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>%
 tmpYearsCoveredPerNearbyStation <- tmpYearsCoveredPerNearbyStation %>% 
   group_by(id) %>% 
   summarise_all(sum)
-
-tmpYearsCoveredPerNearbyStation
-
 # calculate all combinations of locations we might use
 nAvailStations <- nrow(tmpYearsCoveredPerNearbyStation)
-nUsedStations <- 4
-assessCombs_df <- combinations(n = nAvailStations, r = nUsedStations, tmpYearsCoveredPerNearbyStation$id, repeats=FALSE)
+if (nAvailStations < nUsedStations) {
+  nUsedStations <- nAvailStations
+}
+assessCombs_df <- 
+  combinations(n = nAvailStations, r = nUsedStations, tmpYearsCoveredPerNearbyStation$id, repeats=FALSE)
 assessCombs_df
 dim(assessCombs_df)
 nCombinations <- nrow(assessCombs_df)
@@ -104,52 +111,32 @@ for (j in 1:nCombinations) {
 }
 
 
-
 cityResults <- data.frame(o_allPeriod, o_5years) %>% 
-  mutate(ord = o_combination, StationId = assessCombs_df[o_combination,]) %>% 
+  mutate(ord = o_combination) %>% 
   arrange(desc(o_5years), desc(o_allPeriod)) 
 cityResults
-# # TEST
-# assessCombs_df[61,]
-# tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[61,]) %>% select(2:28)
-# tmpYearsCoveredPerNearbyStation %>% filter(id %in% assessCombs_df[61,]) %>% select(29:34)
 
+print("vvvvvvvvvvvvv")
 print(i_city)
-print(cityResults[1,] %>% select(-1,-2,-3))
+print(cityResults[1,])
+print(nrow(cityResults[1,]))
+print(nrow(assessCombs_df))
 
+chosenId <- cityResults[1,]$ord
+print(assessCombs_df[chosenId,])
+
+stationsNames <- c(stationsNames, replicate(n = length(assessCombs_df[chosenId,]), i_city))
+stationsIds <- c(stationsIds, assessCombs_df[chosenId,])
+print("^^^^^^^^^^^^")
+
+}
 # >>>>END LOOP CITY
 # >>>>>>>>>>>>>>>>>
 
+print(stationsIds)
+print(stationsNames)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-
-
-
-
-# Obtain stations near our cities (<50km and up to 5 per city)
-tmpStations <- meteo_nearby_stations(lat_lon_df = relevantCities, 
-                                     station_data = station_data,
-                                     radius = 50, 
-                                     limit = 5, 
-                                     var = c("PRCP", "TMIN", "TMAX"),
-                                     year_min = 1989, 
-                                     year_max = 2021)
-class(tmpStations)
-names(tmpStations)
-
-# Prepare lists of Cities and Stations to use later
-stationsNames <- NULL
-stationsIds <- NULL
-for (tmpCity in relevantCities$id) {
-  stationsNames <- c(stationsNames, rep(tmpCity, length(tmpStations[[tmpCity]]$id)))
-  stationsIds <- c(stationsIds,tmpStations[[tmpCity]]$id)
-}
-stationsNames
-stationsIds
-# ---------------------------
-# ---------------------------
 
 
 # ---------------------------
