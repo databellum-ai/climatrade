@@ -1,27 +1,24 @@
-# ===========================================================
-# ===========================================================
-# ===========================================================
-# PTE: Obtener estaciones a partir de coordenadas de ciudades: https://rdrr.io/cran/rnoaa/man/isd_stations_search.html | https://rdrr.io/cran/rnoaa/man/meteo_nearby_stations.html
-# PTE: Revisar datos y mirar un chart
-# PTE: Parámetro para cargar la historia (STEP 1 de los CSV.GZ) de .RDS o recalcularla
+# PTE: Rellenar valores TAVG que falten donde haya TMIN y TMAX
+# PTE: Habilitar opción "refreshAlsoStations"
 
-
+# ===========================================================
+# ===========================================================
 year_from_NOAA <- 1989
-refreshAlsoHistory <- FALSE
-
+refreshAlsoStations <- FALSE
 from_y <- year_from_NOAA # initial year (parameter)
 to_y <- as.character(year(Sys.Date())) # current year
-
 # Define our target cities (to look for near stations near them)
   # 10 ciudades que dirigen la economía mundial: https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html
-# relevantCities <- data.frame(
-#   id = c("NewYork", "Oviedo", "Amsterdam", "Paris", "HongKong", "Chicago", "London", "LosAngeles", "Beijng", "Madrid", "Albacete", "Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai"),
-#   latitude = c(40.70623940806975, 43.3620683921967, 52.37288021193839, 48.8613182352403, 22.32029644568666, 41.88632188372439, 51.50702741724013, 34.05084926622552, 39.905384001792335, 40.425619645599916, 39.267266932791685, 50.12095925753092, 35.687667406759765, 37.568428507484775, 1.2929342653888358, 25.214919588761404), 
-#   longitude = c(-74.00883633105707, -5.84817121485434, 4.896615844580131, 2.3003412809927495, 114.19091287611904, -87.67086062661967, -0.12701173276875632, -118.25389861960555, 116.37699181234836, -3.7025627487487984, -1.5500112927257998, 8.637929689001126, 139.76554769212072, 126.9780904050825, 103.84642630591777, 55.2762538818061))
 relevantCities <- data.frame(
   id = c("NewYork", "Oviedo", "Paris", "HongKong", "London", "Beijng", "Madrid", "Albacete", "Tokyo"),
-  latitude = c(40.70623940806975, 43.3620683921967, 48.8613182352403, 22.32029644568666, 51.50702741724013, 39.905384001792335, 40.425619645599916, 39.267266932791685, 35.687667406759765), 
+  latitude = c(40.70623940806975, 43.3620683921967, 48.8613182352403, 22.32029644568666, 51.50702741724013, 39.905384001792335, 40.425619645599916, 39.267266932791685, 35.687667406759765),
   longitude = c(-74.00883633105707, -5.84817121485434, 2.3003412809927495, 114.19091287611904, -0.12701173276875632, 116.37699181234836, -3.7025627487487984, -1.5500112927257998, 139.76554769212072))
+# Extended list:
+# relevantCities <- data.frame(
+#   id = c("NewYork", "Oviedo", "Amsterdam", "Paris", "HongKong", "Chicago", "London", "LosAngeles", "Beijng", "Madrid", "Albacete", "Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai"),
+#   latitude = c(40.70623940806975, 43.3620683921967, 52.37288021193839, 48.8613182352403, 22.32029644568666, 41.88632188372439, 51.50702741724013, 34.05084926622552, 39.905384001792335, 40.425619645599916, 39.267266932791685, 50.12095925753092, 35.687667406759765, 37.568428507484775, 1.2929342653888358, 25.214919588761404),
+#   longitude = c(-74.00883633105707, -5.84817121485434, 4.896615844580131, 2.3003412809927495, 114.19091287611904, -87.67086062661967, -0.12701173276875632, -118.25389861960555, 116.37699181234836, -3.7025627487487984, -1.5500112927257998, 8.637929689001126, 139.76554769212072, 126.9780904050825, 103.84642630591777, 55.2762538818061))
+
 
 relevantCities
 
@@ -32,15 +29,10 @@ relevantCities
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 
-# station_data %>% filter(id=="MCM00045011")
-
-
 c_radius <- 80 # radius where stations must be around city
 c_limit <- 10 # max. num. of stations considered
 nUsedStations <- 4 # max. num. stations we'll consider per city
-measureTypes <- c("TMAX", "TMIN", "PRCP") # indicators we want to read
-# measureTypes <- c("TMAX", "TMIN") # indicators we want to read
-# measureTypes <- c("PRCP") # indicators we want to read
+measureTypes <- c("TMAX", "TMIN", "TAVG", "PRCP") # indicators we want to read
 
 # Read available stations
 station_data <- readRDS("./data/stations_NOAA.rds")
@@ -54,13 +46,12 @@ stationsPeriods <- station_data %>%
 stationsPeriods
 
 
-stationsNames <- NULL
-stationsIds <- NULL
 # >>>>>>>>>>>>>>>>>
 # >>>>>>> LOOP CITY
+stationsNames <- NULL
+stationsIds <- NULL
 for (i in c(1:nrow(relevantCities))) {
 i_city <- relevantCities$id[i]
-
 tmpAroundStations <- meteo_nearby_stations(lat_lon_df = relevantCities[i,], 
                                      station_data = station_data,
                                      radius = c_radius, 
@@ -135,11 +126,12 @@ stationsIds <- c(stationsIds, assessCombs_df[chosenId,])
 print("^^^^^^^^^^^^")
 
 }
-# >>>>END LOOP CITY
-# >>>>>>>>>>>>>>>>>
-
-print(stationsIds)
+# <<<<< END LOOP CITY
+# <<<<<<<<<<<<<<<<<<
+print("Cities:")
 print(stationsNames)
+print("Selected statations (groups of stations with highest aggregated coverage per city):")
+print(stationsIds)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -149,10 +141,10 @@ print(stationsNames)
 # STEP 2 (historical): leyendo cada .csv histórico
 baseURL <- 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/'
 historicStationsData <- data.frame()
+print("Reading historical (.csv.gz) values")
 for (i_station in 1:length(stationsIds)) {
   currentURL <- paste(baseURL, stationsIds[i_station],".csv.gz", sep="")
-  print(currentURL)
-  print(paste(stationsIds[i_station],stationsNames[i_station], sep=" - "))
+  print(paste("Station: ",stationsIds[i_station]," (",stationsNames[i_station],")",sep=""))
   tmpStationData <- read_csv(
     file = currentURL, 
     col_names=FALSE)
@@ -161,11 +153,12 @@ for (i_station in 1:length(stationsIds)) {
            station = paste('GHCND:',stationsIds[i_station],sep=""), 
            stationPlace = stationsNames[i_station]) %>% 
     filter(year(date) >= year_from_NOAA) %>% 
-    filter(X3 %in% c("TMIN", "TMAX", "PRCP")) %>% 
+    filter(X3 %in% measureTypes) %>% 
     select(date, station, stationPlace, indicator = X3, value = X4)
   historicStationsData <- rbind(historicStationsData, tmpStationData)
 }
 head(historicStationsData)
+
 # ---------------------------
 # ---------------------------
 
@@ -182,10 +175,13 @@ head(historicStationsData)
 
 # Get data only since last available load
 loadDate <- as.character(Sys.Date()) # today
-firstDateUnavailable <- as.character(max(historicStationsData$date)+1) # use preloaded data to get incrementally
+overlapRecent_Historical <- 15  # number of days we read recent data (API) despite they those dates were contained in historical (.csv.gz), i.e. just in case historical recent values are still volatile
+firstDateUnavailable <- as.character(max(historicStationsData$date)-overlapRecent_Historical) # use preloaded data to get incrementally, though allowing some overlap
+
+allStationsData <- historicStationsData
+print("Reading recent (API) values")
 # Search for recent/new data
 for (i_station in stationsIds) {
-  print(paste(i_station,stationsNames[which(stationsIds == i_station)], sep=" - "))
   recentStationTMIN <- ncdc(datasetid='GHCND', 
                          stationid=paste('GHCND:',i_station,sep=""), 
                          datatypeid='TMIN', 
@@ -198,13 +194,20 @@ for (i_station in stationsIds) {
                          startdate = firstDateUnavailable, enddate = loadDate, 
                          sortfield = 'date', 
                          limit=366)
+  recentStationTAVG <- ncdc(datasetid='GHCND', 
+                            stationid=paste('GHCND:',i_station,sep=""), 
+                            datatypeid='TAVG', 
+                            startdate = firstDateUnavailable, enddate = loadDate, 
+                            sortfield = 'date', 
+                            limit=366)
   recentStationPRCP <- ncdc(datasetid='GHCND', 
                          stationid=paste('GHCND:',i_station,sep=""), 
-                         datatypeid='PRCP', 
+                         datatypeid='TAVG', 
                          startdate = firstDateUnavailable, enddate = loadDate, 
                          sortfield = 'date', 
                          limit=366)
-  recentStationData <- rbind(recentStationTMIN$data, recentStationTMAX$data, recentStationPRCP$data)
+  recentStationData <- rbind(recentStationTMIN$data, recentStationTMAX$data, recentStationTAVG$data, recentStationPRCP$data)
+  print(paste("Station: ", i_station, " (", stationsNames[which(stationsIds == i_station)], ") - ", nrow(recentStationData)," values found",sep=""))  
   if (nrow(recentStationData) == 0) {
     recentStationData <- historicStationsData[FALSE,]  # create an empty dataframe with same columns to append
   } else {
@@ -214,23 +217,21 @@ for (i_station in stationsIds) {
              indicator=datatype) %>% 
       select(date, station, stationPlace, indicator, value)
   }
-  allStationsData <- rbind(historicStationsData, recentStationData)
+  allStationsData <- rbind(allStationsData, recentStationData)
 }
+print("Merging historical (.csv.gz) and recent (API) values")
 head(allStationsData)
 
 # Average by date/city/indicator (in case multiple stations in a city), Spread columns per indicator, and transform temperature to integer celsius degrees
 allStationsData <- allStationsData %>%
   group_by(date, stationPlace, indicator) %>% 
-  summarize(value = mean(value)) %>% 
+  summarize(value = mean(value, na.rm=TRUE)) %>% 
   spread(key = indicator, value = value) %>% 
-  mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0), PRCP=round(PRCP,0))
+  mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0), TAVG=round(TAVG/10,0), PRCP=round(PRCP,0))
 head(allStationsData)
 
-# Create columns combining indicator and place  
-allStationsData <- allStationsData %>%
-  pivot_wider(names_from = stationPlace, values_from = c("TMIN", "TMAX", "PRCP"), names_sep=".")
-head(allStationsData)
-names(allStationsData)
+# Create columns combining indicator and place as suffix  
+allStationsData <- allStationsData %>% pivot_wider(names_from = stationPlace, values_from = c("TMIN", "TMAX", "TAVG", "PRCP"), names_sep=".",names_sort=TRUE)
 
 # Save to RDS
 saveRDS(allStationsData, "./data/data_NOAA.rds")

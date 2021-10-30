@@ -1,3 +1,19 @@
+# tmp1 <- 
+ncdc(datasetid='GHCND', stationid=paste("GHCND:SPE00119792",sep=""), startdate = "2021-10-17", enddate = "2021-10-30", sortfield = 'date', limit=366)
+
+historicStationsDataDEBUG %>% filter(date == "2021-10-28")
+tmp$data
+
+
+historicStationsDataDEBUG %>%
+  group_by(date, stationPlace, indicator) %>% 
+  summarize(value = mean(value)) %>% 
+  spread(key = indicator, value = value) %>% 
+  mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0), TAVG=round(TAVG/10,0), PRCP=round(PRCP,0))
+
+
+
+# ======================================
 # Average by date/city/indicator (in case multiple stations in a city), Spread columns per indicator, and transform temperature to integer celsius degrees
 # allStationsData2 <- 
 
