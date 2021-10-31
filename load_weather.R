@@ -217,6 +217,11 @@ allStationsData <- allStationsData %>%
   mutate(value = ifelse(indicator %in% c("TMIN", "TMAX", "TAVG"), round(value/10,0), value))
 head(allStationsData)
 
+
+# ---------------------------
+# ---------------------------
+# STEP4: Save
+
 # Save to RDS (times-series format)
 saveRDS(allStationsData, "./data/data_weather_ts.rds")
 
