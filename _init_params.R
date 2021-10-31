@@ -8,6 +8,7 @@ if(!require(spotifyr)) install.packages("spotifyr", repos = "http://cran.us.r-pr
 if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
 if(!require(OECD)) install.packages("OECD", repos = "http://cran.us.r-project.org")
 if(!require(gtools)) install.packages("gtools", repos = "http://cran.us.r-project.org")
+if(!require(ggmaps)) install.packages("ggmaps", repos = "http://cran.us.r-project.org") # obtain city coordianates
 
 library(tidyquant)
 library(tidyverse)
@@ -51,4 +52,24 @@ search_period <- "today 12-m" # Examples: "all" for all (since 1jan2004 monthly)
 # Parameters OECD (leading indicators):
 selected_initial_year_OECD <- "2021"
 selected_end_year_OECD <-as.character(year(Sys.Date()))
+
+
+
+# =======================================
+# =======================================
+# Extract weather data
+allStationsData <- readRDS("./data/data_weather_ts.rds") # time-series format
+# allStationsData <- readRDS("./data/data_weather_sp.rds") # spread format
+# source("load_weather.R")
+
+allData <- allStationsData
+
+# =======================================
+# =======================================
+# Save to RDS
+head(allData)
+saveRDS(allData, "./data/data_extracted.rds")
+write.csv(allData, "./data/data_extracted.csv")
+
+
 
