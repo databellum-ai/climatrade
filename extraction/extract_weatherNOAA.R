@@ -1,8 +1,11 @@
-# PTE: Rellenar valores TAVG que falten donde haya TMIN y TMAX
 # PTE: Lectura directa de coordenadas (requiere API de Google)
-  # if(!require(ggmap)) install.packages("ggmap", repos = "http://cran.us.r-project.org") # obtain city coordianates
-  # library(ggmap)
-  # geocode("New York City")
+# https://rdrr.io/cran/ggmap/man/register_google.html
+# https://console.cloud.google.com/google/maps-apis/api-list?project=applied-flag-330811
+
+# https://console.cloud.google.com/apis/credentials/consent/edit;newAppInternalUser=false?project=applied-flag-330811
+# if(!require(ggmap)) install.packages("ggmap", repos = "http://cran.us.r-project.org") # obtain city coordianates
+# library(ggmap)
+# geocode("New York City")
 
 
 # ===========================================================
