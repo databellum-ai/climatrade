@@ -184,7 +184,7 @@ for (i_station in stationsIds) {
 }
 print("Merging historical (.csv.gz) and recent (API) values")
 
-# Average by date/city/indicator (in case multiple stations in a city), , and 
+# Average by date/city/indicator (in case multiple stations in a city)
 allStationsData <- allStationsData %>%
   group_by(date, stationPlace, indicator) %>% 
   summarize(value = mean(value, na.rm=TRUE))
@@ -192,13 +192,20 @@ allStationsData <- allStationsData %>%
 allStationsData <- allStationsData %>% 
   mutate(value = ifelse(indicator %in% c("TMIN", "TMAX", "TAVG"), round(value/10,0), value))
 head(allStationsData)
-
+# Estimate TAVG when unavailable based on TMIN and TMAX values. We need to gather, detect TAVG NAs, calculate them and then gather again to keep tidy (and avoiding creation of new NA records in case calculation is not possible)
+avgMinTemps <- mean(allStationsData$value[allStationsData$indicator=="TMIN"])
+avgMaxTemps <- mean(allStationsData$value[allStationsData$indicator=="TMAX"])
+avgAvgTemps <- mean(allStationsData$value[allStationsData$indicator=="TAVG"])
+coeffAvgTemp <- avgAvgTemps / avgMinTemps # calculate expected TAVG respect TMIN based on all available observations
+allStationsData <- allStationsData %>% 
+  spread(key = indicator, value = value) %>% 
+  mutate(TAVG = ifelse(is.na(TAVG), round(TMIN * coeffAvgTemp,0), TAVG)) %>% 
+  gather(key="indicator", value = "value", na.rm = TRUE, c("PRCP", "TAVG", "TMAX", "TMIN"))
 
 
 # ---------------------------------------------
-# STEP: Save
+# FINAL STEP: Save
 # ---------------------------------------------
-
 # Save to RDS (times-series format)
 saveRDS(allStationsData, "data/data_weather_ts.rds")
 
