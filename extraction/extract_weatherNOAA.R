@@ -1,13 +1,3 @@
-# PTE: Lectura directa de coordenadas (requiere API de Google)
-# https://rdrr.io/cran/ggmap/man/register_google.html
-# https://console.cloud.google.com/google/maps-apis/api-list?project=applied-flag-330811
-
-# https://console.cloud.google.com/apis/credentials/consent/edit;newAppInternalUser=false?project=applied-flag-330811
-# if(!require(ggmap)) install.packages("ggmap", repos = "http://cran.us.r-project.org") # obtain city coordianates
-# library(ggmap)
-# geocode("New York City")
-
-
 # ===========================================================
 # EXTRACTION OF WEATHER DATA FROM NOAA BY CITY/PLACE
 # We initially calculate stations nearby and optimize to reach maximum coverage years (Step 1). Then, we extract historical data from FTP files (Step 2). Finally, we add also most recent data read using NOAA API (Step 3)
@@ -16,11 +6,6 @@
 # ---------------------------------------------
 # STEP 1: get optimal stations near relevant cities
 # ---------------------------------------------
-# Extended list of relevant cities:
-# relevantCities <- data.frame(
-#   id = c("NewYork", "Oviedo", "Amsterdam", "Paris", "HongKong", "Chicago", "London", "LosAngeles", "Beijng", "Madrid", "Albacete", "Frankfurt", "Tokyo", "Seoul", "Singapore", "Dubai"),
-#   latitude = c(40.70623940806975, 43.3620683921967, 52.37288021193839, 48.8613182352403, 22.32029644568666, 41.88632188372439, 51.50702741724013, 34.05084926622552, 39.905384001792335, 40.425619645599916, 39.267266932791685, 50.12095925753092, 35.687667406759765, 37.568428507484775, 1.2929342653888358, 25.214919588761404),
-#   longitude = c(-74.00883633105707, -5.84817121485434, 4.896615844580131, 2.3003412809927495, 114.19091287611904, -87.67086062661967, -0.12701173276875632, -118.25389861960555, 116.37699181234836, -3.7025627487487984, -1.5500112927257998, 8.637929689001126, 139.76554769212072, 126.9780904050825, 103.84642630591777, 55.2762538818061))
 relevantCities
 
 measureTypes <- c("TMAX", "TMIN", "TAVG", "PRCP") # indicators we want to read
@@ -43,6 +28,7 @@ stationsNames <- NULL
 stationsIds <- NULL
 for (i in c(1:nrow(relevantCities))) {
 i_city <- relevantCities$id[i]
+print(paste("City: ",i_city,sep=""))
 tmpAroundStations <- meteo_nearby_stations(lat_lon_df = relevantCities[i,], 
                                      station_data = station_data,
                                      radius = c_radius, 
@@ -103,27 +89,22 @@ cityResults <- data.frame(o_allPeriod, o_5years) %>%
   arrange(desc(o_5years), desc(o_allPeriod)) 
 cityResults
 
-print("vvvvvvvvvvvvv")
-print(i_city)
-print(cityResults[1,])
-print(nrow(cityResults[1,]))
-print(nrow(assessCombs_df))
-
+# print(cityResults[1,])
+# Chosen stations:
 chosenId <- cityResults[1,]$ord
 print(assessCombs_df[chosenId,])
 
 stationsNames <- c(stationsNames, replicate(n = length(assessCombs_df[chosenId,]), i_city))
 stationsIds <- c(stationsIds, assessCombs_df[chosenId,])
-print("^^^^^^^^^^^^")
 
 }
 # <<<<< END LOOP CITY
 # <<<<<<<<<<<<<<<<<<
 
-print("Cities:")
-print(stationsNames)
-print("Selected statations (groups of stations with highest aggregated coverage per city):")
-print(stationsIds)
+# Cities:
+stationsNames
+# Selected statations (groups of stations with highest aggregated coverage per city):
+stationsIds
 
 
 
@@ -132,7 +113,7 @@ print(stationsIds)
 # ---------------------------------------------
 baseURL <- 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/'
 historicStationsData <- data.frame()
-print("Reading historical (.csv.gz) values")
+# Reading historical (.csv.gz) values
 for (i_station in 1:length(stationsIds)) {
   currentURL <- paste(baseURL, stationsIds[i_station],".csv.gz", sep="")
   print(paste("Station: ",stationsIds[i_station]," (",stationsNames[i_station],")",sep=""))
@@ -149,7 +130,7 @@ for (i_station in 1:length(stationsIds)) {
   historicStationsData <- rbind(historicStationsData, tmpStationData)
 }
 head(historicStationsData)
-
+summary(historicStationsData)
 
 
 # ---------------------------------------------
@@ -163,7 +144,7 @@ firstDateUnavailable <- as.character(max(historicStationsData$date)-overlapRecen
 
 allStationsData <- historicStationsData
 recentStationData <- data.frame()
-print("Reading recent (API) values")
+# Reading recent (API) values:
 # Search for recent/new data
 for (i_station in stationsIds) {
   recentStationData <- ncdc(datasetid='GHCND', 
@@ -185,7 +166,8 @@ for (i_station in stationsIds) {
   }
   allStationsData <- rbind(allStationsData, recentStationData)
 }
-print("Merging historical (.csv.gz) and recent (API) values")
+
+# Merging historical (.csv.gz) and recent (API) values"):
 
 # Average by date/city/indicator (in case multiple stations in a city)
 allStationsData <- allStationsData %>%

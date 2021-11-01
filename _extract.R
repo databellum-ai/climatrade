@@ -5,26 +5,37 @@
 # -----------------------------------------------------------------
 
 # =========================================
-# Extract Moon angle data
+# Extract weather from NOAA
 # =========================================
+year_from_NOAA <- 1989
+refreshAlsoStations <- FALSE
+from_y <- year_from_NOAA # initial year (parameter)
+to_y <- as.character(year(Sys.Date())) # current year
+c_radius <- 80 # radius where stations must be around city
+c_limit <- 10 # max. num. of stations considered
+nUsedStations <- 4 # max. num. stations we'll consider per city
+# Define our target cities to look for near stations near them ("10 ciudades que dirigen la economía mundial": https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html)
+cities <- c("NewYork", "Oviedo", "Paris", "HongKong", "London", "Beijing", "Madrid", "Albacete", "Tokyo")
+addresses <- c("New York City, US", "Oviedo, Spain", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Albacete, Spain", "Tokyo, Japan")
+relevantCities <- data.frame(name = cities, addr = addresses)
+relevantCities <- relevantCities %>% 
+  geocode(addr) %>% 
+  select(id = name, latitude = lat, longitude = long)
+relevantCities
 #
-source("extraction/extract_moonData.R")
-
+source("extraction/extract_weatherNOAA.R")
 
 
 # =========================================
-# Extract Twitter posts related data
+# Extract music trends from SPOTIFY
 # =========================================
+# Parameters music extraction:
+freqData <- "daily" # or "weekly"
+numTopTracks <- 3 # how many track we extract per day/week
+fromDate <- "12/29/2016"
+toDate <- "10/17/2021"
 #
-source("extraction/extract_TWITTER.R")
-
-
-
-# =========================================
-# Extract from news
-# =========================================
-#
-source("extraction/extract_newsData.R")
+source("extraction/extract_musicSPOTIFY.R")
 
 
 
@@ -71,35 +82,37 @@ source("extraction/extract_indicatorsOECD.R")
 
 
 # =========================================
-# Extract weather from NOAA
+# Extract Moon angle data
 # =========================================
-year_from_NOAA <- 1989
-refreshAlsoStations <- FALSE
-from_y <- year_from_NOAA # initial year (parameter)
-to_y <- as.character(year(Sys.Date())) # current year
-c_radius <- 80 # radius where stations must be around city
-c_limit <- 10 # max. num. of stations considered
-nUsedStations <- 4 # max. num. stations we'll consider per city
-# Define our target cities to look for near stations near them ("10 ciudades que dirigen la economía mundial": https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html)
-relevantCities <- data.frame(
-  id = c("NewYork", "Oviedo", "Paris", "HongKong", "London", "Beijng", "Madrid", "Albacete", "Tokyo"),
-  latitude = c(40.70623940806975, 43.3620683921967, 48.8613182352403, 22.32029644568666, 51.50702741724013, 39.905384001792335, 40.425619645599916, 39.267266932791685, 35.687667406759765),
-  longitude = c(-74.00883633105707, -5.84817121485434, 2.3003412809927495, 114.19091287611904, -0.12701173276875632, 116.37699181234836, -3.7025627487487984, -1.5500112927257998, 139.76554769212072))
 #
-source("extarct_weatherNOAA.R")
-allStationsData <- readRDS("data/data_weather_ts.rds") # time-series format
-# allStationsData <- readRDS("data/data_weather_sp.rds") # spread format
+source("extraction/extract_moonData.R")
+
+
+
+# =========================================
+# Extract Twitter posts related data
+# =========================================
+#
+source("extraction/extract_TWITTER.R")
+
+
+
+# =========================================
+# Extract from news
+# =========================================
+#
+source("extraction/extract_newsData.R")
 
 
 
 
-# =======================================
-# Save to RDS
-# =======================================
-# allData <- rbind(..., ..., ...)
-# head(allData)
-# saveRDS(allData, "data/data_extracted.rds")
-# write.csv(allData, "data/data_extracted.csv")
+
+
+
+
+
+
+
 
 
 

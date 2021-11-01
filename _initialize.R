@@ -8,7 +8,7 @@ if(!require(spotifyr)) install.packages("spotifyr", repos = "http://cran.us.r-pr
 if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
 if(!require(OECD)) install.packages("OECD", repos = "http://cran.us.r-project.org")
 if(!require(gtools)) install.packages("gtools", repos = "http://cran.us.r-project.org")
-
+if(!require(tidygeocoder)) install.packages("tidygeocoder", repos = "http://cran.us.r-project.org") # Resolve coordinates of cities/places
 
 library(tidyquant)
 library(tidyverse)
@@ -21,7 +21,7 @@ library(rvest)
 library(jsonlite)
 library(spotifyr)# For certain functions and applications, you’ll need to log in as a Spotify user. To do this, your Spotify Developer application needs to have a callback url. You can set this to whatever you want that will work with your application, but a good default option is http://localhost:1410/ (see image below). For more information on authorization, visit the official Spotify Developer Guide. (https://www.rcharlie.com/spotifyr/)
   Sys.setenv(SPOTIFY_CLIENT_ID = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-  Sys.setenv(SPOTIFY_CLIENT_SECRET = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+  Sys.setenv(SPOTIFY_CLIENT_SECRET = 'fECFMxqLfSEuoVkfmRkUCGMALcIRvQey')
   # source("clavesAPI_spotify.R")
 library(readr)
 library(data.table)
@@ -33,5 +33,5 @@ library(rnoaa)
   # source("clavesAPI_noaa.R")
 library(OECD) # To get OECD.org indicators
 library(gtools)
-
+library(tidygeocoder) # Resolve coordinates of cities/places
   

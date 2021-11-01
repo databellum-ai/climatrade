@@ -1,11 +1,7 @@
-# Parameters for extraction
 
-freqData <- "daily" # or "weekly"
-numTopTracks <- 3 # how many track we extract per day/week
-fromDate <- "12/29/2016"
-toDate <- "10/17/2021"
 
-# WE extract available countries and dates depending on frequency chosen (daily/weekly)  
+
+# We extract available countries and dates depending on frequency chosen (daily/weekly)  
 if (freqData == "daily") {
   # Extract country codes
   spotify_tracks <- read_html("https://spotifycharts.com/regional/global/daily/latest")
@@ -38,39 +34,43 @@ if (freqData == "weekly") {
     html_children() %>% html_text()
 }
 
-tmpAvailableCountryCodes
-tmpAvailableCountries 
 tmpAvailableDates <- 
   paste(substring(tmpAvailableDates,7,10),"-",substring(tmpAvailableDates,1,2),"-",substring(tmpAvailableDates,4,5),sep="")
+tmpAvailableCountryCodes
+tmpAvailableCountries
+tmpAvailableDates
 
-
-# EMPEZARÁ AQUI BUCLE-------------------------------
+track <- NULL
+numStreams <- NULL
+# vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+# EMPEZARÁ AQUI BUCLE vvvvvvvvvvvvvvv
 i <- 2 # country index
 j <- 1 # date index
-k <- 1 #track index
+k <- 1 # track index
 url_tracks <- paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[i], "/", freqData, "/", tmpAvailableDates[j], sep="")
 url_tracks
 spotify_tracks <- read_html(url_tracks) %>% html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr')
+spotify_tracks
 
 track[k] <- 
   ((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_children() %>% html_attrs())[[1]]
 track[k] <- str_remove(track,"https://i.scdn.co/image/")
-
-# REVISAR SI SALE COMO "list"...
+track[k]
 numStreams[k] <- (spotify_tracks[k] %>% html_nodes("td"))[5] %>% html_text()
+numStreams[k] <- as.numeric(str_replace_all(numStreams[k] ,",","")) # remove commas of thousands and convert to numeric
 numStreams[k]
-class(numStreams[k])
-# ACABARÁ AQUI BUCLE-------------------------------
-
+# ACABARÁ AQUI BUCLE ^^^^^^^^^^^^^^
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 track[1:numTopTracks]
 numStreams[1:numTopTracks]
 
 
 
+
+
+
 # https://rpubs.com/jorgelopez141/fifaWebsite
-
-
 
 
 # =============================
