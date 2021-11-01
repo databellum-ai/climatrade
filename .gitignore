@@ -23,6 +23,7 @@ clavesAPI_noaa.R
 
 # RStudio files
 .Rproj.user/
+.RProj
 
 # produced vignettes
 vignettes/*.html
