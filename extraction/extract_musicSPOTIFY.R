@@ -1,4 +1,9 @@
-
+# PTE: leer datos de la TRACK de SPOTIFY
+# PTE: decidir qué fechas bajo cada vez (+ carga histórico?)
+# PTE: convertir fecha a "date" en la salida
+# PTE: bajar todoslos países (?)
+# PTE: extraer .RDS "geo" con los países y su nombre
+# PTE: comentarizar código
 
 
 # We extract available countries and dates depending on frequency chosen (daily/weekly)  
@@ -17,7 +22,6 @@ if (freqData == "daily") {
     html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[3]/ul') %>% 
     html_children() %>% html_text()  
 }
-
 if (freqData == "weekly") {
   # Extract country codes
   spotify_tracks <- read_html("https://spotifycharts.com/regional/global/weekly/latest")
@@ -33,39 +37,59 @@ if (freqData == "weekly") {
     html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[3]/ul') %>% 
     html_children() %>% html_text()
 }
-
-tmpAvailableDates <- 
-  paste(substring(tmpAvailableDates,7,10),"-",substring(tmpAvailableDates,1,2),"-",substring(tmpAvailableDates,4,5),sep="")
+tmpAvailableDates <-
+  paste(substring(tmpAvailableDates,7,10),"-",substring(tmpAvailableDates,1,2),"-",substring(tmpAvailableDates,4,5),sep="") # convert date format
 tmpAvailableCountryCodes
 tmpAvailableCountries
 tmpAvailableDates
 
+
 track <- NULL
 numStreams <- NULL
-# vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-i <- 2 # country index
-j <- 1 # date index
+allTracks <- data.frame()
+# LOOPING countries
+# for (i in c(1:length(tmpAvailableDates))) {
+for (i in c(1:5)) {
+  print(paste("Date: ",tmpAvailableDates[i],sep=""))
+  # LOOPING all dates
+  # for (j in c(1:length(tmpAvailableDates))) {
+  for (j in c(1:2)) {
+    print(tmpAvailableCountries[j])
+    url_tracks <- 
+      paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", tmpAvailableDates[j], sep="")
+    spotify_tracks <- read_html(url_tracks) %>% 
+      html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr')
+    spotify_tracks
+    # LOOPING top tracks
+    for (k in c(1:numTopTracks)) {
+      # track index
+      track[k] <- 
+        ((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_children() %>% html_attrs())[[1]]
+      track[k] <- 
+        str_remove(track[k],"https://i.scdn.co/image/")
+      # Scrape number of streams per track
+      numStreams[k] <- (spotify_tracks[k] %>% html_nodes("td"))[5] %>% html_text()  
+      numStreams[k] <- as.numeric(gsub(",", "", numStreams[k]))
+    }  # ^^ TRACKS
+    tracksFoundOnDate <- 
+      data.frame(trackId = track[1:numTopTracks], 
+                 numStreams = numStreams[1:numTopTracks], 
+                 date = tmpAvailableDates[i], 
+                 country = tmpAvailableCountries[j], 
+                 countryCode = tmpAvailableCountryCodes[j])
+    allTracks <- rbind(allTracks, tracksFoundOnDate)
+  } # ^^ DATES
+} # ^^ COUNTRIES
+allTracks
 
-url_tracks <- paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[i], "/", freqData, "/", tmpAvailableDates[j], sep="")
-url_tracks
-spotify_tracks <- read_html(url_tracks) %>% html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr')
-spotify_tracks
-# vvvvvvvvvvvvvvvvvvvvv
-k <- 1 # track index
-track[k] <- 
-  ((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_children() %>% html_attrs())[[1]]
-track[k] <- str_remove(track,"https://i.scdn.co/image/")
-track[k]
-numStreams[k] <- (spotify_tracks[k] %>% html_nodes("td"))[5] %>% html_text()
-numStreams[k] <- as.numeric(str_replace_all(numStreams[k] ,",","")) # remove commas of thousands and convert to numeric
-numStreams[k]
-# ^^^^^^^^^^^^^^^^^^^^
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-track[1:numTopTracks]
-numStreams[1:numTopTracks]
 
 
+
+
+access_token <- get_spotify_access_token()
+
+tracks <- get_playlist_tracks(my_plists2)
+features <- get_track_audio_features(tracks)
 
 
 
