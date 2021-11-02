@@ -1,49 +1,25 @@
-# tmp1 <- 
-ncdc(datasetid='GHCND', stationid=paste("GHCND:SPE00119792",sep=""), startdate = "2021-10-17", enddate = "2021-10-30", sortfield = 'date', limit=366)
-
-historicStationsDataDEBUG %>% filter(date == "2021-10-28")
-tmp$data
-
-
-historicStationsDataDEBUG %>%
-  group_by(date, stationPlace, indicator) %>% 
-  summarize(value = mean(value)) %>% 
-  spread(key = indicator, value = value) %>% 
-  mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0), TAVG=round(TAVG/10,0), PRCP=round(PRCP,0))
+print(tmpAvailableCountries[2])
+url_tracks <- 
+  paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[2], "/", freqData, "/", tmpAvailableDates[1], sep="")
+url_tracks
+spotify_tracks <- read_html(url_tracks) %>% 
+  html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr')
+spotify_tracks
 
 
-
-# ======================================
-# Average by date/city/indicator (in case multiple stations in a city), Spread columns per indicator, and transform temperature to integer celsius degrees
-# allStationsData2 <- 
+track[k] <- 
+  ((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_children() %>% html_attrs())[[1]]
 
 
-allStationsData_current %>% filter(date=="1989-01-01" & stationPlace %in% c("Amsterdam", "Beijing", "Frankfurt")) %>% 
+read_html(url_tracks) %>% 
+  html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr[1]/td[1]/a') %>% html_children()
 
-# Amsterdam el 1989-01-01:
-ncdc(datasetid='GHCND', 
-     stationid=paste('GHCND:','NLE00100503',sep=""), 
-     startdate = "1989-01-01", enddate = "1989-01-01", 
-     sortfield = 'date', 
-     limit=366)
-ncdc(datasetid='GHCND', 
-     stationid=paste('GHCND:','NLE00101920',sep=""), 
-     startdate = "1989-01-01", enddate = "1989-01-01", 
-     sortfield = 'date', 
-     limit=366)
-ncdc(datasetid='GHCND', 
-     stationid=paste('GHCND:','NLE00101926',sep=""), 
-     startdate = "1989-01-01", enddate = "1989-01-01", 
-     sortfield = 'date', 
-     limit=366)
+tmp[1]
 
-allStationsData_current %>% filter(date=="1989-01-01" & stationPlace %in% c("Amsterdam", "Beijing", "Frankfurt")) %>% 
-  group_by(date, stationPlace, indicator) %>% 
-  summarize(value = mean(value)) %>% 
-  spread(key = indicator, value = value) %>% 
-  mutate(TMIN=round(TMIN/10,0), TMAX=round(TMAX/10,0), PRCP=round(PRCP,0)) %>% 
-  head()
 
-filter(allStationsData_current, (date == "1989-01-01" & stationPlace == "Frankfurt"))
-allStationsData_2
+tmp <- (((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_attrs())[[1]])[1]
 
+
+tmp[1]
+class(tmp)
+length(tmp)
