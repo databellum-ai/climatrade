@@ -43,7 +43,6 @@ tmpAvailableDates
 track <- NULL
 numStreams <- NULL
 # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-# EMPEZARÁ AQUI BUCLE vvvvvvvvvvvvvvv
 i <- 2 # country index
 j <- 1 # date index
 
@@ -61,7 +60,6 @@ numStreams[k] <- (spotify_tracks[k] %>% html_nodes("td"))[5] %>% html_text()
 numStreams[k] <- as.numeric(str_replace_all(numStreams[k] ,",","")) # remove commas of thousands and convert to numeric
 numStreams[k]
 # ^^^^^^^^^^^^^^^^^^^^
-# ACABARÁ AQUI BUCLE ^^^^^^^^^^^^^^
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 track[1:numTopTracks]
