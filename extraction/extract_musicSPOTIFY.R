@@ -46,12 +46,13 @@ numStreams <- NULL
 # EMPEZARÁ AQUI BUCLE vvvvvvvvvvvvvvv
 i <- 2 # country index
 j <- 1 # date index
-k <- 1 # track index
+
 url_tracks <- paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[i], "/", freqData, "/", tmpAvailableDates[j], sep="")
 url_tracks
 spotify_tracks <- read_html(url_tracks) %>% html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr')
 spotify_tracks
-
+# vvvvvvvvvvvvvvvvvvvvv
+k <- 1 # track index
 track[k] <- 
   ((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_children() %>% html_attrs())[[1]]
 track[k] <- str_remove(track,"https://i.scdn.co/image/")
@@ -59,6 +60,7 @@ track[k]
 numStreams[k] <- (spotify_tracks[k] %>% html_nodes("td"))[5] %>% html_text()
 numStreams[k] <- as.numeric(str_replace_all(numStreams[k] ,",","")) # remove commas of thousands and convert to numeric
 numStreams[k]
+# ^^^^^^^^^^^^^^^^^^^^
 # ACABARÁ AQUI BUCLE ^^^^^^^^^^^^^^
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

@@ -4,6 +4,20 @@
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 
+
+# =========================================
+# Extract music trends from SPOTIFY
+# =========================================
+# Parameters music extraction:
+freqData <- "daily" # or "weekly"
+numTopTracks <- 3 # how many tracks we extract per day/week
+fromDate <- "12/29/2016"
+toDate <- "10/17/2021"
+#
+source("extraction/extract_musicSPOTIFY.R")
+
+
+
 # =========================================
 # Extract weather from NOAA
 # =========================================
@@ -24,18 +38,6 @@ relevantCities <- relevantCities %>%
 relevantCities
 #
 source("extraction/extract_weatherNOAA.R")
-
-
-# =========================================
-# Extract music trends from SPOTIFY
-# =========================================
-# Parameters music extraction:
-freqData <- "daily" # or "weekly"
-numTopTracks <- 3 # how many track we extract per day/week
-fromDate <- "12/29/2016"
-toDate <- "10/17/2021"
-#
-source("extraction/extract_musicSPOTIFY.R")
 
 
 
