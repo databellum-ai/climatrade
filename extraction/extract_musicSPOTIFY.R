@@ -82,14 +82,34 @@ for (i in c(1:5)) {
 } # ^^ COUNTRIES
 allTracks
 
-
-
-
+# ------------------------------------------------
+tmpTracksIds <- c("3bMdWvDfVZwwEkPVSmIqt1", "49Zt8N0m0RLLFzCELwV7yG", "1HEHQ6UgRvbJ4byX7JIuF9", "2xdVantHk5zayugYswViOh", "3sAsM39lExnrDY9R3NCNh2", "0CB8UyGmMO0G7nLEmjmCyn", "5RaquHTS3o2qz44TVyLzKg", "5r6ADOcMFbdo5VSgTmjXfw", "4tX1L7YYwkXeQAuQJ4Yhl2", "6oFnxJJDkrLPvF2X6cEI5D", "1UWbBFaZNksb3AmgldkprR", "6SnD5dJk06mhNQvvF270cw", "7CSrmKCRz7g9Z4GdKg3Asn", "4HgxCQLqNcd8s6lyoR4aag", "4SDscXJTjdF2YgSkYADyU0", "36HznXQNGoen7dwq4Vv6nP", "7rLB8H9GIzlxgXxXVqQltR", "1nht40JT9sTCtXxrpPi5Gm", "5dIgCsaxQnexMVpHXRHWpu", "1853Cr5Cf8UjmPAWhidVn9", "5K2rrGyZ3ggTF6y0n3lM5v", "0WGmmWaQezfhLxrH0vmuOf", "48NLsNOGOQbKEWxFXcihUM", "7tljncoprKWXchoN4KUziP", "6ZCfm60qPoAGTmV6mxBDJ7", "1208J1WMoVXWdyfEgGM8OT", "2iBKjbODc0lVr39itL51Ty", "6UNXLI8GSXkXo53Oin16uo", "1KePwwly0kr3TG2ankaXwd", "3lFWdUEDo0ZFK2bzDBqHfM")
 
 access_token <- get_spotify_access_token()
 
-tracks <- get_playlist_tracks(my_plists2)
-features <- get_track_audio_features(tracks)
+tmpTracksFeatures <- get_track_audio_features(
+  tmpTracksIds, 
+  authorization = access_token)
+tmpTracksFeatures %>% select("id","duration_ms",1:11)
+names(tmpTracksFeatures)
+
+
+
+
+
+
+
+
+tmpTracksData <- 
+  get_tracks(
+    ids = tmpTracksIds,
+    market = NULL,
+    authorization = access_token,
+    include_meta_info = TRUE
+  )
+tmpTracksData$tracks %>% select("id", -"available_markets", "duration_ms", -"href", -"preview_url", -"uri", -"external_urls.spotify", "external_ids.isrc")    
+
+
 
 
 
