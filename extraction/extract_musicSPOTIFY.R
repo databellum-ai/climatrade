@@ -1,10 +1,14 @@
-# PTE: leer datos de la TRACK de SPOTIFY
 # PTE: decidir qué fechas bajo cada vez (+ carga histórico incremental)
 # PTE: convertir fecha a "date" en la salida
 # PTE: bajar todoslos países
 # PTE: extraer .RDS "geo" con los países y su nombre
-# PTE: comentarizar código
+# PTE: reducir a 100 track cada llamada a la API
 
+
+
+# ================================
+# STEP 1: Determine countries and dates we need to collect
+# ================================
 
 # We extract available countries and dates depending on frequency chosen (daily/weekly)  
 if (freqData == "daily") {
@@ -44,9 +48,14 @@ tmpAvailableCountries
 tmpAvailableDates
 
 
+
+# ================================
+# STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams
+# ================================
+
 track <- NULL
 numStreams <- NULL
-allTracks <- data.frame()
+listenedTracks <- data.frame()
 # LOOPING countries
 # for (i in c(1:length(tmpAvailableDates))) {
 for (i in c(1:5)) {
@@ -77,34 +86,49 @@ for (i in c(1:5)) {
                  date = tmpAvailableDates[i], 
                  country = tmpAvailableCountries[j], 
                  countryCode = tmpAvailableCountryCodes[j])
-    allTracks <- rbind(allTracks, tracksFoundOnDate)
+    listenedTracks <- rbind(listenedTracks, tracksFoundOnDate)
   } # ^^ DATES
 } # ^^ COUNTRIES
-allTracks
+listenedTracks
 
-# ------------------------------------------------
-# tmpTracksIds <- c("3bMdWvDfVZwwEkPVSmIqt1", "49Zt8N0m0RLLFzCELwV7yG", "1HEHQ6UgRvbJ4byX7JIuF9", "2xdVantHk5zayugYswViOh", "3sAsM39lExnrDY9R3NCNh2", "0CB8UyGmMO0G7nLEmjmCyn", "5RaquHTS3o2qz44TVyLzKg", "5r6ADOcMFbdo5VSgTmjXfw", "4tX1L7YYwkXeQAuQJ4Yhl2", "6oFnxJJDkrLPvF2X6cEI5D", "1UWbBFaZNksb3AmgldkprR", "6SnD5dJk06mhNQvvF270cw", "7CSrmKCRz7g9Z4GdKg3Asn", "4HgxCQLqNcd8s6lyoR4aag", "4SDscXJTjdF2YgSkYADyU0", "36HznXQNGoen7dwq4Vv6nP", "7rLB8H9GIzlxgXxXVqQltR", "1nht40JT9sTCtXxrpPi5Gm", "5dIgCsaxQnexMVpHXRHWpu", "1853Cr5Cf8UjmPAWhidVn9", "5K2rrGyZ3ggTF6y0n3lM5v", "0WGmmWaQezfhLxrH0vmuOf", "48NLsNOGOQbKEWxFXcihUM", "7tljncoprKWXchoN4KUziP", "6ZCfm60qPoAGTmV6mxBDJ7", "1208J1WMoVXWdyfEgGM8OT", "2iBKjbODc0lVr39itL51Ty", "6UNXLI8GSXkXo53Oin16uo", "1KePwwly0kr3TG2ankaXwd", "3lFWdUEDo0ZFK2bzDBqHfM")
 
+# ================================
+# STEP 3: Call Spotify API to obtain tracks features, and the consolidate to one value per date/country
+# ================================
+#
+# Info on meaning of each feature: https://rpubs.com/PeterDola/SpotifyTracks +:
+# -Danceability: Numerical, danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.
+# -Tempo (BPM: Numerical, Overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.
+# -Energy: Numerical, Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. Perceptual features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy.
+
+# calling API for tracks features
 access_token <- get_spotify_access_token()
-
-tmpTracksFeatures <- get_track_audio_features(
-  allTracks$trackId, 
-  authorization = access_token)
-tmpTracksFeatures %>% 
-  select("id","duration_ms",1:11)
-names(tmpTracksFeatures)
-
+tmpTracksFeatures <- 
+  get_track_audio_features(
+    listenedTracks$trackId, 
+    authorization = access_token)
+tmpTracksFeatures <- tmpTracksFeatures %>% 
+  select("danceability","energy","tempo")
 
 
+nrow(listenedTracks)
 
-tmpTracksData <- 
-  get_tracks(
-    ids = tmpTracksIds,
-    market = NULL,
-    authorization = access_token,
-    include_meta_info = TRUE
-  )
-tmpTracksData$tracks %>% select("id", -"available_markets", "duration_ms", -"href", -"preview_url", -"uri", -"external_urls.spotify", "external_ids.isrc")    
+nCalls <- trunc(0.5 + 30/8)
+
+for (c in c(1:nCalls)) {
+  c1<- (c)*8
+  c2 <- c*8+1
+  print(paste(c1, c2))
+}
 
 
+
+
+listenedTracks
+tmpTracksFeatures
+cbind(listenedTracks,tmpTracksFeatures)
+
+# ================================
+# SAVE
+# ================================
 
