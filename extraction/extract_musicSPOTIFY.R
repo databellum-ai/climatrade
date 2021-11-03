@@ -1,8 +1,7 @@
-# PTE: decidir qué fechas bajo cada vez (+ carga histórico incremental)
-# PTE: convertir fecha a "date" en la salida
-# PTE: bajar todoslos países
+# PTE: ponderar por núm. de streams las features de las tracks
+# PTE: carga histórico-incremental
+# PTE: bajar todoslos países y probar volumen
 # PTE: extraer .RDS "geo" con los países y su nombre
-# PTE: reducir a 100 track cada llamada a la API
 
 
 
@@ -62,7 +61,7 @@ for (i in c(1:5)) {
   print(paste("Date: ",tmpAvailableDates[i],sep=""))
   # LOOPING all dates
   # for (j in c(1:length(tmpAvailableDates))) {
-  for (j in c(1:2)) {
+  for (j in c(1:3)) {
     print(tmpAvailableCountries[j])
     url_tracks <- 
       paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", tmpAvailableDates[i], sep="")
@@ -103,36 +102,44 @@ listenedTracks
 
 # calling API for tracks features
 access_token <- get_spotify_access_token()
-tmpTracksFeatures <- 
-  get_track_audio_features(
-    listenedTracks$trackId, 
-    authorization = access_token)
-tmpTracksFeatures <- tmpTracksFeatures %>% 
-  select("danceability","energy","tempo")
-
-
-
-
-recsToProc <- nrow(listenedTracks)  # records to process
-recsToProc <- 30
-maxRec <- 8  # limit of records per API 
-nCalls <- trunc(0.5 + recsToProc/maxRec) # calculate number of call required
+# There is a limit of 100 track in each query to the API, so we slice tracks in lots
+recsToProc <- nrow(listenedTracks)  # total records (tracks) to process
+maxRec <- 90  # limit of records per API (100, but just in case...)
+nCalls <- 1 + floor((recsToProc-1)/maxRec) # calculate number of calls required
+accumFeatures <- data.frame()  # we will accumulate results here
 
 for (c in c(1:nCalls)) {
   tmpFromRecord <- 1+((c-1)*maxRec)
-  tmpToRecord  <- c*maxRec
-  if (tmpToRecord ...)
-  print(paste("Call:",tmpFromRecord, tmpToRecord))
+  tmpToRecord <- c*maxRec
+  tmpToRecord <- ifelse(tmpToRecord <= recsToProc, tmpToRecord, recsToProc)
+  print(paste("Obtaining features of tracks: ",tmpFromRecord, " to ", tmpToRecord))
+  tmpTracksFeatures <-
+    get_track_audio_features(
+      listenedTracks[tmpFromRecord:tmpToRecord, 1],
+      authorization = access_token)
+  accumFeatures <- rbind(accumFeatures, tmpTracksFeatures)
 }
+# all other columns already in the source list
+accumFeatures <- accumFeatures %>% select("danceability","energy","tempo")
+
+listenedTracks  # source of tracks found
+accumFeatures  # features extracted for those tracks
+accumFeatures <- cbind(listenedTracks,accumFeatures) # we bind all columns
+accumFeatures
+
+# Finally, let group by date/country/feature
+accumFeatures <- accumFeatures %>% 
+  group_by(country, date) %>% 
+  summarize(danceability = mean(danceability), energy = mean(energy), tempo = mean(tempo)) %>% 
+  select(date, country, danceability, energy, tempo)
 
 
+tmp
 
 
-listenedTracks
-tmpTracksFeatures
-cbind(listenedTracks,tmpTracksFeatures)
 
 # ================================
 # SAVE
 # ================================
 
+saveRDS(accumFeatures,"data/data_music_ts.rds")
