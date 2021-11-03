@@ -111,14 +111,18 @@ tmpTracksFeatures <- tmpTracksFeatures %>%
   select("danceability","energy","tempo")
 
 
-nrow(listenedTracks)
 
-nCalls <- trunc(0.5 + 30/8)
+
+recsToProc <- nrow(listenedTracks)  # records to process
+recsToProc <- 30
+maxRec <- 8  # limit of records per API 
+nCalls <- trunc(0.5 + recsToProc/maxRec) # calculate number of call required
 
 for (c in c(1:nCalls)) {
-  c1<- (c)*8
-  c2 <- c*8+1
-  print(paste(c1, c2))
+  tmpFromRecord <- 1+((c-1)*maxRec)
+  tmpToRecord  <- c*maxRec
+  if (tmpToRecord ...)
+  print(paste("Call:",tmpFromRecord, tmpToRecord))
 }
 
 
