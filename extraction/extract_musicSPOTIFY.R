@@ -1,6 +1,5 @@
 # PTE: ponderar por núm. de streams las features de las tracks
-# PTE: carga histórico-incremental
-# PTE: bajar todoslos países y probar volumen
+# PTE: bajar todos los países y probar volumen
 # PTE: extraer .RDS "geo" con los países y su nombre
 
 
@@ -47,6 +46,16 @@ tmpAvailableCountries
 tmpAvailableDates
 
 
+# read already available data to ensure claculation only of delta. At the end we'll consolidate
+historicTracksFeatures <- readRDS("data/data_music_ts.rds")
+# get a list of dates appearing in the website but not in our historic record and use it for further process
+existingDates <- historicTracksFeatures %>% group_by(date) %>% summarize()
+existingDates
+unProcessedDates <- tmpAvailableDates[!(tmpAvailableDates %in% existingDates$date)]
+unProcessedDates
+
+# to eventually process only a limited number of recent dates:
+unProcessedDates <- unProcessedDates[1:3]
 
 # ================================
 # STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams
@@ -55,16 +64,14 @@ tmpAvailableDates
 track <- NULL
 numStreams <- NULL
 listenedTracks <- data.frame()
-# LOOPING countries
-# for (i in c(1:length(tmpAvailableDates))) {
-for (i in c(1:5)) {
-  print(paste("Date: ",tmpAvailableDates[i],sep=""))
-  # LOOPING all dates
-  # for (j in c(1:length(tmpAvailableDates))) {
-  for (j in c(1:3)) {
+# LOOPING dates
+for (i in c(1:length(unProcessedDates))) {
+  print(paste("Date: ",unProcessedDates[i],sep=""))
+  # LOOPING all countries
+  for (j in c(1:length(tmpAvailableCountries))) {
     print(tmpAvailableCountries[j])
     url_tracks <- 
-      paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", tmpAvailableDates[i], sep="")
+      paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", unProcessedDates[i], sep="")
     spotify_tracks <- read_html(url_tracks) %>% 
       html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr')
     spotify_tracks
@@ -82,7 +89,7 @@ for (i in c(1:5)) {
     tracksFoundOnDate <- 
       data.frame(trackId = track[1:numTopTracks], 
                  numStreams = numStreams[1:numTopTracks], 
-                 date = tmpAvailableDates[i], 
+                 date = unProcessedDates[i], 
                  country = tmpAvailableCountries[j], 
                  countryCode = tmpAvailableCountryCodes[j])
     listenedTracks <- rbind(listenedTracks, tracksFoundOnDate)
@@ -106,7 +113,7 @@ access_token <- get_spotify_access_token()
 recsToProc <- nrow(listenedTracks)  # total records (tracks) to process
 maxRec <- 90  # limit of records per API (100, but just in case...)
 nCalls <- 1 + floor((recsToProc-1)/maxRec) # calculate number of calls required
-accumFeatures <- data.frame()  # we will accumulate results here
+allTracksFeatures <- data.frame()  # we will accumulate results here
 
 for (c in c(1:nCalls)) {
   tmpFromRecord <- 1+((c-1)*maxRec)
@@ -117,29 +124,33 @@ for (c in c(1:nCalls)) {
     get_track_audio_features(
       listenedTracks[tmpFromRecord:tmpToRecord, 1],
       authorization = access_token)
-  accumFeatures <- rbind(accumFeatures, tmpTracksFeatures)
+  allTracksFeatures <- rbind(allTracksFeatures, tmpTracksFeatures)
 }
-# all other columns already in the source list
-accumFeatures <- accumFeatures %>% select("danceability","energy","tempo")
 
 listenedTracks  # source of tracks found
-accumFeatures  # features extracted for those tracks
-accumFeatures <- cbind(listenedTracks,accumFeatures) # we bind all columns
-accumFeatures
+allTracksFeatures  # features extracted for those tracks
+allTracksFeatures <- cbind(listenedTracks,allTracksFeatures) # we bind all columns
+allTracksFeatures
 
-# Finally, let group by date/country/feature
-accumFeatures <- accumFeatures %>% 
+# Finally, let's group by date/country/feature
+allTracksFeatures <- allTracksFeatures %>% 
   group_by(country, date) %>% 
   summarize(danceability = mean(danceability), energy = mean(energy), tempo = mean(tempo)) %>% 
   select(date, country, danceability, energy, tempo)
 
+# new data obtained
+allTracksFeatures
 
-tmp
+# consolidate with historical data
+allTracksFeatures <- rbind(allTracksFeatures, historicTracksFeatures)
 
-
+unique(allTracksFeatures$date)
+unique(allTracksFeatures$country)
 
 # ================================
 # SAVE
 # ================================
 
-saveRDS(accumFeatures,"data/data_music_ts.rds")
+saveRDS(allTracksFeatures,"data/data_music_ts.rds")
+
+
