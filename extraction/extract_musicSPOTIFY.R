@@ -1,6 +1,7 @@
+# PTE: problema cálculo de Chipre (#17), Luxemburgo (#42) el 25/09/2021 y en general URL que no responden: "Error in open.connection(x, "rb") : HTTP error 404.
 # PTE: ponderar por núm. de streams las features de las tracks
-# PTE: bajar todos los países y probar volumen
 # PTE: extraer .RDS "geo" con los países y su nombre
+# PTE: Download histórico para archivo
 
 
 
@@ -55,7 +56,7 @@ unProcessedDates <- tmpAvailableDates[!(tmpAvailableDates %in% existingDates$dat
 unProcessedDates
 
 # to eventually process only a limited number of recent dates:
-unProcessedDates <- unProcessedDates[1:3]
+unProcessedDates <- unProcessedDates[1:2]
 
 # ================================
 # STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams
@@ -68,7 +69,8 @@ listenedTracks <- data.frame()
 for (i in c(1:length(unProcessedDates))) {
   print(paste("Date: ",unProcessedDates[i],sep=""))
   # LOOPING all countries
-  for (j in c(1:length(tmpAvailableCountries))) {
+  # for (j in c(1:length(tmpAvailableCountries))) {
+  for (j in c(17,42)) {
     print(tmpAvailableCountries[j])
     url_tracks <- 
       paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", unProcessedDates[i], sep="")
