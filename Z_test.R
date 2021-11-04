@@ -12,13 +12,11 @@ df %>%
   summarise(wm_var = weighted.mean(var.mean.time, var.amount)) %>% as.data.frame()
 
 
+tmp_allTracksFeatures %>% select(country, date, danceability, numStreams)
+tmp_allTracksFeatures %>% group_by(country, date) %>% summarise(dnc = mean(as.numeric(danceability)))
+tmp_allTracksFeatures %>% group_by(country, date) %>% summarise(wm_dnc = weighted.mean(as.numeric(danceability), as.numeric(numStreams) ))
 
-# CODE.....
 
-allTracksFeatures %>% 
-  group_by(country, date) %>% 
-  summarise(danceability = mean(danceability))
 
-allTracksFeatures %>% 
-  group_by(country, date) %>% 
-  summarise(danceability = weighted.mean(danceability, nStreams))
+
+

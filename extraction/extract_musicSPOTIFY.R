@@ -1,5 +1,4 @@
-# PTE: "weighted means" por núm. de streams las features de las tracks
-# PTE: meter casi todas las features
+# PTE: carga de volumen
 # PTE: extraer .RDS "geo" con los países y su nombre
 
 
@@ -55,11 +54,15 @@ if (file.exists("data/data_music_ts.rds")) {
   unProcessedDates <- tmpAvailableDates[!(tmpAvailableDates %in% existingDates$date)]
   unProcessedDates
 } else {
+  # in case there is no history of data, we must process all available (on the web) dates
   historicTracksFeatures <- data.frame()
   unProcessedDates <- tmpAvailableDates
 }
 # to eventually process only a limited number of recent dates:
 unProcessedDates <- unProcessedDates[1:2]
+
+unProcessedDates
+
 
 
 # ================================
@@ -73,8 +76,7 @@ listenedTracks <- data.frame()
 for (i in c(1:length(unProcessedDates))) {
   print(paste("Date: ",unProcessedDates[i],sep=""))
   # LOOPING all countries
-  # for (j in c(1:length(tmpAvailableCountries))) {
-  for (j in c(1:3)) {
+  for (j in c(1:length(tmpAvailableCountries))) {
   # for (j in c(17,42)) {
     print(tmpAvailableCountries[j])
     url_tracks <-
@@ -112,10 +114,11 @@ listenedTracks
 # STEP 3: Call Spotify API to obtain tracks features, and the consolidate to one value per date/country
 # ================================
 #
-# Info on meaning of each feature: https://rpubs.com/PeterDola/SpotifyTracks +:
+# Info on meaning of each feature:
 # -Danceability: Numerical, danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.
 # -Tempo (BPM: Numerical, Overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.
 # -Energy: Numerical, Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. Perceptual features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy.
+# (see description of other features here: https://rpubs.com/PeterDola/SpotifyTracks)
 
 # calling API for tracks features
 access_token <- get_spotify_access_token()
@@ -142,14 +145,20 @@ allTracksFeatures  # features extracted for those tracks
 allTracksFeatures <- cbind(listenedTracks,allTracksFeatures) # we bind all columns
 allTracksFeatures
 
-# Finally, let's group by date/country/feature
+# Finally, let's group by date/country/feature using weighted mean of the values of top track's features 
 allTracksFeatures <- allTracksFeatures %>% 
   group_by(country, date) %>% 
-  summarize(danceability = mean(danceability), energy = mean(energy), tempo = mean(tempo))
-
-
-# %>% 
-#   select(date, country, danceability, energy, tempo)
+  summarize(
+    danceability = weighted.mean(as.numeric(danceability), as.numeric(numStreams)), 
+    energy = weighted.mean(as.numeric(energy), as.numeric(numStreams)), 
+    tempo = weighted.mean(as.numeric(tempo), as.numeric(numStreams)), 
+    key = weighted.mean(as.numeric(key), as.numeric(numStreams)), 
+    loudness = weighted.mean(as.numeric(loudness), as.numeric(numStreams)),   
+    speechiness = weighted.mean(as.numeric(speechiness), as.numeric(numStreams)),  
+    acousticness = weighted.mean(as.numeric(acousticness), as.numeric(numStreams)),  
+    instrumentalness = weighted.mean(as.numeric(instrumentalness), as.numeric(numStreams)),  
+    liveness = weighted.mean(as.numeric(liveness), as.numeric(numStreams)),  
+    valence = weighted.mean(as.numeric(valence), as.numeric(numStreams)))
 
 # new data obtained
 allTracksFeatures
@@ -164,7 +173,7 @@ unique(allTracksFeatures$country)
 # SAVE
 # ================================
 
-saveRDS(allTracksFeatures,)
+saveRDS(allTracksFeatures,"data/data_music_ts.rds")
 
 
 
