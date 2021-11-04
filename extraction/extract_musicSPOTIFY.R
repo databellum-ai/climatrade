@@ -1,7 +1,5 @@
-# PTE: problema cálculo de Chipre (#17), Luxemburgo (#42) el 25/09/2021 y en general URL que no responden: "Error in open.connection(x, "rb") : HTTP error 404.
 # PTE: ponderar por núm. de streams las features de las tracks
 # PTE: extraer .RDS "geo" con los países y su nombre
-# PTE: Download histórico para archivo
 
 
 
@@ -74,7 +72,8 @@ listenedTracks <- data.frame()
 for (i in c(1:length(unProcessedDates))) {
   print(paste("Date: ",unProcessedDates[i],sep=""))
   # LOOPING all countries
-  for (j in c(1:length(tmpAvailableCountries))) {
+  # for (j in c(1:length(tmpAvailableCountries))) {
+  for (j in c(1:3)) {
   # for (j in c(17,42)) {
     print(tmpAvailableCountries[j])
     url_tracks <-
@@ -145,8 +144,11 @@ allTracksFeatures
 # Finally, let's group by date/country/feature
 allTracksFeatures <- allTracksFeatures %>% 
   group_by(country, date) %>% 
-  summarize(danceability = mean(danceability), energy = mean(energy), tempo = mean(tempo)) %>% 
-  select(date, country, danceability, energy, tempo)
+  summarize(danceability = mean(danceability), energy = mean(energy), tempo = mean(tempo))
+
+
+# %>% 
+#   select(date, country, danceability, energy, tempo)
 
 # new data obtained
 allTracksFeatures
