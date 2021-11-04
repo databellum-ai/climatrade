@@ -1,4 +1,5 @@
-# PTE: ponderar por núm. de streams las features de las tracks
+# PTE: "weighted means" por núm. de streams las features de las tracks
+# PTE: meter casi todas las features
 # PTE: extraer .RDS "geo" con los países y su nombre
 
 
