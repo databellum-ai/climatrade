@@ -48,15 +48,20 @@ tmpAvailableDates
 
 
 # read already available data to ensure claculation only of delta. At the end we'll consolidate
-historicTracksFeatures <- readRDS("data/data_music_ts.rds")
-# get a list of dates appearing in the website but not in our historic record and use it for further process
-existingDates <- historicTracksFeatures %>% group_by(date) %>% summarize()
-existingDates
-unProcessedDates <- tmpAvailableDates[!(tmpAvailableDates %in% existingDates$date)]
-unProcessedDates
-
+if (file.exists("data/data_music_ts.rds")) {
+  historicTracksFeatures <- readRDS("data/data_music_ts.rds")
+  # get a list of dates appearing in the website but not in our historic record and use it for further process
+  existingDates <- historicTracksFeatures %>% group_by(date) %>% summarize()
+  existingDates
+  unProcessedDates <- tmpAvailableDates[!(tmpAvailableDates %in% existingDates$date)]
+  unProcessedDates
+} else {
+  historicTracksFeatures <- data.frame()
+  unProcessedDates <- tmpAvailableDates
+}
 # to eventually process only a limited number of recent dates:
 unProcessedDates <- unProcessedDates[1:2]
+
 
 # ================================
 # STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams
@@ -69,34 +74,37 @@ listenedTracks <- data.frame()
 for (i in c(1:length(unProcessedDates))) {
   print(paste("Date: ",unProcessedDates[i],sep=""))
   # LOOPING all countries
-  # for (j in c(1:length(tmpAvailableCountries))) {
-  for (j in c(17,42)) {
+  for (j in c(1:length(tmpAvailableCountries))) {
+  # for (j in c(17,42)) {
     print(tmpAvailableCountries[j])
-    url_tracks <- 
+    url_tracks <-
       paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", unProcessedDates[i], sep="")
-    spotify_tracks <- read_html(url_tracks) %>% 
-      html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr')
-    spotify_tracks
-    # LOOPING top tracks
-    for (k in c(1:numTopTracks)) {
-      # track index
-      track[k] <- 
-        (((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_attrs())[[1]])[1]
-      track[k] <- 
-        str_remove(track[k],"https://open.spotify.com/track/")
-      # Scrape number of streams per track
-      numStreams[k] <- (spotify_tracks[k] %>% html_nodes("td"))[5] %>% html_text()  
-      numStreams[k] <- as.numeric(gsub(",", "", numStreams[k]))
-    }  # ^^ TRACKS
-    tracksFoundOnDate <- 
-      data.frame(trackId = track[1:numTopTracks], 
-                 numStreams = numStreams[1:numTopTracks], 
-                 date = unProcessedDates[i], 
-                 country = tmpAvailableCountries[j], 
-                 countryCode = tmpAvailableCountryCodes[j])
-    listenedTracks <- rbind(listenedTracks, tracksFoundOnDate)
+    # we obtain NA is case requested page does not exist or returns an error
+    spotify_tracks <- tryCatch(read_html(url_tracks) %>%
+                                 html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr'), error = function(e){NA})
+    if (!(is.na(spotify_tracks))) {
+      # LOOPING top tracks
+      for (k in c(1:numTopTracks)) {
+        # track index
+        track[k] <-
+          (((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_attrs())[[1]])[1]
+        track[k] <-
+          str_remove(track[k],"https://open.spotify.com/track/")
+        # Scrape number of streams per track
+        numStreams[k] <- (spotify_tracks[k] %>% html_nodes("td"))[5] %>% html_text()
+        numStreams[k] <- as.numeric(gsub(",", "", numStreams[k]))
+      }  # ^^ TRACKS
+      tracksFoundOnDate <-
+        data.frame(trackId = track[1:numTopTracks],
+                   numStreams = numStreams[1:numTopTracks],
+                   date = unProcessedDates[i],
+                   country = tmpAvailableCountries[j],
+                   countryCode = tmpAvailableCountryCodes[j])
+      listenedTracks <- rbind(listenedTracks, tracksFoundOnDate)
+    } # END IF to ensure page is reachable
   } # ^^ DATES
 } # ^^ COUNTRIES
+
 listenedTracks
 
 
@@ -153,6 +161,7 @@ unique(allTracksFeatures$country)
 # SAVE
 # ================================
 
-saveRDS(allTracksFeatures,"data/data_music_ts.rds")
+saveRDS(allTracksFeatures,)
+
 
 
