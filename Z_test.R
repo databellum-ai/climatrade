@@ -1,16 +1,24 @@
+# https://datacornering.com/how-to-calculate-weighted-mean-in-r/
+
+df <- data.frame(
+  'cat' = c('A', 'A', 'B', 'B'),
+  'var amount' = c(88, 31, 84, 41),
+  'var mean time' = c(312, 437, 211, 818)
+)
+df
+
+df %>%
+  group_by(cat) %>%
+  summarise(wm_var = weighted.mean(var.mean.time, var.amount)) %>% as.data.frame()
 
 
-testok <- tryCatch(read_html("https://spotifycharts.com/regional/us/daily/2021-09-25"), error = function(e){NA})
-testko <- tryCatch(read_html("https://spotifycharts.com/regional/cy/daily/2021-09-25"), error = function(e){NA})
 
-testok
-testko
+# CODE.....
 
+allTracksFeatures %>% 
+  group_by(country, date) %>% 
+  summarise(danceability = mean(danceability))
 
-
-
-
-
-
-
-
+allTracksFeatures %>% 
+  group_by(country, date) %>% 
+  summarise(danceability = weighted.mean(danceability, nStreams))
