@@ -1,8 +1,3 @@
-# PTE: carga de volumen
-# PTE: extraer .RDS "geo" con los países y su nombre
-
-
-
 # ================================
 # STEP 1: Determine countries and dates we need to collect
 # ================================
@@ -58,7 +53,7 @@ if (file.exists("data/data_music_ts.rds")) {
   historicTracksFeatures <- data.frame()
   unProcessedDates <- tmpAvailableDates
 }
-# to eventually process only a limited number of recent dates:
+# to process only a limited number of recent dates:
 unProcessedDates <- unProcessedDates[1:30]
 
 unProcessedDates
@@ -74,17 +69,16 @@ numStreams <- NULL
 listenedTracks <- data.frame()
 # LOOPING dates
 for (i in c(1:length(unProcessedDates))) {
-  print(paste("Date: ",unProcessedDates[i],sep=""))
+  print("---------------------------")
   # LOOPING all countries
   for (j in c(1:length(tmpAvailableCountries))) {
-  # for (j in c(17,42)) {
-    print(tmpAvailableCountries[j])
+    print(paste(unProcessedDates[i], " (", tmpAvailableCountries[j], ")"," [",i,"]",sep=""))
     url_tracks <-
       paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", unProcessedDates[i], sep="")
     # we obtain NA is case requested page does not exist or returns an error
     spotify_tracks <- tryCatch(read_html(url_tracks) %>%
                                  html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr'), error = function(e){NA})
-    if (!(is.na(spotify_tracks))) {
+    if ( !(is.na(spotify_tracks) | length(spotify_tracks) == 0) ) {
       # LOOPING top tracks
       for (k in c(1:numTopTracks)) {
         # track index
@@ -147,7 +141,7 @@ allTracksFeatures
 
 # Finally, let's group by date/country/feature using weighted mean of the values of top track's features 
 allTracksFeatures <- allTracksFeatures %>% 
-  group_by(country, date) %>% 
+  group_by(countryCode, country, date) %>% 
   summarize(
     danceability = weighted.mean(as.numeric(danceability), as.numeric(numStreams)), 
     energy = weighted.mean(as.numeric(energy), as.numeric(numStreams)), 
@@ -172,8 +166,10 @@ unique(allTracksFeatures$country)
 # ================================
 # SAVE
 # ================================
-
+# Save dataset
 saveRDS(allTracksFeatures,"data/data_music_ts.rds")
-
-
+# Save also countries and codes for further consolidation with other data
+geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
+geo_music
+saveRDS(geo_music,"data/geo_music.rds")
 

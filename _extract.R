@@ -14,7 +14,14 @@ numTopTracks <- 3 # how many tracks we extract per day/week
 fromDate <- "12/29/2016"
 toDate <- "10/17/2021"
 #
-source("extraction/extract_musicSPOTIFY.R")
+# Each call download only a number of dates. We need to iterate
+for (i in c(1:6)) {
+  print(paste("===================== ITERATION OF EXTRACT:", i))
+  source("extraction/extract_musicSPOTIFY.R")
+}
+
+
+
 
 
 
