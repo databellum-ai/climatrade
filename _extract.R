@@ -13,9 +13,10 @@ freqData <- "daily" # or "weekly"
 numTopTracks <- 3 # how many tracks we extract per day/week
 fromDate <- "12/29/2016"
 toDate <- "10/17/2021"
+lotSize <- 30  # dates processed in a run
 #
 # Each call download only a number of dates. We need to iterate
-for (i in c(1:3)) {
+for (i in c(1:12)) {
   print(paste("===================== ITERATION OF EXTRACT:", i))
   source("extraction/extract_musicSPOTIFY.R")
 }

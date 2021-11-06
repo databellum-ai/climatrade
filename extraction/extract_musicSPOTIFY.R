@@ -54,7 +54,7 @@ if (file.exists("data/data_music_ts.rds")) {
   unProcessedDates <- tmpAvailableDates
 }
 # to process only a limited number of recent dates:
-unProcessedDates <- unProcessedDates[1:30]
+unProcessedDates <- unProcessedDates[1:lotSize]
 
 unProcessedDates
 
