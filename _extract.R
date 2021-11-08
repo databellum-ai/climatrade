@@ -14,7 +14,7 @@ numTopTracks <- 3 # how many tracks we extract per day/week
 lotSize <- 30  # dates processed in a run
 #
 # Each call download only a number of dates. We need to iterate
-for (i in c(1:9)) {
+for (i in c(1:3)) {
   print(paste("===================== ITERATION OF EXTRACT:", i))
   source("extraction/extract_musicSPOTIFY.R")
 }
