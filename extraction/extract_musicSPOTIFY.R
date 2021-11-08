@@ -76,9 +76,14 @@ for (i in c(1:length(unProcessedDates))) {
     url_tracks <-
       paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", unProcessedDates[i], sep="")
     # we obtain NA is case requested page does not exist or returns an error
-    spotify_tracks <- tryCatch(read_html(url_tracks) %>%
-                                 html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr'), error = function(e){NA})
-    if ( !(is.na(spotify_tracks) | length(spotify_tracks) == 0) ) {
+    spotify_tracks <- 
+      tryCatch(
+        read_html(url_tracks) %>% 
+          html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr'), 
+        error = function(e){"error"})
+    readingError_404 <- ifelse(spotify_tracks[1] == "error", TRUE, FALSE)
+    readingError_Zero <- (length(spotify_tracks) == 0)
+    if ( !(readingError_404) & !(readingError_Zero) ) {
       # LOOPING top tracks
       for (k in c(1:numTopTracks)) {
         # track index
