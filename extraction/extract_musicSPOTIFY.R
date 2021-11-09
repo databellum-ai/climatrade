@@ -43,7 +43,6 @@ unProcessedDates <- unProcessedDates[1:lotSize]
 unProcessedDates
 
 
-
 # ================================
 # STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams
 # ================================
