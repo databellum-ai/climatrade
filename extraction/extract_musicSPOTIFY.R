@@ -2,37 +2,21 @@
 # STEP 1: Determine countries and dates we need to collect
 # ================================
 
-# We extract available countries and dates depending on frequency chosen (daily/weekly)  
-if (freqData == "daily") {
-  # Extract country codes
-  spotify_tracks <- read_html("https://spotifycharts.com/regional/global/daily/latest")
-  tmpAvailableCountryCodes <- spotify_tracks %>% 
-    html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[1]/ul/li') %>% 
-    html_attr("data-value")
-  # Extract country names
-  tmpAvailableCountries <- spotify_tracks %>% 
-    html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[1]/ul/li') %>% 
-    html_text()
-  # Extraction of dates available when DAILY
-  tmpAvailableDates <- spotify_tracks %>% 
-    html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[3]/ul') %>% 
-    html_children() %>% html_text()  
-}
-if (freqData == "weekly") {
-  # Extract country codes
-  spotify_tracks <- read_html("https://spotifycharts.com/regional/global/weekly/latest")
-  tmpAvailableCountryCodes <- spotify_tracks %>% 
-    html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[1]/ul/li') %>% 
-    html_attr("data-value")
-  # Extract country names
-  tmpAvailableCountries <- spotify_tracks %>% 
-    html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[1]/ul/li') %>% 
-    html_text()
-  # Extract of dates available when WEEKLY
-  tmpAvailableDates <- spotify_tracks %>% 
-    html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[3]/ul') %>% 
-    html_children() %>% html_text()
-}
+# We extract available countries and dates
+# Extract country codes
+spotify_tracks <- read_html("https://spotifycharts.com/regional/global/daily/latest")
+tmpAvailableCountryCodes <- spotify_tracks %>% 
+  html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[1]/ul/li') %>% 
+  html_attr("data-value")
+# Extract country names
+tmpAvailableCountries <- spotify_tracks %>% 
+  html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[1]/ul/li') %>% 
+  html_text()
+# Extraction of dates available when DAILY
+tmpAvailableDates <- spotify_tracks %>% 
+  html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[3]/ul') %>% 
+  html_children() %>% html_text()  
+
 tmpAvailableDates <-
   paste(substring(tmpAvailableDates,7,10),"-",substring(tmpAvailableDates,1,2),"-",substring(tmpAvailableDates,4,5),sep="") # convert date format
 tmpAvailableCountryCodes
@@ -80,10 +64,8 @@ for (i in c(1:length(unProcessedDates))) {
       tryCatch(
         read_html(url_tracks) %>% 
           html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr'), 
-        error = function(e){"error"})
-    readingError_404 <- ifelse(spotify_tracks[1] == "error", TRUE, FALSE)
-    readingError_Zero <- (length(spotify_tracks) == 0)
-    if ( !(readingError_404) & !(readingError_Zero) ) {
+        error = function(e){NA})
+    if ( length(spotify_tracks) >= 3  ) {
       # LOOPING top tracks
       for (k in c(1:numTopTracks)) {
         # track index
