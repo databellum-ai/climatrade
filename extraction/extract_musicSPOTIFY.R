@@ -1,3 +1,5 @@
+# https://charts.spotify.com/charts/view/regional-at-daily/2021-11-07
+
 # ================================
 # STEP 1: Determine countries and dates we need to collect
 # ================================
