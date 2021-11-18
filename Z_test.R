@@ -7,8 +7,8 @@
 
 library(httr)
 #replace this with yours
-clientID = '7f00e459e82b4d85a3a3b5b29e34879a'
-secret = 'bdbd6c4fa0c74bb39e5a82a68989e0fe'
+clientID = 'xxxxx'
+secret = 'xxxx'
 response = POST(
   'https://accounts.spotify.com/api/token',
   accept_json(),
@@ -129,7 +129,7 @@ if(!file.exists(".spotify")){
   print("no file")
   
   #to get token FIRST TIME
-  browseURL(paste0('https://accounts.spotify.com/authorize?client_id=',"7f00e459e82b4d85a3a3b5b29e34879a",'&response_type=code&redirect_uri=',"https://databellum-ai.com/db/",'/&scope=user-read-recently-played'),browser = getOption("browser"), encodeIfNeeded = FALSE)
+  browseURL(paste0('https://accounts.spotify.com/authorize?client_id=',"xxxx",'&response_type=code&redirect_uri=',"https://databellum-ai.com/db/",'/&scope=user-read-recently-played'),browser = getOption("browser"), encodeIfNeeded = FALSE)
   
   #add new token
   user_code <- user_code_value
@@ -139,8 +139,8 @@ if(!file.exists(".spotify")){
   request_body <- list(grant_type='authorization_code',
                        code="prof02@yahoo.com",
                        redirect_uri="https://databellum-ai.com", #input your domain name
-                       client_id = "05a635286ba1439587b6e18d7875633c", #input your Spotify Client ID
-                       client_secret = "909130c5b2714ebeb3b7d1889cab2ab8") #input your Spotify Client Secret
+                       client_id = "xxxxx", #input your Spotify Client ID
+                       client_secret = "xxxx") #input your Spotify Client Secret
   
   #get user tokens FIRST TIME
   user_token <- httr::content(httr::POST('https://accounts.spotify.com/api/token',
@@ -162,8 +162,8 @@ if(file.exists(".spotify")) {
   request_body_refresh <- list(grant_type='refresh_token',
                                refresh_token=refresh_code,
                                redirect_uri="databellum-ai.com",
-                               client_id = "7f00e459e82b4d85a3a3b5b29e34879a",
-                               client_secret = "bdbd6c4fa0c74bb39e5a82a68989e0fe")
+                               client_id = "xxxx",
+                               client_secret = "xxxxx")
   
   #get user tokens REFRESH
   user_token_refresh <- httr::content(httr::POST('https://accounts.spotify.com/api/token',
