@@ -1,14 +1,69 @@
+# ====================================================
+# CON RSelenium
+# ====================================================
+# https://levelup.gitconnected.com/web-scraping-with-r-part-2-dynamic-webpages-de620a161671
+
+library(RSelenium)
+
+install.packages('Rcpp') 
+library("Rccp")
+
+library(binman)  
+list_versions("chromedriver")
+
+driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")
+remDr <- driver[["client"]]
+# rD <- rsDriver(browser="chrome", port=1234L, chromever = "96.0.4664.45")
+# remDr <- rD[["client"]]
+
+spotify_tracks <- read_html(remDr$getPageSource()[[1]])
+# https://stackoverflow.com/questions/57370389/what-is-the-difference-between-rvesthtml-text-and-rseleniumgetpagesource?rq=1
+spotify_tracks %>% html_nodes(xpath = '//*[@id="__next"]/div/div/main')
+spotify_tracks
+
+# rvest:
+spotify_tracks <- read_html("https://charts.spotify.com/charts/view/regional-es-daily/2021-11-18")
+tmp <- spotify_tracks %>%
+  html_nodes(xpath = '//*[@id="__next"]/div/div/main/div[2]/div[3]/div') %>% html_attr("data-value")
+
+# ====================================================
+# CON rvest:
+# ====================================================
+spotify_tracks <- read_html("https://charts.spotify.com/charts/view/regional-bo-daily/2021-11-18")
+tmp <- spotify_tracks %>% 
+  html_nodes(xpath = '//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[7]') %>% 
+  html_attr("data-value")
+tmp
+
+spotify_tracks <- read_html("https://charts.spotify.com/charts/view/regional-es-daily/2021-11-18")
+tmp <- spotify_tracks %>% 
+  html_nodes(xpath = '//*[@id="__next"]/div/div/main/div[2]/div[3]/div') %>% html_attr("data-value")
+tmp
+
+
+# ---------------------------------------------------
+# ARCHIVO CSV CON LINK:
+# ---------------------------------------------------
+# https://charts-spotify-com-service.spotify.com/auth/v0/charts/regional-au-daily/2021-11-17
+read.csv("https://spotifycharts.com/regional/global/daily/2020-07-29/download/regional-global-daily-2020-07-29.csv")
+read_csv("https://spotifycharts.com/regional/global/daily/2020-07-29/download/regional-global-daily-2020-07-29.csv")
+read.table("https://spotifycharts.com/regional/global/daily/2020-07-29/download/regional-global-daily-2020-07-29.csv")
+library(data.table)
+fread("https://spotifycharts.com/regional/global/daily/2020-07-29/download/regional-global-daily-2020-07-29.csv")
+fread("https://spotifycharts.com/regional/global/daily/2020-07-29")
+
+
+# ---------------------------------------------------
+# CON LA API de Spotify:
+# ---------------------------------------------------
 # https://charts-spotify-com-service.spotify.com/auth/v0/charts/regional-be-daily/2021-11-07
-
-
 # ===================================================
 # https://medium.com/swlh/accessing-spotifys-api-using-r-1a8eef0507c
 # https://developer.spotify.com/documentation/web-api/
-
 library(httr)
 #replace this with yours
-clientID = 'xxxxx'
-secret = 'xxxx'
+clientID = 'xxxxxxxx'
+secret = 'xxxxxxx'
 response = POST(
   'https://accounts.spotify.com/api/token',
   accept_json(),
@@ -23,7 +78,24 @@ HeaderValue = paste0('Bearer ', mytoken)
 HeaderValue
 mytoken
 
+# ---------------
+# MARKETS CON API:
+response2 <- GET(url = 'https://api.spotify.com/v1/markets', add_headers(Authorization = HeaderValue))
+tmp <- content(response2)$markets
+tmp
 
+# SEARCH CON API:
+queryChain <- "search?q=artist:Julio%20Iglesias&type=album"
+URI <- paste0('https://api.spotify.com/v1/', queryChain)
+response <- GET(url = URI, add_headers(Authorization = HeaderValue))
+tmp = content(response)
+tmp
+
+
+
+# ---------------------------------------------------
+# CON LA API de Spotify (2):
+# ---------------------------------------------------
 artistID = "06HL4z0CvFAxyc27GXpf02"
 URI = paste0('https://api.spotify.com/v1/artists/', artistID)
 response2 = GET(url = URI, add_headers(Authorization = HeaderValue))
