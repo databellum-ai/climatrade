@@ -2,33 +2,11 @@
 # CON RSelenium
 # ====================================================
 
+# https://thatdatatho.com/tutorial-web-scraping-rselenium/
+
 library(RSelenium)
 library(binman)  
 list_versions("chromedriver")
-# install.packages('Rcpp') 
-# library("Rccp")
-
-# https://thatdatatho.com/tutorial-web-scraping-rselenium/
-
-# ################
-# ### Original ###
-# ################
-# library(RSelenium)
-# library(tidyverse)
-# 
-# driver <- rsDriver(browser=c("chrome"))
-# remote_driver <- driver[["client"]]
-# remote_driver$open()
-# 
-# remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
-# 
-# #########################
-# ### UPDATE 09/11/2019 ###
-# #########################
-# 
-# driver <- rsDriver(browser = c("chrome"), chromever = "78.0.3904.70")
-# remote_driver <- driver[["client"]] 
-# remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
 # 
 # #########################
 # ### UPDATE 16/02/2020 ###
@@ -51,14 +29,12 @@ list_versions("chromedriver")
 #                                 max() %>%
 #                                 as.character())
 # remote_driver <- driver[["client"]] 
-# remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
 
 driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")
 remote_driver <- driver[["client"]]
 remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
 
 address_element <- remote_driver$findElement(using = 'class', value = 'width70')
-address_element
 address_element$sendKeysToElement(list("Lombard Street, San Francisco"))
 button_element <- remote_driver$findElement(using = 'class', value = "button")
 button_element$clickElement()
@@ -101,9 +77,7 @@ data.frame(street_names, purrr::flatten_chr(vector_out)) %>%
   dplyr::mutate(., vector_out = stringr::str_remove_all(vector_out, "\\(|\\)")) %>%
   tidyr::separate(., vector_out, into = c("latitude", "longitude"), sep = ",")
 
-
-
-
+# ====================================
 
 # https://levelup.gitconnected.com/web-scraping-with-r-part-2-dynamic-webpages-de620a161671
 
