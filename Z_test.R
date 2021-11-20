@@ -1,20 +1,112 @@
 # ====================================================
 # CON RSelenium
 # ====================================================
-# https://levelup.gitconnected.com/web-scraping-with-r-part-2-dynamic-webpages-de620a161671
 
 library(RSelenium)
-
-install.packages('Rcpp') 
-library("Rccp")
-
 library(binman)  
 list_versions("chromedriver")
+# install.packages('Rcpp') 
+# library("Rccp")
+
+# https://thatdatatho.com/tutorial-web-scraping-rselenium/
+
+# ################
+# ### Original ###
+# ################
+# library(RSelenium)
+# library(tidyverse)
+# 
+# driver <- rsDriver(browser=c("chrome"))
+# remote_driver <- driver[["client"]]
+# remote_driver$open()
+# 
+# remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
+# 
+# #########################
+# ### UPDATE 09/11/2019 ###
+# #########################
+# 
+# driver <- rsDriver(browser = c("chrome"), chromever = "78.0.3904.70")
+# remote_driver <- driver[["client"]] 
+# remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
+# 
+# #########################
+# ### UPDATE 16/02/2020 ###
+# #########################
+# driver <- RSelenium::rsDriver(browser = "chrome",
+#                               chromever =
+#                                 system2(command = "wmic",
+#                                         args = 'datafile where name="C:\\\\Program Files (x86)\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe" get Version /value',
+#                                         stdout = TRUE,
+#                                         stderr = TRUE) %>%
+#                                 stringr::str_extract(pattern = "(?<=Version=)\\d+\\.\\d+\\.\\d+\\.") %>%
+#                                 magrittr::extract(!is.na(.)) %>%
+#                                 stringr::str_replace_all(pattern = "\\.",
+#                                                          replacement = "\\\\.") %>%
+#                                 paste0("^",  .) %>%
+#                                 stringr::str_subset(string =
+#                                                       binman::list_versions(appname = "chromedriver") %>%
+#                                                       dplyr::last()) %>%
+#                                 as.numeric_version() %>%
+#                                 max() %>%
+#                                 as.character())
+# remote_driver <- driver[["client"]] 
+# remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
 
 driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")
-remDr <- driver[["client"]]
-# rD <- rsDriver(browser="chrome", port=1234L, chromever = "96.0.4664.45")
-# remDr <- rD[["client"]]
+remote_driver <- driver[["client"]]
+remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
+
+address_element <- remote_driver$findElement(using = 'class', value = 'width70')
+address_element
+address_element$sendKeysToElement(list("Lombard Street, San Francisco"))
+button_element <- remote_driver$findElement(using = 'class', value = "button")
+button_element$clickElement()
+out <- remote_driver$findElement(using = "class", value="coordinatetxt")
+lat_long <- out$getElementText()
+
+street_names <- c("Lombard Street, San Francisco", 
+                  "Santa Monica Boulevard", 
+                  "Bourbon Street, New Orleans", 
+                  "Fifth Avenue, New York", 
+                  "Richards Street, Vancouver")
+
+get_lat_lon <- function(street_names) {
+  remote_driver$navigate("https://www.latlong.net/convert-address-to-lat-long.html")
+  final <- c()
+  for(i in 1:length(street_names)) {
+    
+    remote_driver$refresh()
+    Sys.sleep(1)
+    
+    address_element <- remote_driver$findElement(using = 'class', value = 'width70')
+    
+    address_element$sendKeysToElement(list(street_names[i]))
+    button_element <- remote_driver$findElement(using = 'class', value = "button")
+    
+    button_element$clickElement()
+    Sys.sleep(3)
+    
+    out <- remote_driver$findElement(using = "class", value = "coordinatetxt")
+    output <- out$getElementText()
+    final <- c(final, output)
+    
+  }
+  
+  return(final)
+}
+vector_out <- get_lat_lon(street_names)
+
+data.frame(street_names, purrr::flatten_chr(vector_out)) %>%
+  dplyr::mutate(., vector_out = stringr::str_remove_all(vector_out, "\\(|\\)")) %>%
+  tidyr::separate(., vector_out, into = c("latitude", "longitude"), sep = ",")
+
+
+
+
+
+# https://levelup.gitconnected.com/web-scraping-with-r-part-2-dynamic-webpages-de620a161671
+
 
 spotify_tracks <- read_html(remDr$getPageSource()[[1]])
 # https://stackoverflow.com/questions/57370389/what-is-the-difference-between-rvesthtml-text-and-rseleniumgetpagesource?rq=1
