@@ -53,15 +53,8 @@ numStreams <- NULL
 listenedTracks <- data.frame()
 
 # Ensure login
-url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[1],"-daily/",unProcessedDates[1],sep="")
+url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[1],"-daily/",unProcessedDates[6],sep="")
 remote_driver$navigate(url)
-
-# Check no load error
-if (length(remote_driver$findElements(using='xpath', '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3'))!=0) {
-  print("No available data")
-  } else {
-  print("Available data!")
-}
 
 # LOOPING dates
 for (i in c(6:6)) {
