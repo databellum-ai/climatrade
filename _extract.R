@@ -6,6 +6,16 @@
 
 
 # =========================================
+# Extract music trends from SPOTIFY
+# =========================================
+# Parameters music extraction:
+musicInitialDate <- "2017-01-01"
+numTopTracks <- 3 # how many tracks we extract per day/week
+lotSize <- 90  # dates processed in a run. If not enough, just repeat run
+#
+source("extraction/extract_musicSPOTIFY.R")
+
+# =========================================
 # Extract calendar data (Moon angle + Weekday) data
 # =========================================
 #
@@ -55,16 +65,6 @@ source("extraction/extract_newsData.R")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-
-# =========================================
-# Extract music trends from SPOTIFY
-# =========================================
-# Parameters music extraction:
-numTopTracks <- 3 # how many tracks we extract per day/week
-lotSize <- 90  # dates processed in a run. If not enough, just repeat run
-#
-source("extraction/extract_musicSPOTIFY.R")
 
 # =========================================
 # Extract weather from NOAA
