@@ -1,5 +1,5 @@
 # PTE: pasar login
-# PTE: leer países
+# PTE: leer países (resolver "aria-expanded" o  leer de geo_music.rds)
 # PTE: lanzar por fechas
 # PTE: integrar con original
 
