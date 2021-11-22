@@ -56,11 +56,13 @@ listenedTracks <- data.frame()
 url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[1],"-daily/",unProcessedDates[6],sep="")
 remote_driver$navigate(url)
 
+numTopTracks <- 3
+listenedTracks <- data.frame()
 # LOOPING dates
 for (i in c(6:6)) {
   # for (i in c(1:length(unProcessedDates))) {
   # LOOPING all countries
-  for (j in c(1:1)) {
+  for (j in c(1:10)) {
     # for (j in c(1:nrow(allPossibleCountries))) {
     print(allPossibleCountries$countryCode[j])
     url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[j],"-daily/",unProcessedDates[i],sep="")
@@ -68,10 +70,8 @@ for (i in c(6:6)) {
     if (length(remote_driver$findElements(using='xpath', '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3'))==0) { # Check no load error
       staticVersion <- remote_driver$getPageSource()[[1]]
       spotify_tracks <- read_html(staticVersion) # rvest
-      numTopTracks <- 3
       track <- NULL
       numStreams <- NULL
-      listenedTracks <- data.frame()
       # LOOPING top tracks
       for (k in c(1:numTopTracks)) {
         track[k] <- spotify_tracks %>% 
