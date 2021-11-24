@@ -1,8 +1,11 @@
+# PTE: ejecución estable bucles
 # PTE: pasar login
-# PTE: leer países (resolver "aria-expanded" o  leer de geo_music.rds)
-# PTE: lanzar por fechas
 # PTE: integrar con original
 
+library(tidyverse)
+library(rvest)
+library(RSelenium)
+library(binman)
 
 # Determine what dates we'll process:
 unProcessedDates <- NULL
@@ -35,10 +38,7 @@ allPossibleCountries
 
 # https://thatdatatho.com/tutorial-web-scraping-rselenium/
 
-library(tidyverse)
-library(rvest)
-library(RSelenium)
-library(binman)
+
 #Shut Down Client and Server
 # remote_driver$close()
 # driver$server$stop()
@@ -57,6 +57,7 @@ listenedTracks <- data.frame()
 url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[1],"-daily/",unProcessedDates[6],sep="")
 remote_driver$navigate(url)
 
+
 # LOOPING dates
 for (i in c(19:19)) {
   # for (i in c(1:length(unProcessedDates))) {
@@ -69,7 +70,9 @@ for (i in c(19:19)) {
     url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[j],"-daily/",unProcessedDates[i],sep="")
     remote_driver$navigate(url)
     print(paste("URL:", url))
-    if (length(remote_driver$findElements(using='xpath', '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3'))==0) { # Check no load error
+    pageNotLoaded <- length(remote_driver$findElements(using='xpath', '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3')) != 0
+    print(paste("Not loaded?:", pageNotLoaded))
+    if (!pageNotLoaded) { # Check no load error
       staticVersion <- remote_driver$getPageSource()[[1]]
       spotify_tracks <- read_html(staticVersion) # rvest
       track <- NULL
@@ -82,6 +85,8 @@ for (i in c(19:19)) {
         numStreams[k] <- spotify_tracks %>% 
           html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[7]',sep="")) %>% html_text() 
         numStreams[k] <- as.numeric(gsub(",", "", numStreams[k]))
+        print(paste("k =",k,"| track ->",track[k]))
+        print(paste("k =",k,"| numStreams ->",numStreams[k]))  
       }  # ^^ TRACKS
       # tracksJustFound <-
       #   data.frame(trackId = track[1:numTopTracks],
@@ -90,13 +95,30 @@ for (i in c(19:19)) {
       #              country = NA,
       #              countryCode = NA)
       # listenedTracks <- rbind(listenedTracks, tracksJustFound)   
-      print(paste(track,k))
-      print(paste(numStreams,k))      
+      print(track)
+      print(numStreams)      
     }
   }
 }
 
 head(listenedTracks)
+
+
+
+
+
+
+
+k <- 3
+spotify_tracks %>% html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[3]/div/div[1]/a',sep="")) %>% html_attr("href")
+
+
+staticVersion <- remote_driver$getPageSource()[[1]]
+staticVersion
+spotify_tracks <- read_html(staticVersion) # rvest
+spotify_tracks
+read_html(staticVersion) %>% html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[1]/a',sep="")) %>% html_attr("href")
+
 
 
 
