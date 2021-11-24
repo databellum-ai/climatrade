@@ -6,7 +6,7 @@
 
 # Determine what dates we'll process:
 unProcessedDates <- NULL
-allPossibleDates <- seq(as.Date(musicInitialDate), Sys.Date(), by="days")
+allPossibleDates <- seq(as.Date(musicInitialDate), Sys.Date()-1, by="days")
 allPossibleDates
 # read already available data to ensure claculation only of delta. At the end we'll consolidate
 if (file.exists("data/data_music_ts.rds")) {
@@ -50,23 +50,25 @@ remote_driver <- driver[["client"]]
 
 track <- NULL
 numStreams <- NULL
+numTopTracks <- 3
 listenedTracks <- data.frame()
 
 # Ensure login
 url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[1],"-daily/",unProcessedDates[6],sep="")
 remote_driver$navigate(url)
 
-numTopTracks <- 3
-listenedTracks <- data.frame()
 # LOOPING dates
-for (i in c(6:6)) {
+for (i in c(19:19)) {
   # for (i in c(1:length(unProcessedDates))) {
+  print(unProcessedDates[i])
+  print("----------")
   # LOOPING all countries
-  for (j in c(1:10)) {
+  for (j in c(2:2)) {
     # for (j in c(1:nrow(allPossibleCountries))) {
     print(allPossibleCountries$countryCode[j])
     url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[j],"-daily/",unProcessedDates[i],sep="")
     remote_driver$navigate(url)
+    print(paste("URL:", url))
     if (length(remote_driver$findElements(using='xpath', '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3'))==0) { # Check no load error
       staticVersion <- remote_driver$getPageSource()[[1]]
       spotify_tracks <- read_html(staticVersion) # rvest
@@ -81,17 +83,17 @@ for (i in c(6:6)) {
           html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[7]',sep="")) %>% html_text() 
         numStreams[k] <- as.numeric(gsub(",", "", numStreams[k]))
       }  # ^^ TRACKS
-      tracksJustFound <-
-        data.frame(trackId = track[1:numTopTracks],
-                   numStreams = numStreams[1:numTopTracks],
-                   date = NA,
-                   country = NA,
-                   countryCode = NA)
-      listenedTracks <- rbind(listenedTracks, tracksJustFound)   
+      # tracksJustFound <-
+      #   data.frame(trackId = track[1:numTopTracks],
+      #              numStreams = numStreams[1:numTopTracks],
+      #              date = NA,
+      #              country = NA,
+      #              countryCode = NA)
+      # listenedTracks <- rbind(listenedTracks, tracksJustFound)   
+      print(paste(track,k))
+      print(paste(numStreams,k))      
     }
   }
-  print(unProcessedDates[i])
-  print("----------")
 }
 
 head(listenedTracks)
