@@ -1,4 +1,3 @@
-# PTE: corregir grabación del df: tracksJustFound
 # PTE: ejecución estable bucles: regular el delay + resiliente a fallos de carga
 # PTE: pasar login
 # PTE: integrar con original
@@ -94,8 +93,8 @@ for (i in c(19:19)) {
         data.frame(trackId = track[1:numTopTracks],
                    numStreams = numStreams[1:numTopTracks],
                    date = unProcessedDates[i],
-                   country = allPossibleCountries$country,
-                   countryCode = allPossibleCountries$countryCode)
+                   country = allPossibleCountries$country[j],
+                   countryCode = allPossibleCountries$countryCode[j] )
       listenedTracks <- rbind(listenedTracks, tracksJustFound)
     }
   }
@@ -108,22 +107,6 @@ head(listenedTracks)
 
 
 
-
-k <- 3
-spotify_tracks %>% html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[3]/div/div[1]/a',sep="")) %>% html_attr("href")
-
-
-staticVersion <- remote_driver$getPageSource()[[1]]
-staticVersion
-spotify_tracks <- read_html(staticVersion) # rvest
-spotify_tracks
-staticVersion %>% html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[1]/a',sep="")) %>% html_attr("href")
-
-
-
-
-//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[1]/a
-//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[2]/a
 
 # ----------------------------------
 
