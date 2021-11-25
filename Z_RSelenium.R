@@ -40,9 +40,9 @@ allPossibleCountries
 
 
 #Shut Down Client and Server
-# remote_driver$close()
-# driver$server$stop()
-# system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
+remote_driver$close()
+driver$server$stop()
+system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
 list_versions("chromedriver")
 driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")
 remote_driver <- driver[["client"]]
