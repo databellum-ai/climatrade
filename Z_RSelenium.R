@@ -1,4 +1,5 @@
-# PTE: ejecución estable bucles
+# PTE: corregir grabación del df: tracksJustFound
+# PTE: ejecución estable bucles: regular el delay + resiliente a fallos de carga
 # PTE: pasar login
 # PTE: integrar con original
 
@@ -48,15 +49,12 @@ driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.46
 remote_driver <- driver[["client"]]
 
 
-track <- NULL
-numStreams <- NULL
 numTopTracks <- 3
 listenedTracks <- data.frame()
 
 # Ensure login
-url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[1],"-daily/",unProcessedDates[6],sep="")
+url <- paste("https://charts.spotify.com/charts/overview/global")
 remote_driver$navigate(url)
-
 
 # LOOPING dates
 for (i in c(19:19)) {
@@ -64,11 +62,12 @@ for (i in c(19:19)) {
   print(unProcessedDates[i])
   print("----------")
   # LOOPING all countries
-  for (j in c(2:2)) {
-    # for (j in c(1:nrow(allPossibleCountries))) {
+  for (j in c(1:nrow(allPossibleCountries))) {
     print(allPossibleCountries$countryCode[j])
     url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[j],"-daily/",unProcessedDates[i],sep="")
     remote_driver$navigate(url)
+    # Delay to wait until page loads:
+    #Sys.sleep(0.1)  
     print(paste("URL:", url))
     pageNotLoaded <- length(remote_driver$findElements(using='xpath', '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3')) != 0
     print(paste("Not loaded?:", pageNotLoaded))
@@ -80,23 +79,24 @@ for (i in c(19:19)) {
       # LOOPING top tracks
       for (k in c(1:numTopTracks)) {
         track[k] <- spotify_tracks %>% 
-          html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[3]/div/div[1]/a',sep="")) %>% html_attr("href")
+          html_nodes(xpath = 
+                       paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[3]/div/div[1]/a',sep="")) %>% 
+          html_attr("href")
         track[k] <- str_remove(track[k],"https://open.spotify.com/track/")
         numStreams[k] <- spotify_tracks %>% 
-          html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[7]',sep="")) %>% html_text() 
+          html_nodes(xpath = 
+                       paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[7]',sep="")) %>% html_text() 
         numStreams[k] <- as.numeric(gsub(",", "", numStreams[k]))
         print(paste("k =",k,"| track ->",track[k]))
         print(paste("k =",k,"| numStreams ->",numStreams[k]))  
       }  # ^^ TRACKS
-      # tracksJustFound <-
-      #   data.frame(trackId = track[1:numTopTracks],
-      #              numStreams = numStreams[1:numTopTracks],
-      #              date = NA,
-      #              country = NA,
-      #              countryCode = NA)
-      # listenedTracks <- rbind(listenedTracks, tracksJustFound)   
-      print(track)
-      print(numStreams)      
+      tracksJustFound <-
+        data.frame(trackId = track[1:numTopTracks],
+                   numStreams = numStreams[1:numTopTracks],
+                   date = unProcessedDates[i],
+                   country = allPossibleCountries$country,
+                   countryCode = allPossibleCountries$countryCode)
+      listenedTracks <- rbind(listenedTracks, tracksJustFound)
     }
   }
 }
@@ -117,13 +117,13 @@ staticVersion <- remote_driver$getPageSource()[[1]]
 staticVersion
 spotify_tracks <- read_html(staticVersion) # rvest
 spotify_tracks
-read_html(staticVersion) %>% html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[1]/a',sep="")) %>% html_attr("href")
+staticVersion %>% html_nodes(xpath = paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[1]/a',sep="")) %>% html_attr("href")
 
 
 
 
-
-
+//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[1]/a
+//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[2]/a
 
 # ----------------------------------
 
