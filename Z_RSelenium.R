@@ -1,6 +1,9 @@
-# PTE: ejecución estable bucles: regular el delay + resiliente a fallos de carga
+# PTE: ejecución estable bucles: regular el delay
 # PTE: pasar login
 # PTE: integrar con original
+
+
+numTopTracks <- 3
 
 library(tidyverse)
 library(rvest)
@@ -40,62 +43,79 @@ allPossibleCountries
 
 
 #Shut Down Client and Server
-remote_driver$close()
-driver$server$stop()
-system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
+# remote_driver$close()
+# driver$server$stop()
+# system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
 list_versions("chromedriver")
 driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")
 remote_driver <- driver[["client"]]
 
 
-numTopTracks <- 3
-listenedTracks <- data.frame()
-
 # Ensure login
 url <- paste("https://charts.spotify.com/charts/overview/global")
 remote_driver$navigate(url)
 
+
+listenedTracks <- data.frame()
 # LOOPING dates
 for (i in c(19:19)) {
   # for (i in c(1:length(unProcessedDates))) {
   print(unProcessedDates[i])
   print("----------")
   # LOOPING all countries
-  for (j in c(1:nrow(allPossibleCountries))) {
+  for (j in c(1:3)) {
+  # for (j in c(1:nrow(allPossibleCountries))) {
     print(allPossibleCountries$countryCode[j])
     url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[j],"-daily/",unProcessedDates[i],sep="")
+    # We generate a static version of this dynamic page
     remote_driver$navigate(url)
-    # Delay to wait until page loads:
-    #Sys.sleep(0.1)  
+
+    
+    
+    # Delay until page loads:
+    Sys.sleep(3)
+    staticVersion <- remote_driver$getPageSource()[[1]] %>% read_html() # to use with rvest
+    # staticVersion <-NULL
+    # while(is.null(staticVersion)){
+    #   staticVersion <- tryCatch({remote_driver$getPageSource()[[1]]},
+    #                       error = function(e){NULL})
+    #   #loop until element with name <value> is found in <webpage url>
+    # }
+    # staticVersion <- staticVersion %>% read_html()
+
+
+    # We check page is loaded using a typical H3 appearing in failing loads
+    pageLoaded <- staticVersion %>% 
+      html_nodes(xpath = '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3') %>% 
+      is_empty()
     print(paste("URL:", url))
-    pageNotLoaded <- length(remote_driver$findElements(using='xpath', '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3')) != 0
-    print(paste("Not loaded?:", pageNotLoaded))
-    if (!pageNotLoaded) { # Check no load error
-      staticVersion <- remote_driver$getPageSource()[[1]]
-      spotify_tracks <- read_html(staticVersion) # rvest
+    print(paste("Loaded?:", pageLoaded))
+    if (pageLoaded) { # Check no load error
       track <- NULL
       numStreams <- NULL
       # LOOPING top tracks
       for (k in c(1:numTopTracks)) {
-        track[k] <- spotify_tracks %>% 
+        track[k] <- staticVersion %>% 
           html_nodes(xpath = 
                        paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[3]/div/div[1]/a',sep="")) %>% 
           html_attr("href")
         track[k] <- str_remove(track[k],"https://open.spotify.com/track/")
-        numStreams[k] <- spotify_tracks %>% 
+        numStreams[k] <- staticVersion %>% 
           html_nodes(xpath = 
                        paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[7]',sep="")) %>% html_text() 
         numStreams[k] <- as.numeric(gsub(",", "", numStreams[k]))
         print(paste("k =",k,"| track ->",track[k]))
         print(paste("k =",k,"| numStreams ->",numStreams[k]))  
       }  # ^^ TRACKS
-      tracksJustFound <-
-        data.frame(trackId = track[1:numTopTracks],
-                   numStreams = numStreams[1:numTopTracks],
-                   date = unProcessedDates[i],
-                   country = allPossibleCountries$country[j],
-                   countryCode = allPossibleCountries$countryCode[j] )
-      listenedTracks <- rbind(listenedTracks, tracksJustFound)
+      if (length(track[1:numTopTracks]) ==3) { # We'll append data only if actually extracted (page might have failed to load)
+        tracksJustFound <-
+          data.frame(trackId = track[1:numTopTracks],
+                     numStreams = numStreams[1:numTopTracks],
+                     date = unProcessedDates[i],
+                     country = allPossibleCountries$country[j],
+                     countryCode = allPossibleCountries$countryCode[j] )
+        listenedTracks <- rbind(listenedTracks, tracksJustFound)
+      }
     }
   }
 }
