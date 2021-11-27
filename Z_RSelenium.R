@@ -2,6 +2,7 @@
 # PTE: integrar con original
 # PTE: separar inicialización
 # PTE: cambiar clave Spotify
+# PTE: instalar&probar en otros PCs
 
 
 numTopTracks <- 3
