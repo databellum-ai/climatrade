@@ -1,14 +1,19 @@
-# PTE: ejecución estable bucles: regular el delay
-# PTE: pasar login
+# PTE: pasar cookies
 # PTE: integrar con original
+# PTE: separar inicialización
+# PTE: cambiar clave Spotify
 
 
 numTopTracks <- 3
+accountSpotify <- "jes@databellum-ai.com"
+passwordSpotify <- "xxxxxx"
 
 library(tidyverse)
 library(rvest)
 library(RSelenium)
 library(binman)
+
+# ---------------------------
 
 # Determine what dates we'll process:
 unProcessedDates <- NULL
@@ -50,40 +55,51 @@ list_versions("chromedriver")
 driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")
 remote_driver <- driver[["client"]]
 
-
 # Ensure login
-url <- paste("https://charts.spotify.com/charts/overview/global")
+url <- paste("https://accounts.spotify.com/en/login?continue=https:%2F%2Fcharts.spotify.com%2Flogin")
 remote_driver$navigate(url)
-
+address_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-username"]')
+password_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-password"]')
+button_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-button"]')
+address_element$clearElement()
+password_element$clearElement()
+address_element$sendKeysToElement(list(accountSpotify))
+password_element$sendKeysToElement(list(passwordSpotify))
+button_element$clickElement()
+# + accept cookies...
 
 listenedTracks <- data.frame()
 # LOOPING dates
-for (i in c(19:19)) {
-  # for (i in c(1:length(unProcessedDates))) {
+for (i in c(1:length(unProcessedDates))) {
   print(unProcessedDates[i])
   print("----------")
   # LOOPING all countries
-  for (j in c(1:3)) {
-  # for (j in c(1:nrow(allPossibleCountries))) {
+  for (j in c(1:nrow(allPossibleCountries))) {
     print(allPossibleCountries$countryCode[j])
     url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[j],"-daily/",unProcessedDates[i],sep="")
     # We generate a static version of this dynamic page
     remote_driver$navigate(url)
-
     
+    # We need to delay until ensure page is loaded
+    success <- FALSE  
+    numTries <- 0
+    while (!success & numTries <= 5) {
+      Sys.sleep(1)  # delay to facilitate full load
+      print("Waiting for page to fully load")      
+      success <- tryCatch({
+        remote_driver$findElement(
+          using = 'xpath', 
+          value = '//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[1]/a')
+        TRUE
+      }, 
+      warning = function(w) { FALSE },
+      error = function(e) { FALSE },
+      finally = { })
+      numTries <- numTries + 1
+    }
     
-    # Delay until page loads:
-    Sys.sleep(3)
-    staticVersion <- remote_driver$getPageSource()[[1]] %>% read_html() # to use with rvest
-    # staticVersion <-NULL
-    # while(is.null(staticVersion)){
-    #   staticVersion <- tryCatch({remote_driver$getPageSource()[[1]]},
-    #                       error = function(e){NULL})
-    #   #loop until element with name <value> is found in <webpage url>
-    # }
-    # staticVersion <- staticVersion %>% read_html()
-
-
+    # Now we are ready to process static page using rvest
+    staticVersion <- remote_driver$getPageSource()[[1]] %>% read_html()   
     # We check page is loaded using a typical H3 appearing in failing loads
     pageLoaded <- staticVersion %>% 
       html_nodes(xpath = '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3') %>% 
@@ -123,48 +139,78 @@ for (i in c(19:19)) {
 head(listenedTracks)
 
 
+# --------------------------------------------------------------------
+# --------------------------------------------------------------------
+# --------------------------------------------------------------------
 
 
 
+# ================================
+# STEP 3: Call Spotify API to obtain tracks features, and the consolidate to one value per date/country
+# ================================
+#
+# Info on meaning of each feature:
+# -Danceability: Numerical, danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.
+# -Tempo (BPM: Numerical, Overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.
+# -Energy: Numerical, Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. Perceptual features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy.
+# (see description of other features here: https://rpubs.com/PeterDola/SpotifyTracks)
 
+# calling API for tracks features
+access_token <- get_spotify_access_token()
+# There is a limit of 100 track in each query to the API, so we slice tracks in lots
+recsToProc <- nrow(listenedTracks)  # total records (tracks) to process
+maxRec <- 90  # limit of records per API (100, but just in case...)
+nCalls <- 1 + floor((recsToProc-1)/maxRec) # calculate number of calls required
+allTracksFeatures <- data.frame()  # we will accumulate results here
 
-# ----------------------------------
+for (c in c(1:nCalls)) {
+  tmpFromRecord <- 1+((c-1)*maxRec)
+  tmpToRecord <- c*maxRec
+  tmpToRecord <- ifelse(tmpToRecord <= recsToProc, tmpToRecord, recsToProc)
+  print(paste("Obtaining features of tracks: ",tmpFromRecord, " to ", tmpToRecord))
+  tmpTracksFeatures <-
+    get_track_audio_features(
+      listenedTracks[tmpFromRecord:tmpToRecord, 1],
+      authorization = access_token)
+  allTracksFeatures <- rbind(allTracksFeatures, tmpTracksFeatures)
+}
 
-# <div data-testid="region-filter" class="RegionSelect__OverviewFilter-ibo3np-0 ilDAmP"><span class="Trigger-sc-18ecbf7-0 cGQwPM Trigger-uvfeg5-0 jQtrTN RegionSelect__StyledDropdownTrigger-ibo3np-1 iBVLW"><div class="Container-s1cmq-0 fQlZAH"><button aria-haspopup="listbox" id="dropdown-toggle" aria-labelledby="dropdown-label dropdown-toggle" aria-expanded="false" class="Button-sc-18tio8-0 jPCnoE">Global</button><svg role="img" focusable="false" height="16" width="16" viewBox="0 0 24 24" aria-hidden="true" class="Svg-sc-1usfroi-0 jhoCoB Arrow-sc-62daq7-0 dKKkZe"><polyline points="20 8 12 17 4 8" fill="none" stroke="#181818"></polyline></svg></div></span></div>
+listenedTracks  # source of tracks found
+allTracksFeatures  # features extracted for those tracks
+allTracksFeatures <- cbind(listenedTracks,allTracksFeatures) # we bind all columns
+allTracksFeatures
 
-# <span class="Trigger-sc-18ecbf7-0 cGQwPM Trigger-uvfeg5-0 jQtrTN RegionSelect__StyledDropdownTrigger-ibo3np-1 iBVLW"><div class="Container-s1cmq-0 fQlZAH"><button aria-haspopup="listbox" id="dropdown-toggle" aria-labelledby="dropdown-label dropdown-toggle" aria-expanded="false" class="Button-sc-18tio8-0 jPCnoE">Australia</button><svg role="img" focusable="false" height="16" width="16" viewBox="0 0 24 24" aria-hidden="true" class="Svg-sc-1usfroi-0 jhoCoB Arrow-sc-62daq7-0 dKKkZe"><polyline points="20 8 12 17 4 8" fill="none" stroke="#181818"></polyline></svg></div></span>
+# Finally, let's group by date/country/feature using weighted mean of the values of top track's features 
+allTracksFeatures <- allTracksFeatures %>% 
+  group_by(countryCode, country, date) %>% 
+  summarize(
+    danceability = weighted.mean(as.numeric(danceability), as.numeric(numStreams)), 
+    energy = weighted.mean(as.numeric(energy), as.numeric(numStreams)), 
+    tempo = weighted.mean(as.numeric(tempo), as.numeric(numStreams)), 
+    key = weighted.mean(as.numeric(key), as.numeric(numStreams)), 
+    loudness = weighted.mean(as.numeric(loudness), as.numeric(numStreams)),   
+    speechiness = weighted.mean(as.numeric(speechiness), as.numeric(numStreams)),  
+    acousticness = weighted.mean(as.numeric(acousticness), as.numeric(numStreams)),  
+    instrumentalness = weighted.mean(as.numeric(instrumentalness), as.numeric(numStreams)),  
+    liveness = weighted.mean(as.numeric(liveness), as.numeric(numStreams)),  
+    valence = weighted.mean(as.numeric(valence), as.numeric(numStreams)))
 
+# new data obtained
+allTracksFeatures
 
-test <- remote_driver$findElement(using = 'xpath', value = '//*[@id="dropdown-toggle"]')
-test <- remote_driver$findElement(using = 'class', value = 'Container-s1cmq-0')
+# consolidate with historical data
+allTracksFeatures <- rbind(allTracksFeatures, historicTracksFeatures)
 
-test <- remote_driver$findElement(using = 'xpath', value = '//*[@id="__next"]/div/div/main/div[2]/div[1]/header/div/div[2]/div/span/div')
-view(test$getElementText())
+unique(allTracksFeatures$date)
+unique(allTracksFeatures$country)
 
+# ================================
+# SAVE
+# ================================
+# # Save dataset
+# saveRDS(allTracksFeatures,"data/data_music_ts.rds")
+# # Save also countries and codes for further consolidation with other data
+# geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
+# geo_music
+# saveRDS(geo_music,"data/geo_music.rds")
 
-test <- remote_driver$findElement(using = 'xpath', value = '//*[@id="__next"]/div/div/main/div[2]/div[1]/header/div/div[2]/div/span')
-test$clickElement()
-test$getActiveElement()
-
-element <- unlist(remote_driver$findElement("class name", "Button-sc-18tio8-0")$getElementAttribute('class'))
-length(element)
-
-
-test <- remote_driver$findElement("data-testid", "region-filter")
-test
-
-buttonElem <- remote_driver$findElement("class name", "Button-sc-18tio8-0")
-view(buttonElem$getElementText())
-buttonElem$clickElement()
-
-# -----------------------------------------
-
-
-address_element <- remote_driver$findElement(using = 'class', value = 'width70')
-address_element$sendKeysToElement(list("Lombard Street, San Francisco"))
-button_element <- remote_driver$findElement(using = 'class', value = "button")
-button_element$clickElement()
-out <- remote_driver$findElement(using = "class", value="coordinatetxt")
-lat_long <- out$getElementText()
-
-# url <- "https://charts.spotify.com/charts/view/regional-global-daily/latest"
