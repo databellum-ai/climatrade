@@ -1,12 +1,8 @@
-# PTE: integrar con original
-# PTE: separar inicialización a
-# PTE: cambiar clave Spotify
+# PTE: comprobar datos ("data/data_music_ts2.rds" y mover a titular)
+# PTE: separar inicialización&launcher y renombrar a titular
 # PTE: instalar&probar en otros PCs
 
-# https://thatdatatho.com/tutorial-web-scraping-rselenium/
 
-
-numTopTracks <- 3
 accountSpotify <- "jes@databellum-ai.com"
 passwordSpotify <- "DBellum$2021"
 spotifyClientId <- "7f00e459e82b4d85a3a3b5b29e34879a"
@@ -21,7 +17,6 @@ library(spotifyr)# For certain functions and applications, you’ll need to log 
 Sys.setenv(SPOTIFY_CLIENT_ID = spotifyClientId)
 Sys.setenv(SPOTIFY_CLIENT_SECRET = spotifySecretId)
 
-# source("clavesAPI_spotify.R")
 # ---------------------------
 
 # ================================
@@ -33,12 +28,11 @@ unProcessedDates <- NULL
 allPossibleDates <- seq(as.Date(musicInitialDate), Sys.Date()-1, by="days")
 # read already available data to ensure claculation only of delta. At the end we'll consolidate
 if (file.exists("data/data_music_ts.rds")) {
-  historicTracksFeatures <- readRDS("data/data_music_ts.rds")
+  historicTracksFeatures <- readRDS("data/data_music_ts2.rds")
   # get a list of dates appearing in the website but not in our historic record and use it for further process
   existingDates <- historicTracksFeatures %>% group_by(date) %>% summarize()
   existingDates$date <- as.Date(existingDates$date)
   unProcessedDates <- allPossibleDates[!(allPossibleDates %in% existingDates$date)]
-  unProcessedDates
 } else {
   # in case there is no history of data, we must process all available (on the web) dates
   historicTracksFeatures <- data.frame()
@@ -70,6 +64,7 @@ remote_driver <- driver[["client"]]
 # Ensure login
 url <- paste("https://accounts.spotify.com/en/login?continue=https:%2F%2Fcharts.spotify.com%2Flogin")
 remote_driver$navigate(url)
+Sys.sleep(5)  # delay to facilitate full load
 address_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-username"]')
 password_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-password"]')
 button_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-button"]')
@@ -84,8 +79,7 @@ cookies_element$clickElement()
 
 listenedTracks <- data.frame()
 # LOOPING dates
-for (i in c(1:19)) {
-# for (i in c(1:length(unProcessedDates))) {
+for (i in c(1:length(unProcessedDates))) {
   print(unProcessedDates[i])
   print("----------")
   # LOOPING all countries
@@ -142,7 +136,7 @@ for (i in c(1:19)) {
         tracksJustFound <-
           data.frame(trackId = track[1:numTopTracks],
                      numStreams = numStreams[1:numTopTracks],
-                     date = unProcessedDates[i],
+                     date = as.character(unProcessedDates[i]),
                      country = allPossibleCountries$country[j],
                      countryCode = allPossibleCountries$countryCode[j] )
         listenedTracks <- rbind(listenedTracks, tracksJustFound)
@@ -222,9 +216,9 @@ unique(allTracksFeatures$country)
 # SAVE
 # ================================
 # # Save dataset
-# saveRDS(allTracksFeatures,"data/data_music_ts.rds")
+saveRDS(allTracksFeatures,"data/data_music_ts2.rds")
 # # Save also countries and codes for further consolidation with other data
-# geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
-# geo_music
-# saveRDS(geo_music,"data/geo_music.rds")
+geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
+geo_music
+saveRDS(geo_music,"data/geo_music.rds")
 
