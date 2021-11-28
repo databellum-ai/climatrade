@@ -1,11 +1,9 @@
 # PTE: integrar con original
-# PTE: separar inicialización
+# PTE: separar inicialización a
 # PTE: cambiar clave Spotify
 # PTE: instalar&probar en otros PCs
 
 # https://thatdatatho.com/tutorial-web-scraping-rselenium/
-
-update.packages(ask = FALSE)
 
 
 numTopTracks <- 3
