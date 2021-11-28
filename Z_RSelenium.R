@@ -1,25 +1,38 @@
-# PTE: pasar cookies
 # PTE: integrar con original
 # PTE: separar inicialización
 # PTE: cambiar clave Spotify
 # PTE: instalar&probar en otros PCs
 
+# https://thatdatatho.com/tutorial-web-scraping-rselenium/
+
+update.packages(ask = FALSE)
+
 
 numTopTracks <- 3
 accountSpotify <- "jes@databellum-ai.com"
-passwordSpotify <- "xxxxxx"
+passwordSpotify <- "DBellum$2021"
+spotifyClientId <- "7f00e459e82b4d85a3a3b5b29e34879a"
+spotifySecretId <- "bdbd6c4fa0c74bb39e5a82a68989e0fe"
 
 library(tidyverse)
 library(rvest)
 library(RSelenium)
 library(binman)
+library(rvest)
+library(spotifyr)# For certain functions and applications, you’ll need to log in as a Spotify user. To do this, your Spotify Developer application needs to have a callback url. You can set this to whatever you want that will work with your application, but a good default option is http://localhost:1410/ (see image below). For more information on authorization, visit the official Spotify Developer Guide. (https://www.rcharlie.com/spotifyr/)
+Sys.setenv(SPOTIFY_CLIENT_ID = spotifyClientId)
+Sys.setenv(SPOTIFY_CLIENT_SECRET = spotifySecretId)
 
+# source("clavesAPI_spotify.R")
 # ---------------------------
+
+# ================================
+# STEP 1: Determine countries and dates we need to collect
+# ================================
 
 # Determine what dates we'll process:
 unProcessedDates <- NULL
 allPossibleDates <- seq(as.Date(musicInitialDate), Sys.Date()-1, by="days")
-allPossibleDates
 # read already available data to ensure claculation only of delta. At the end we'll consolidate
 if (file.exists("data/data_music_ts.rds")) {
   historicTracksFeatures <- readRDS("data/data_music_ts.rds")
@@ -43,19 +56,19 @@ unProcessedDates
 
 # Determine what countries we'll process:
 allPossibleCountries <- readRDS("data/geo_music.rds")
-allPossibleCountries
-
-# https://thatdatatho.com/tutorial-web-scraping-rselenium/
+allPossibleCountries$countryCode
 
 
-#Shut Down Client and Server
-# remote_driver$close()
-# driver$server$stop()
-# system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
+# ================================
+# STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams
+# ================================
+
+# Start RSelenium server
 list_versions("chromedriver")
 driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")
 remote_driver <- driver[["client"]]
 
+# Page initialization prepartion (login + accept cookies)
 # Ensure login
 url <- paste("https://accounts.spotify.com/en/login?continue=https:%2F%2Fcharts.spotify.com%2Flogin")
 remote_driver$navigate(url)
@@ -67,11 +80,14 @@ password_element$clearElement()
 address_element$sendKeysToElement(list(accountSpotify))
 password_element$sendKeysToElement(list(passwordSpotify))
 button_element$clickElement()
-# + accept cookies...
+# Accept cookies...
+cookies_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="onetrust-accept-btn-handler"]')
+cookies_element$clickElement()
 
 listenedTracks <- data.frame()
 # LOOPING dates
-for (i in c(1:length(unProcessedDates))) {
+for (i in c(1:19)) {
+# for (i in c(1:length(unProcessedDates))) {
   print(unProcessedDates[i])
   print("----------")
   # LOOPING all countries
@@ -139,11 +155,10 @@ for (i in c(1:length(unProcessedDates))) {
 
 head(listenedTracks)
 
-
-# --------------------------------------------------------------------
-# --------------------------------------------------------------------
-# --------------------------------------------------------------------
-
+#Shut Down Client and Server
+remote_driver$close()
+driver$server$stop()
+system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
 
 
 # ================================
