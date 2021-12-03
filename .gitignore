@@ -1,6 +1,5 @@
 # Keys
-clavesAPI_spotify.R
-clavesAPI_noaa.R
+keys_APIs.R
 
 # History files
 .Rhistory
