@@ -1,7 +1,5 @@
 # rm(list = ls())
 
-# source("keys_APIs.R")
-
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 if(!require(tidyquant)) install.packages("tidyquant", repos = "http://cran.us.r-project.org") # To get stock data
 if(!require(gtrendsR)) install.packages("gtrendsR", repos = "http://cran.us.r-project.org") # To get GoogleTrends data
@@ -28,9 +26,16 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(rnoaa)
-  options(noaakey = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-  # source("clavesAPI_noaa.R")
 library(OECD) # To get OECD.org indicators
 library(gtools)
 library(tidygeocoder) # Resolve coordinates of cities/places
-  
+
+# Libraries Spotify
+library(tidyverse)
+library(rvest)
+library(RSelenium)
+library(binman)
+library(rvest)
+library(spotifyr)# For certain functions and applications, you’ll need to log in as a Spotify user. To do this, your Spotify Developer application needs to have a callback url. You can set this to whatever you want that will work with your application, but a good default option is http://localhost:1410/ (see image below). For more information on authorization, visit the official Spotify Developer Guide. (https://www.rcharlie.com/spotifyr/)
+
+source("keys_APIs.R")

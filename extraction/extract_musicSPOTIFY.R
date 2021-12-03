@@ -1,95 +1,141 @@
-# https://charts.spotify.com/charts/view/regional-at-daily/2021-11-07
+
+Sys.setenv(SPOTIFY_CLIENT_ID = spotifyClientId)
+Sys.setenv(SPOTIFY_CLIENT_SECRET = spotifySecretId)
+
 
 # ================================
 # STEP 1: Determine countries and dates we need to collect
 # ================================
 
-# We extract available countries and dates
-# Extract country codes
-spotify_tracks <- read_html("https://spotifycharts.com/regional/global/daily/latest")
-tmpAvailableCountryCodes <- spotify_tracks %>% 
-  html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[1]/ul/li') %>% 
-  html_attr("data-value")
-# Extract country names
-tmpAvailableCountries <- spotify_tracks %>% 
-  html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[1]/ul/li') %>% 
-  html_text()
-# Extraction of dates available when DAILY
-tmpAvailableDates <- spotify_tracks %>% 
-  html_nodes(xpath = '//*[@id="content"]/div/div/div/span/div[1]/div/div/div/div[3]/ul') %>% 
-  html_children() %>% html_text()  
-
-tmpAvailableDates <-
-  paste(substring(tmpAvailableDates,7,10),"-",substring(tmpAvailableDates,1,2),"-",substring(tmpAvailableDates,4,5),sep="") # convert date format
-tmpAvailableCountryCodes
-tmpAvailableCountries
-tmpAvailableDates
-
-
+# Determine what dates we'll process:
+unProcessedDates <- NULL
+allPossibleDates <- seq(as.Date(musicInitialDate), Sys.Date()-1, by="days")
 # read already available data to ensure claculation only of delta. At the end we'll consolidate
 if (file.exists("data/data_music_ts.rds")) {
-  historicTracksFeatures <- readRDS("data/data_music_ts.rds")
+  historicTracksFeatures <- readRDS("data/data_music_ts2.rds")
   # get a list of dates appearing in the website but not in our historic record and use it for further process
   existingDates <- historicTracksFeatures %>% group_by(date) %>% summarize()
-  existingDates
-  unProcessedDates <- tmpAvailableDates[!(tmpAvailableDates %in% existingDates$date)]
-  unProcessedDates
+  existingDates$date <- as.Date(existingDates$date)
+  unProcessedDates <- allPossibleDates[!(allPossibleDates %in% existingDates$date)]
 } else {
   # in case there is no history of data, we must process all available (on the web) dates
   historicTracksFeatures <- data.frame()
-  unProcessedDates <- tmpAvailableDates
+  unProcessedDates <- allPossibleDates
 }
 # to process only a limited number of recent dates:
-unProcessedDates <- unProcessedDates[1:lotSize]
-
+if (length(unProcessedDates) <= lotSize) {
+  unProcessedDates <- unProcessedDates[1:length(unProcessedDates)] 
+} else { 
+  unProcessedDates <- unProcessedDates[1:lotSize]
+}
 unProcessedDates
+
+# Determine what countries we'll process:
+allPossibleCountries <- readRDS("data/geo_music.rds")
+allPossibleCountries$countryCode
 
 
 # ================================
 # STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams
 # ================================
 
-track <- NULL
-numStreams <- NULL
+# Start RSelenium server
+list_versions("chromedriver")
+driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")
+remote_driver <- driver[["client"]]
+
+# Page initialization prepartion (login + accept cookies)
+# Ensure login
+url <- paste("https://accounts.spotify.com/en/login?continue=https:%2F%2Fcharts.spotify.com%2Flogin")
+remote_driver$navigate(url)
+Sys.sleep(5)  # delay to facilitate full load
+address_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-username"]')
+password_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-password"]')
+button_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="login-button"]')
+address_element$clearElement()
+password_element$clearElement()
+address_element$sendKeysToElement(list(accountSpotify))
+password_element$sendKeysToElement(list(passwordSpotify))
+button_element$clickElement()
+Sys.sleep(5)  # delay to facilitate full load
+# Accept cookies...
+cookies_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="onetrust-accept-btn-handler"]')
+cookies_element$clickElement()
+
 listenedTracks <- data.frame()
 # LOOPING dates
 for (i in c(1:length(unProcessedDates))) {
-  print("---------------------------")
+  print(unProcessedDates[i])
+  print("----------")
   # LOOPING all countries
-  for (j in c(1:length(tmpAvailableCountries))) {
-    print(paste(unProcessedDates[i], " (", tmpAvailableCountries[j], ")"," [",i,"]",sep=""))
-    url_tracks <-
-      paste("https://spotifycharts.com/regional/", tmpAvailableCountryCodes[j], "/", freqData, "/", unProcessedDates[i], sep="")
-    # we obtain NA is case requested page does not exist or returns an error
-    spotify_tracks <- 
-      tryCatch(
-        read_html(url_tracks) %>% 
-          html_nodes(xpath='//*[@id="content"]/div/div/div/span/table/tbody/tr'), 
-        error = function(e){NA})
-    if ( length(spotify_tracks) >= 3  ) {
+  for (j in c(1:nrow(allPossibleCountries))) {
+    print(allPossibleCountries$countryCode[j])
+    url <- paste("https://charts.spotify.com/charts/view/regional-",allPossibleCountries$countryCode[j],"-daily/",unProcessedDates[i],sep="")
+    # We generate a static version of this dynamic page
+    remote_driver$navigate(url)
+    
+    # We need to delay until ensure page is loaded
+    success <- FALSE  
+    numTries <- 0
+    while (!success & numTries <= 5) {
+      Sys.sleep(1)  # delay to facilitate full load
+      print("Waiting for page to fully load")      
+      success <- tryCatch({
+        remote_driver$findElement(
+          using = 'xpath', 
+          value = '//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[1]/td[3]/div/div[1]/a')
+        TRUE
+      }, 
+      warning = function(w) { FALSE },
+      error = function(e) { FALSE },
+      finally = { })
+      numTries <- numTries + 1
+    }
+    
+    # Now we are ready to process static page using rvest
+    staticVersion <- remote_driver$getPageSource()[[1]] %>% read_html()   
+    # We check page is loaded using a typical H3 appearing in failing loads
+    pageLoaded <- staticVersion %>% 
+      html_nodes(xpath = '//*[@id="__next"]/div/div/main/div[2]/div[2]/div/h3') %>% 
+      is_empty()
+    print(paste("URL:", url))
+    print(paste("Loaded?:", pageLoaded))
+    if (pageLoaded) { # Check no load error
+      track <- NULL
+      numStreams <- NULL
       # LOOPING top tracks
       for (k in c(1:numTopTracks)) {
-        # track index
-        track[k] <-
-          (((spotify_tracks[k] %>% html_nodes("td"))[1] %>% html_nodes("a") %>% html_attrs())[[1]])[1]
-        track[k] <-
-          str_remove(track[k],"https://open.spotify.com/track/")
-        # Scrape number of streams per track
-        numStreams[k] <- (spotify_tracks[k] %>% html_nodes("td"))[5] %>% html_text()
+        track[k] <- staticVersion %>% 
+          html_nodes(xpath = 
+                       paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[3]/div/div[1]/a',sep="")) %>% 
+          html_attr("href")
+        track[k] <- str_remove(track[k],"https://open.spotify.com/track/")
+        numStreams[k] <- staticVersion %>% 
+          html_nodes(xpath = 
+                       paste('//*[@id="__next"]/div/div/main/div[2]/div[3]/div/table/tbody/tr[',k,']/td[7]',sep="")) %>% html_text() 
         numStreams[k] <- as.numeric(gsub(",", "", numStreams[k]))
+        print(paste("k =",k,"| track ->",track[k]))
+        print(paste("k =",k,"| numStreams ->",numStreams[k]))  
       }  # ^^ TRACKS
-      tracksFoundOnDate <-
-        data.frame(trackId = track[1:numTopTracks],
-                   numStreams = numStreams[1:numTopTracks],
-                   date = unProcessedDates[i],
-                   country = tmpAvailableCountries[j],
-                   countryCode = tmpAvailableCountryCodes[j])
-      listenedTracks <- rbind(listenedTracks, tracksFoundOnDate)
-    } # END IF to ensure page is reachable
-  } # ^^ DATES
-} # ^^ COUNTRIES
+      if (length(track[1:numTopTracks]) ==3) { # We'll append data only if actually extracted (page might have failed to load)
+        tracksJustFound <-
+          data.frame(trackId = track[1:numTopTracks],
+                     numStreams = numStreams[1:numTopTracks],
+                     date = as.character(unProcessedDates[i]),
+                     country = allPossibleCountries$country[j],
+                     countryCode = allPossibleCountries$countryCode[j] )
+        listenedTracks <- rbind(listenedTracks, tracksJustFound)
+      }
+    }
+  }
+}
 
-listenedTracks
+head(listenedTracks)
+
+#Shut Down Client and Server
+remote_driver$close()
+driver$server$stop()
+system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
 
 
 # ================================
@@ -154,9 +200,9 @@ unique(allTracksFeatures$country)
 # ================================
 # SAVE
 # ================================
-# Save dataset
-saveRDS(allTracksFeatures,"data/data_music_ts.rds")
-# Save also countries and codes for further consolidation with other data
+# # Save dataset
+saveRDS(allTracksFeatures,"data/data_music_ts2.rds")
+# # Save also countries and codes for further consolidation with other data
 geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
 geo_music
 saveRDS(geo_music,"data/geo_music.rds")

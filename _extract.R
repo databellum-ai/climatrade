@@ -8,17 +8,18 @@
 # =========================================
 # Extract music trends from SPOTIFY
 # =========================================
+# PTE: comprobar datos ("data/data_music_ts2.rds" y mover a titular)
+# PTE: separar inicialización&launcher y renombrar a titular
+# PTE: instalar&probar en otros PCs
 # Parameters music extraction:
 musicInitialDate <- "2017-01-01"
 numTopTracks <- 3 # how many tracks we extract per day/week
 lotSize <- 90  # dates processed in a run. If not enough, just repeat run
-#
 source("extraction/extract_musicSPOTIFY.R")
 
 # =========================================
 # Extract calendar data (Moon angle + Weekday) data
 # =========================================
-#
 source("extraction/extract_moonData.R")
 
 
@@ -29,7 +30,6 @@ source("extraction/extract_moonData.R")
 chosenTickers = c("AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
 endDateTicker = as.Date(today())
 startingDateTicker = endDateTicker - 365 # also as... "2021-01-01"
-#
 source("extraction/extract_stocksPrices.R")
 
 
@@ -41,21 +41,18 @@ search_concept_gral <- "Banks"
 search_concepts <- c("unicaja", "bbva", "santander")
 search_places = c("ES", "ES", "ES") # ("" for all)
 search_period <- "today 12-m" # Examples: "all" for all (since 1jan2004 monthly), "today+5-y" for last five years (default, weekly), "today 12-m" for 12 month from today (weekly), "today 3-m" for 3 months from today (daily), "now 7-d" for last week (hourly), "now 1-d" for last 24h (every 8 minutes), "now 4-H" for last 4h (every 5 minutes), "now 4-H" for last 60min UTC (every minute), "Y-m-d Y-m-d" for time span between two dates)
-#
 source("extraction/extract_searchsGTrends.R")
 
 
 # =========================================
 # Extract Twitter posts related data
 # =========================================
-#
 source("extraction/extract_TWITTER.R")
 
 
 # =========================================
 # Extract from news
 # =========================================
-#
 source("extraction/extract_newsData.R")
 
 
@@ -84,13 +81,11 @@ relevantCities <- relevantCities %>%
   geocode(addr) %>% 
   select(id = name, latitude = lat, longitude = long)
 relevantCities
-#
 source("extraction/extract_weatherNOAA.R")
 
 # =========================================
 # Extract from FIFA Ranking
 # =========================================
-#
 source("extraction/extract_rankingFIFA.R")
 
 # =========================================
@@ -99,7 +94,6 @@ source("extraction/extract_rankingFIFA.R")
 # Parameters OECD (leading indicators):
 selected_initial_year_OECD <- "2021"
 selected_end_year_OECD <-as.character(year(Sys.Date()))
-#
 source("extraction/extract_indicatorsOECD.R")
 
 

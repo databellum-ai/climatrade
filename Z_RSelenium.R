@@ -1,23 +1,7 @@
-# PTE: comprobar datos ("data/data_music_ts2.rds" y mover a titular)
-# PTE: separar inicialización&launcher y renombrar a titular
-# PTE: instalar&probar en otros PCs
 
-
-accountSpotify <- "jes@databellum-ai.com"
-passwordSpotify <- "DBellum$2021"
-spotifyClientId <- "7f00e459e82b4d85a3a3b5b29e34879a"
-spotifySecretId <- "bdbd6c4fa0c74bb39e5a82a68989e0fe"
-
-library(tidyverse)
-library(rvest)
-library(RSelenium)
-library(binman)
-library(rvest)
-library(spotifyr)# For certain functions and applications, you’ll need to log in as a Spotify user. To do this, your Spotify Developer application needs to have a callback url. You can set this to whatever you want that will work with your application, but a good default option is http://localhost:1410/ (see image below). For more information on authorization, visit the official Spotify Developer Guide. (https://www.rcharlie.com/spotifyr/)
 Sys.setenv(SPOTIFY_CLIENT_ID = spotifyClientId)
 Sys.setenv(SPOTIFY_CLIENT_SECRET = spotifySecretId)
 
-# ---------------------------
 
 # ================================
 # STEP 1: Determine countries and dates we need to collect
@@ -73,6 +57,7 @@ password_element$clearElement()
 address_element$sendKeysToElement(list(accountSpotify))
 password_element$sendKeysToElement(list(passwordSpotify))
 button_element$clickElement()
+Sys.sleep(5)  # delay to facilitate full load
 # Accept cookies...
 cookies_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="onetrust-accept-btn-handler"]')
 cookies_element$clickElement()
