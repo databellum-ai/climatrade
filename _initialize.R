@@ -18,11 +18,12 @@ if(!require(OECD)) install.packages("OECD", repos = "http://cran.us.r-project.or
 if(!require(gtools)) install.packages("gtools", repos = "http://cran.us.r-project.org")
 if(!require(tidygeocoder)) install.packages("tidygeocoder", repos = "http://cran.us.r-project.org") # Resolve coordinates of cities/places
 # INSTALL SCRAPE PACKAGES:
-  # 1) Ensure java installed
+  # + Ensure java installed
   if(!require(rvest)) install.packages("rvest", repos = "http://cran.us.r-project.org")  # to scrape static pages
   if(!require(RSelenium)) install.packages("RSelenium", repos = "http://cran.us.r-project.org")  # to scrape dynamic  pages, includes binman
   if(!require(wdman)) install.packages("wdman", repos = "http://cran.us.r-project.org")  # for chromedriver install
-
+  # + Install chromedriver with function chrome() of package "wdman":
+  # cDrv <- chrome()
 
 # ===============
 # LIBRARIES
