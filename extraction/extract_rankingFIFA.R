@@ -1,6 +1,6 @@
-# Web visible: https://www.fifa.com/fifa-world-ranking/men
-# Datos JSON: https://www.fifa.com/api/ranking-overview?locale=en&dateId=id13407
-
+# =======================
+# FIFA RAnking extraction
+# =======================
 
 
 # Let's obtain available dates with their associated ids for each URL "issue"
@@ -20,12 +20,14 @@ currentDate
 
 # now we get ranking for each historical issue and accumulate it in a dataframe
 for(i in 1:length(ids_datesAvailable)) {
+  print(paste(
+    "Date:",datesAvailable[i],"processing",i,"of",length(ids_datesAvailable),"dates"))
   pageAtDate <- paste("https://www.fifa.com/api/ranking-overview?locale=en&dateId=",ids_datesAvailable[i],sep="")
   # Let's obtain available dates with their associated ids for URL
   jsonListTeams <- fromJSON(pageAtDate, flatten=TRUE)
   currentMonthRanking <- jsonListTeams$rankings
   currentMonthRanking <- currentMonthRanking %>% 
-    mutate(issueDate = as.Date(parse_date_time(datesAvailable[i], orders = "d b Y", locale = "us")), 
+    mutate(Date = as.Date(parse_date_time(datesAvailable[i], orders = "d b Y", locale = "us")), 
            Rank = rankingItem.rank, 
            CountryName = rankingItem.name, 
            Points = rankingItem.totalPoints, 
@@ -33,7 +35,7 @@ for(i in 1:length(ids_datesAvailable)) {
            idRegion = tag.id, 
            lastIssue = currentDate_id, 
            lastIssueDate = currentDate) %>% 
-    select(issueDate, Rank, CountryName, Points, CountryCode, idRegion, lastIssue, lastIssueDate)
+    select(Date, Rank, CountryName, Points, CountryCode, idRegion, lastIssue, lastIssueDate)
   if(i==1) {
     historicalRankingFIFA <- currentMonthRanking
   } else {
@@ -43,5 +45,15 @@ for(i in 1:length(ids_datesAvailable)) {
 
 head(historicalRankingFIFA)
 
+# Prepare data per date and country
+historicalRankingFIFA <- historicalRankingFIFA %>% group_by(Date, CountryCode) %>% summarise(Rank = mean(Rank))
+# Spread format as output
+historicalRankingFIFA <- historicalRankingFIFA %>% spread(key = CountryCode, value = Rank, fill = NA) %>% arrange(desc(Date))
+
+# We also extract countries and regions for standardization in further steps
+geo_FIFA <- historicalRankingFIFA %>% group_by(CountryCode,CountryName) %>% summarise(Region = first(idRegion))
+
+
 # Save to RDS
-saveRDS(historicalRankingFIFA, "data/rankingFIFA.rds")
+saveRDS(historicalRankingFIFA, "data/data_FIFA_ts.rds")
+saveRDS(historicalRankingFIFA, "data/geo_FIFA.rds")

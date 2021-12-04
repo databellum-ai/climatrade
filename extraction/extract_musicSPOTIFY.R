@@ -5,8 +5,8 @@ lotSize <- 90  # dates processed in a run. If not enough, just repeat run
 # ================================
 # STEP 1: Determine countries and dates we need to collect
 # ================================
-
 # Determine what dates we'll process:
+musicInitialDate <- "2017-01-01"
 unProcessedDates <- NULL
 allPossibleDates <- seq(as.Date(musicInitialDate), Sys.Date()-1, by="days")
 # read already available data to ensure claculation only of delta. At the end we'll consolidate

@@ -1,3 +1,38 @@
+## PTE: backup incorporado de los datos al principio de la extraccion
+
+# =========================================
+# DATA WE EXTRACT:
+# ----------------
+#   * Assets values, indexes:
+# -STOCK&ASSETS PRICES [daily | . | ?? | YahooFinance] 
+# --OECD CLI, BCI, CCI leading indicators [monthly | by_country | 1960 | OECD]
+#   * Social symptoms:
+# -SEARCHES RELATIVE VOLUME OVER TIME [daily | global, by_concept | ?? | GoogleTrends]
+# -Twitter POST SENTIMENTS value for given list of concepts [daily | global, by_concept | ?? | Twitter]
+# --MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
+# --FOOTBALL RANKING OF COUNTRIES [monthly | by_country&region | 1992 | FIFA]
+#   * Earth influence on facts:
+# -MOON PHASES and TIDES table in NYC [daily | NYC | 1960 | R]
+# -DAILY WEATHER in key worldwide cities  [daily | by_city | ?? | NOAA]
+#   * Causality hypothesis ("seed")
+# -KAM (Key Asset to Model)
+# -KCH (KAM Causality Hypothesis)
+#
+#
+# FUTURE DEVELOPMENTS:
+# --------------------
+# -Separate Google searches per country
+# -Separate Twitter posts per country
+# -Twitter posts volume (currently using Google searchs for it)
+# -Analysis ("tag cloud", etc.) of related term-searches to list given
+# -News combined/coexisting terms (in same article) volume and sentiment
+# -Use points instead of ranking in the FIFA classification
+
+
+
+# =========================================
+
+
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 # Data extraction from miscelaneous sources
@@ -8,12 +43,33 @@
 # =========================================
 # Extract music trends from SPOTIFY
 # =========================================
-# PTE: comprobar datos ("data/data_music_ts2.rds" y mover a titular)
-# PTE: separar inicialización&launcher y renombrar a titular
-# PTE: instalar&probar en otros PCs
-# Parameters music extraction:
-musicInitialDate <- "2017-01-01"
-source("extraction/extract_musicSPOTIFY.R")
+source("extraction/extract_musicSPOTIFY.R") 
+
+
+# =========================================
+# Extract from FIFA Ranking
+# =========================================
+source("extraction/extract_rankingFIFA.R")
+
+
+# =========================================
+# Extract leading indicators from OECD
+# =========================================
+source("extraction/extract_indicatorsOECD.R")
+# Chart
+leadingIndicatorsOECD %>%
+  ggplot(aes(as_date(Date), OECD_CLI, color=Country)) + geom_line()
+
+
+
+# =========================================
+# Extract weather from NOAA
+# =========================================
+source("extraction/extract_weatherNOAA.R")
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # =========================================
 # Extract calendar data (Moon angle + Weekday) data
@@ -46,57 +102,6 @@ source("extraction/extract_searchsGTrends.R")
 # Extract Twitter posts related data
 # =========================================
 source("extraction/extract_TWITTER.R")
-
-
-# =========================================
-# Extract from news
-# =========================================
-source("extraction/extract_newsData.R")
-
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-# =========================================
-# Extract weather from NOAA
-# =========================================
-year_from_NOAA <- 1989
-refreshAlsoStations <- FALSE
-from_y <- year_from_NOAA # initial year (parameter)
-to_y <- as.character(year(Sys.Date())) # current year
-c_radius <- 80 # radius where stations must be around city
-c_limit <- 10 # max. num. of stations considered
-nUsedStations <- 4 # max. num. stations we'll consider per city
-# Define our target cities to look for near stations near them ("10 ciudades que dirigen la economía mundial": https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html)
-cities <- c("NewYork", "Oviedo", "Paris", "HongKong", "London", "Beijing", "Madrid", "Albacete", "Tokyo")
-addresses <- c("New York City, US", "Oviedo, Spain", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Albacete, Spain", "Tokyo, Japan")
-relevantCities <- data.frame(name = cities, addr = addresses)
-relevantCities <- relevantCities %>% 
-  geocode(addr) %>% 
-  select(id = name, latitude = lat, longitude = long)
-relevantCities
-source("extraction/extract_weatherNOAA.R")
-
-# =========================================
-# Extract from FIFA Ranking
-# =========================================
-source("extraction/extract_rankingFIFA.R")
-
-# =========================================
-# Extract leading indicators from OECD
-# =========================================
-# Parameters OECD (leading indicators):
-selected_initial_year_OECD <- "2021"
-selected_end_year_OECD <-as.character(year(Sys.Date()))
-source("extraction/extract_indicatorsOECD.R")
-
-
-
-
 
 
 

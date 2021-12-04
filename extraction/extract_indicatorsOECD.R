@@ -1,8 +1,12 @@
+# ===========================
+# EXTRACT OECD CLI, BCI CLI LEADING INDICATORS
+# ===========================
+
 # https://data.oecd.org/leadind/composite-leading-indicator-cli.htm
 # MEI_CLI (Composite Leading Indicators (MEI)) | https://www.oecd.org/sdd/leading-indicators/41629509.pdf
 # https://fgeerolf.com/data/oecd/index.html | https://fgeerolf.com/data/oecd/MEI_CLI.html
 # https://stats.oecd.org/Index.aspx?DataSetCode=MEI_CLI
-# Inicators:
+# Indicators:
 # LOLITOAA:	Amplitude adjusted (CLI)
 # BSCICP03: Standardised, amplitude adjusted (Long term average=100) Business Confidence Indicator (BCI)
 # CSCICP03: Standardised, amplitude adjusted (Long term average=100), Consumer Confidence Indicator (CCI)
@@ -17,7 +21,8 @@ head(countries_OECD)
 # ===========================
 # Historical data (1960-2020) calculation
 # Let's add historical data archived: EVENTUAL extraction of data 1960-2020: not necessary to run query, instead, data are read from archived .RDS
-leadingIndicatorsOECD_1960_2020 <- readRDS("data/leadingIndicatorsOECD_1960_2020.rds")
+leadingIndicatorsOECD_1960_2020 <- readRDS("data/historical_OECD_1960_2020.rds")
+# ===========================
 # # Extract data from OECD
 # leadingIndicatorsOECD_1960_2020 <- get_dataset("MEI_CLI", 
 #                                      filter = list(c("LOLITOAA", "BSCICP03", "CSCICP03"), "",c("M")), 
@@ -36,6 +41,8 @@ leadingIndicatorsOECD_1960_2020 <- readRDS("data/leadingIndicatorsOECD_1960_2020
 # ===========================
 
 # Extract fresh data (>=2021) from OECD
+selected_initial_year_OECD <- "2021"
+selected_end_year_OECD <-as.character(year(Sys.Date()))  # current year
 leadingIndicatorsOECD <- get_dataset("MEI_CLI", 
                                      filter = list(c("LOLITOAA", "BSCICP03", "CSCICP03"), "",c("M")), 
                                      start_time = selected_initial_year_OECD, 
@@ -58,10 +65,7 @@ leadingIndicatorsOECD <- leadingIndicatorsOECD %>%
          Indicator = replace(Indicator, Indicator == "CSCICP03", "OECD_CCI")) %>% 
   spread(key = Indicator, value = Value)
 
-# Chart
-leadingIndicatorsOECD %>%
-  ggplot(aes(as_date(Date), OECD_CLI, color=Country)) + geom_line()
 
 # Save to RDS
 saveRDS(countries_OECD, "data/geo_OECD.rds") # Countries master table
-saveRDS(leadingIndicatorsOECD, "data/data_OECD.rds") # Values indicators
+saveRDS(leadingIndicatorsOECD, "data/data_OECD_ts.rds") # Values indicators

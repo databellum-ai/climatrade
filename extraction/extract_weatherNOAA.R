@@ -6,14 +6,31 @@
 # ---------------------------------------------
 # STEP 1: get optimal stations near relevant cities
 # ---------------------------------------------
+# PArameters for extraction
+year_from_NOAA <- 1989
+refreshAlsoStations <- FALSE
+from_y <- year_from_NOAA # initial year (parameter)
+to_y <- as.character(year(Sys.Date())) # current year
+c_radius <- 80 # radius where stations must be around city
+c_limit <- 10 # max. num. of stations considered
+nUsedStations <- 4 # max. num. stations we'll consider per city
+# Define our target cities to look for near stations near them ("10 ciudades que dirigen la economía mundial": https://cincodias.elpais.com/cincodias/2007/06/13/sentidos/1181701636_850215.html)
+# Declare our relevant cities
+cities <- c("NewYork", "Oviedo", "Paris", "HongKong", "London", "Beijing", "Madrid", "Albacete", "Tokyo")
+addresses <- c("New York City, US", "Oviedo, Spain", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Albacete, Spain", "Tokyo, Japan")
+relevantCities <- data.frame(name = cities, addr = addresses)
+# Obtain coordinates of relevant cities
+relevantCities <- relevantCities %>% 
+  geocode(addr) %>% 
+  select(id = name, latitude = lat, longitude = long)
 relevantCities
 
 measureTypes <- c("TMAX", "TMIN", "TAVG", "PRCP") # indicators we want to read
 
 # Read available stations
-station_data <- readRDS("data/stations_NOAA.rds")
+station_data <- readRDS("data/aux_stations_NOAA.rds")
 # station_data <- ghcnd_stations() # Takes a while to run
-# saveRDS(station_data, "data/stations_NOAA.rds") # Save to RDS
+# saveRDS(station_data, "data/aux_stations_NOAA.rds") # Save to RDS
 
 station_data
 stationsPeriods <- station_data %>% 
