@@ -6,7 +6,7 @@
 #   * Assets values, indexes:
 # -STOCK&ASSETS PRICES [daily | . | ?? | YahooFinance] 
 # --OECD CLI, BCI, CCI leading indicators [monthly | by_country | 1960 | OECD]
-#   * Social symptoms:
+#   * Social symptoms/indicators:
 # -SEARCHES RELATIVE VOLUME OVER TIME [daily | global, by_concept | ?? | GoogleTrends]
 # -Twitter POST SENTIMENTS value for given list of concepts [daily | global, by_concept | ?? | Twitter]
 # --MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
