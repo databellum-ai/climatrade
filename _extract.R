@@ -11,9 +11,10 @@
 # -Twitter POST SENTIMENTS value for given list of concepts [daily | global, by_concept | ?? | Twitter]
 # --MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
 # --FOOTBALL RANKING OF COUNTRIES [monthly | by_country&region | 1992 | FIFA]
+# -AIR TRAFFIC [daily | by_city | 2012 | openSkies]
 #   * Earth influence on facts:
-# -MOON PHASES and TIDES table in NYC [daily | NYC | 1960 | R]
-# -DAILY WEATHER in key worldwide cities  [daily | by_city | ?? | NOAA]
+# -MOON PHASES, TIDES table in NYC, SUNRISE/SUNSET/NIGHTHOURS [daily | NYC | 1960 | suncalc, rtide]
+# --DAILY WEATHER in key worldwide cities  [daily | by_city | 1989 | NOAA]
 #   * Causality hypothesis ("seed")
 # -KAM (Key Asset to Model)
 # -KCH (KAM Causality Hypothesis)
@@ -65,7 +66,17 @@ leadingIndicatorsOECD %>%
 # =========================================
 # Extract weather from NOAA
 # =========================================
+# Declare our relevant cities
+cities <- c("NewYork", "Paris", "HongKong", "London", "Beijing", "Madrid", "Tokyo")
+addresses <- c("New York City, US", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Tokyo, Japan")
+countries <- c("US", "FR", "CH", "UK", "CH", "SP", "JP")
 source("extraction/extract_weatherNOAA.R")
+
+
+# =========================================
+# Extract air traffic data data
+# =========================================
+source("extraction/extract_airTraffic.R")
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -99,13 +110,9 @@ source("extraction/extract_searchsGTrends.R")
 
 
 # =========================================
-# Extract Twitter posts related data
+# Extract Twitter posts sentiment data
 # =========================================
 source("extraction/extract_TWITTER.R")
-
-
-
-
 
 
 

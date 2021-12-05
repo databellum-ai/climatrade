@@ -1,3 +1,14 @@
+# ================================
+# Extract music data
+# ================================
+
+library(tidyverse)
+# Libraries Spotify (including RSelenium)
+library(RSelenium)
+library(wdman) # for chromedriver install (related to Rselenium)
+library(binman) # for chromedriver versions check (related to Rselenium)
+library(rvest)
+library(spotifyr)# For certain functions and applications, you’ll need to log in as a Spotify user. To do this, your Spotify Developer application needs to have a callback url. You can set this to whatever you want that will work with your application, but a good default option is http://localhost:1410/ (see image below). For more information on authorization, visit the official Spotify Developer Guide. (https://www.rcharlie.com/spotifyr/)
 
 numTopTracks <- 3 # how many tracks we extract per day/week
 lotSize <- 90  # dates processed in a run. If not enough, just repeat run
@@ -27,14 +38,15 @@ if (length(unProcessedDates) <= lotSize) {
 } else { 
   unProcessedDates <- unProcessedDates[1:lotSize]
 }
-print(paste("Dates to process:",unProcessedDates))
-
+print("Dates to process:")
+print(unProcessedDates)
 
 # Determine what countries we'll process:
 allPossibleCountries <- readRDS("data/geo_music.rds")
 print("Countries to process:")
 print(allPossibleCountries$countryCode)
 
+# if (TRUE) {  # We finish here if no dates to process
 if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here if no dates to process
   # ================================
   # STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams

@@ -11,7 +11,8 @@
 # BSCICP03: Standardised, amplitude adjusted (Long term average=100) Business Confidence Indicator (BCI)
 # CSCICP03: Standardised, amplitude adjusted (Long term average=100), Consumer Confidence Indicator (CCI)
 
-
+library(tidyverse)
+library(OECD) # To get OECD.org indicators
 
 # Collect countries (not online updated. See: https://fgeerolf.com/data/oecd/MEI_CLI.html)
 # Load RDS:
