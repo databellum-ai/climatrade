@@ -1,30 +1,40 @@
-# PTE: OJO: los datos empiezan en 2016 y su volumen va creciendo con el número de voluntarios
-# ...es mejor usar un ratio (p.e. vuelos desde NYC ó Shangai respecto al total)
-
+# PTE: almacenar resultados
+# PTE: determinar una fecha razonable de inicio
+# PTE: cálculo incremental de fechas basado en .RDS acumulado
 
 # https://www.rdocumentation.org/packages/openSkies/versions/1.1.1
 # https://cran.r-project.org/web/packages/openSkies/openSkies.pdf
 
+library(tidyverse)
+library(openSkies)
+library(lubridate)
 
-library("openSkies")
+startDate <- "2018-01-30"
+initialDateAvailable <- ymd(startDate, tz = "UTC")
+currentDate <-as.POSIXct(Sys.Date()-1)
+allDates <- seq(initialDateAvailable, currentDate, by="days")
+allDates
 
-# Obtain a list with information for all the flights that departed from Seville
-# Airport on the 25th of July, 2019 between 9 AM and 11 AM, local time.
-testDepartures <- getAirportDepartures(airport="KJFK", startTime="2018-01-30 19:00:00",
-                                   endTime="2018-01-30 20:00:00", timeZone="Europe/London")
-testArrivals <- getAirportArrivals(airport="KJFK", startTime="2018-01-30 19:00:00",
-                     endTime="2018-01-30 20:00:00", timeZone="Europe/London")
-length(testDepartures)
-length(testArrivals)
-# Operations
-operations <- length(testDepartures) + length(testArrivals)
-operations
-testDepartures
+coef_00to02_UTCtoTotal <- 0.074681009  # We use this coefficient to estimate full-day flight based on 2 hours period from 00 to 02 UTC. This was calculated using a linear regression approach from all 2-hours periods within a representative day
 
-# Obtain a list with information for all the flights registered during the 16th
-# of November, 2019 between 9 AM and 10 AM, London time.
-flights <- getIntervalFlights(startTime="2018-01-30 19:00:00", 
-                              endTime="2018-01-30 20:00:00", timeZone="Europe/London")
-# Count the number of registered flights.
-length(flights)
-worldFlights
+for (i in c(length(allDates):1)) {
+  dateStart <- allDates[i]
+  dateEnd <- dateStart + hours(23) + minutes(59) + seconds(59)  
+  dateEnd_sample <- dateStart + hours(02) + minutes(00) + seconds(00)  # API restricted to 2 hours for total flights
+  print("-------------")
+  print(paste("DATE:",dateStart))
+  numFlightsWorld <- getIntervalFlights(startTime=dateStart, 
+                                        endTime=dateEnd_sample, timeZone="UTC")
+  numFlightsWorld <- round(length(numFlightsWorld) / coef_00to02_UTCtoTotal)  # Flights estimated full day
+  print(paste0("World flights on ",dateStart, ": ", numFlightsWorld))
+  for (j in c(1:length(airports))) {
+    tmpDepartures <- getAirportDepartures(
+      airport=airports[j],
+      startTime=dateStart,
+      endTime=dateEnd,
+      timeZone="UTC")
+    numDepartures <- length(tmpDepartures)
+    print(paste0("Airport ",airports[j]," (",countries[j],") "," # departures: ",numDepartures))
+  }
+}
+

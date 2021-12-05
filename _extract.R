@@ -33,6 +33,11 @@
 
 # =========================================
 
+# Declare our relevant cities
+cities <- c("NewYork", "Paris", "HongKong", "London", "Beijing", "Madrid", "Tokyo")
+addresses <- c("New York City, US", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Tokyo, Japan")
+countries <- c("US", "FR", "CH", "UK", "CH", "SP", "JP")
+airports <- c("KJFK", "LFPG", "VHHH", "EGLL", "ZBAA", "LEMD", "RJTT")
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -66,10 +71,6 @@ leadingIndicatorsOECD %>%
 # =========================================
 # Extract weather from NOAA
 # =========================================
-# Declare our relevant cities
-cities <- c("NewYork", "Paris", "HongKong", "London", "Beijing", "Madrid", "Tokyo")
-addresses <- c("New York City, US", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Tokyo, Japan")
-countries <- c("US", "FR", "CH", "UK", "CH", "SP", "JP")
 source("extraction/extract_weatherNOAA.R")
 
 
