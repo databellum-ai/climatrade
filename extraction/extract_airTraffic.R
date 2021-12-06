@@ -7,7 +7,7 @@ library(tidyverse)
 library(openSkies)
 library(lubridate)
 
-startDate <- "2021-11-01"
+startDate <- "2021-10-30"
 
 # ================================
 # STEP 1: Determine dates we need to collect and check if incremental or full process required

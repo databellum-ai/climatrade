@@ -7,21 +7,23 @@
 # -STOCK&ASSETS PRICES [daily | . | ?? | YahooFinance] 
 # --OECD CLI, BCI, CCI leading indicators [monthly | by_country | 1960 | OECD]
 #
+# Social symptoms/indicators:
+# -Twitter POST SENTIMENTS value for given list of concepts [daily | global, by_concept | ?? | Twitter]
+# -SEARCHES RELATIVE-VOLUME OVER TIME [daily | global, by_concept | ?? | GoogleTrends]
+# --AIR TRAFFIC [daily | by_city | 2012 | openSkies]
+# --MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
+# --FOOTBALL RANKING OF COUNTRIES [monthly | by_country&region | 1992 | FIFA]
+#
+# Earth influence on facts:
+# --MOON PHASES, SUNRISE/SUNSET/NIGHTHOURS [daily | NYC | 1960 | suncalc]
+# --DAILY WEATHER in key worldwide cities  [daily | by_city | 1989 | NOAA]
+#
 # Causality hypothesis ("seed")
 # -KAM (Key Asset to Model)
 # -KCH (KAM Causality Hypothesis)
 #
-# Social symptoms/indicators:
-# -SEARCHES RELATIVE VOLUME OVER TIME [daily | global, by_concept | ?? | GoogleTrends]
-# -Twitter POST SENTIMENTS value for given list of concepts [daily | global, by_concept | ?? | Twitter]
-# --MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
-# --FOOTBALL RANKING OF COUNTRIES [monthly | by_country&region | 1992 | FIFA]
-# -AIR TRAFFIC [daily | by_city | 2012 | openSkies]
 #
-# Earth influence on facts:
-# -MOON PHASES, TIDES table in NYC, SUNRISE/SUNSET/NIGHTHOURS [daily | NYC | 1960 | suncalc, rtide]
-# --DAILY WEATHER in key worldwide cities  [daily | by_city | 1989 | NOAA]
-
+#
 # FUTURE DEVELOPMENTS:
 # --------------------
 # -Separate Google searches per country
@@ -77,18 +79,25 @@ source("extraction/extract_weatherNOAA.R")
 
 
 # =========================================
-# Extract air traffic data data
+# Extract air traffic data
 # =========================================
 source("extraction/extract_airTraffic.R")
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# =========================================
+# Extract Moon and Sun related data (phase, night hours)
+# =========================================
+source("extraction/extract_moonSunData.R")
+
 
 # =========================================
-# Extract calendar data (Moon angle + Weekday) data
+# Extract Twitter posts sentiment data
 # =========================================
-source("extraction/extract_moonData.R")
+source("extraction/extract_TWITTER.R")
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 # =========================================
@@ -112,10 +121,6 @@ search_period <- "today 12-m" # Examples: "all" for all (since 1jan2004 monthly)
 source("extraction/extract_searchsGTrends.R")
 
 
-# =========================================
-# Extract Twitter posts sentiment data
-# =========================================
-source("extraction/extract_TWITTER.R")
 
 
 
