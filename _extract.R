@@ -3,23 +3,25 @@
 # =========================================
 # DATA WE EXTRACT:
 # ----------------
-#   * Assets values, indexes:
+# Assets values, indexes, outcomes:
 # -STOCK&ASSETS PRICES [daily | . | ?? | YahooFinance] 
 # --OECD CLI, BCI, CCI leading indicators [monthly | by_country | 1960 | OECD]
-#   * Social symptoms/indicators:
+#
+# Causality hypothesis ("seed")
+# -KAM (Key Asset to Model)
+# -KCH (KAM Causality Hypothesis)
+#
+# Social symptoms/indicators:
 # -SEARCHES RELATIVE VOLUME OVER TIME [daily | global, by_concept | ?? | GoogleTrends]
 # -Twitter POST SENTIMENTS value for given list of concepts [daily | global, by_concept | ?? | Twitter]
 # --MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
 # --FOOTBALL RANKING OF COUNTRIES [monthly | by_country&region | 1992 | FIFA]
 # -AIR TRAFFIC [daily | by_city | 2012 | openSkies]
-#   * Earth influence on facts:
+#
+# Earth influence on facts:
 # -MOON PHASES, TIDES table in NYC, SUNRISE/SUNSET/NIGHTHOURS [daily | NYC | 1960 | suncalc, rtide]
 # --DAILY WEATHER in key worldwide cities  [daily | by_city | 1989 | NOAA]
-#   * Causality hypothesis ("seed")
-# -KAM (Key Asset to Model)
-# -KCH (KAM Causality Hypothesis)
-#
-#
+
 # FUTURE DEVELOPMENTS:
 # --------------------
 # -Separate Google searches per country

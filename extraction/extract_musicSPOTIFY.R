@@ -20,7 +20,7 @@ lotSize <- 90  # dates processed in a run. If not enough, just repeat run
 musicInitialDate <- "2017-01-01"
 unProcessedDates <- NULL
 allPossibleDates <- seq(as.Date(musicInitialDate), Sys.Date()-1, by="days")
-# read already available data to ensure claculation only of delta. At the end we'll consolidate
+# read already available data to ensure calculation only of delta. At the end we'll consolidate
 if (file.exists("data/data_music_ts.rds")) {
   historicTracksFeatures <- readRDS("data/data_music_ts.rds")
   # get a list of dates appearing in the website but not in our historic record and use it for further process
