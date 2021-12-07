@@ -1,4 +1,6 @@
-# PTE: determinar una fecha razonable de inicio
+# ================================
+# EXTRACT AIR TRAFFIC DATA FROM THE OPENSKY NETWORK
+# ================================
 
 # https://www.rdocumentation.org/packages/openSkies/versions/1.1.1
 # https://cran.r-project.org/web/packages/openSkies/openSkies.pdf
@@ -7,8 +9,7 @@ library(tidyverse)
 library(openSkies)
 library(lubridate)
 
-
-startDate <- "2015-12-01"
+startDate <- "2016-01-01"
 yesterdayRefDate <- Sys.Date()-1
 
 # ================================
@@ -31,7 +32,7 @@ if (file.exists("data/data_airTraffic_ts.rds")) {
   historicDailyFlights <- data.frame()
   unProcessedDates <- allPossibleDates
 }
-# Data must be fully recalculated if countries exisitng and demanded are different
+# Data must be fully recalculated if countries existing and demanded are different
 if (!sameCountriesList) {
   historicDailyFlights <- data.frame()
   unProcessedDates <- allPossibleDates

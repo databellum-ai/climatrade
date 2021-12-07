@@ -10,7 +10,7 @@
 # Social symptoms/indicators:
 # -Twitter POST SENTIMENTS value for given list of concepts [daily | global, by_concept | ?? | Twitter]
 # -SEARCHES RELATIVE-VOLUME OVER TIME [daily | global, by_concept | ?? | GoogleTrends]
-# --AIR TRAFFIC [daily | by_city | 2012 | openSkies]
+# --AIR TRAFFIC [daily | by_city | 2016 | openSkies]
 # --MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
 # --FOOTBALL RANKING OF COUNTRIES [monthly | by_country&region | 1992 | FIFA]
 #
