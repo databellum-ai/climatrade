@@ -93,7 +93,7 @@ source("extraction/extract_moonSunData.R")
 # =========================================
 # Extract Twitter posts sentiment data
 # =========================================
-source("extraction/extract_TWITTER.R")
+source("extraction/extract_sentimentsTwitter.R")
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

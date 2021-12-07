@@ -4,10 +4,14 @@
 
 # https://analytics4all.org/2016/11/16/r-connect-to-twitter-with-r/
 
+# ~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~
 
-# ~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~
 install.packages("twitteR")
+install.packages("GGally")
+install.packages("devtools")
+
+library(tidyverse)
 library(twitteR)
 
 
@@ -40,6 +44,7 @@ resultTwits[[1]]
 # ~~~~~~~~~~~~~~~~~~~~
 # EXAMPLE 2:
 # https://rpubs.com/Papacosmas/sentiments
+
 
 
 library(utils)
