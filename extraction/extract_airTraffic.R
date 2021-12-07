@@ -7,14 +7,25 @@ library(tidyverse)
 library(openSkies)
 library(lubridate)
 
-startDate <- "2018-01-01"
+
+startDate <- "2017-01-01"
+yesterdayRefDate <- Sys.Date()-1
+
+# CHECK ERROR 1
+# startDate <- "2018-03-30"
+# yesterdayRefDate <- "2018-03-30"
+
+#  CHECK ERROR 2
+# startDate <- "2017-12-12"
+# yesterdayRefDate <- "2017-12-31"
+
 
 # ================================
 # STEP 1: Determine dates we need to collect and check if incremental or full process required
 # ================================
 # Determine what dates we'll process:
 unProcessedDates <- NULL
-allPossibleDates <- seq(ymd(startDate, tz = "UTC"), as.POSIXct(Sys.Date()-1), by="days")
+allPossibleDates <- seq(ymd(startDate, tz = "UTC"), ymd(yesterdayRefDate, tz = "UTC"), by="days")
 allPossibleDates
 # read already available data to ensure calculation only of delta. At the end we'll consolidate
 if (file.exists("data/data_airTraffic_ts.rds")) {

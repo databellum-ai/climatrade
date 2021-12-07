@@ -4,7 +4,9 @@
 
 
 library(tidyverse)
+library(lubridate)
 library(tidygeocoder) # Resolve coordinates of cities/places
+library(suncalc)
 
 # Obtain coordinates of relevant cities
 relevantCitiesCoordinates <- data.frame(name = cities, addr = addresses) %>% 
@@ -17,7 +19,6 @@ relevantCitiesCoordinates
 # MOON PHASE, SUNRISE/SUNSET/NIGHT_HOURS DAILY
 # =====================================================
 # https://cran.r-project.org/web/packages/suncalc/suncalc.pdf
-library(suncalc)
 
 initialDate <- "1960-01-01"
 allPossibleDates <- seq(ymd(initialDate, tz = "UTC"), as.POSIXct(Sys.Date()), by="days")
