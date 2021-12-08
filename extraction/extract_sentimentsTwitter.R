@@ -1,15 +1,16 @@
 # PTE: problema con le paquete "sentiment"
+# PTE: crear lista de sinónimos de cada término
 # PTE: fallo de código en línea: "tm_map(tweets_collections, content_transformer(functio...."
 # PTE: añadir PositiveWordsResearch al prinicipio del sentiment analysis? (https://positivewordsresearch.com/list-of-positive-words/)
 # PTE: valorar problema de sólo 10 días hacia atrás (¿pagar? / ¿mantener predicciones corto plazo? / ¿usar otra fuente... news?)
 
 
-# install.packages("ROAuth")
-# install.packages("twitteR")
-# install.packages("stringr")
-# install.packages("tm")
-# install.packages("wordcloud2")  # to draw tag clouds
-# install.packages("sentimentAnalysis")  # to draw tag clouds
+install.packages("ROAuth")
+install.packages("twitteR")
+install.packages("stringr")
+install.packages("tm")
+install.packages("wordcloud2")  # to draw tag clouds
+
 
 library(tidyverse)
 library(ROAuth)
@@ -17,7 +18,7 @@ library(twitteR)
 library(stringr)
 library(tm)
 library(wordcloud2)
-library(sentiment)
+# library(sentiment)
 library(data.table)
 library(ggthemes)
 library(ggplot2)
@@ -86,6 +87,38 @@ head(distinctWordsDF)
 wordcloud2(distinctWordsDF)
 
 
+
+
+# RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
+
+
+searchTerms <- c("Daimler", "@POTUS", "telecinco")
+
+# ================================
+# STEP 1: Extract words from Twitter
+# ================================
+
+i <- 1
+searchTerms[1]
+
+# connect to twitter API from the twitter package
+setup_twitter_oauth(twitter_api_key, twitter_api_secret, twitter_access_token, twitter_access_token_secret)
+tweets_found <- searchTwitter(searchTerms[i], n = 1000, resultType = "recent", lang = "en", retryOnRateLimit = 100)
+
+# we convert the tweets_found from list to a data frame
+tweets_found.df <- twListToDF(tweets_found)
+head(tweets_found.df)
+# We remove repeated and clean "..."
+tweets_found.nodups.df <- distinct(tweets_found.df, text, .keep_all = TRUE)
+tweets_found.nodups.df$text <- gsub("… ", "", tweets_found.nodups.df$text)
+# We change the feature created to Date
+tweets_found.nodups.df <- plyr::rename(tweets_found.nodups.df, c(created = "Date"))
+tweets_found.nodups.df$Date <- as.Date(tweets_found.nodups.df$Date)
+# We transform from datetime to date format
+tweets_text <- lapply(tweets_found, function(x) x$getText())
+# We delete the (retweets)
+tweets_unique <- unique(tweets_text)
+
 # ================================
 # STEP 2: Score Sentiment Function
 # ================================
@@ -94,6 +127,8 @@ wordcloud2(distinctWordsDF)
 # Obtain Positive and Negative words reference listings
 # We use the famous lexicon of posive and negative words that was created from : Liu, Bing, Minqing Hu, and Junsheng Cheng. “Opinion observer: analyzing and comparing opinions on the web.” In Proceedings of the 14th international conference on World Wide Web (WWW-2005), pp. 342-351. ACM, May 10-14, 2005. Thanks to Liu and Hu we will add more than 6500 positive phrases, idioms and quotes
 # https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html#lexicon
+
+
 hu.liu.negative = scan("data/opinion-lexicon-English/negative-words.txt", what="character", comment.char=";")
 hu.liu.positive = scan("data/opinion-lexicon-English/positive-words.txt", what="character", comment.char=";")
 PositiveWordsResearch <- NULL
@@ -111,7 +146,7 @@ neg.words <- c(hu.liu.negative, "avoid", "lose", "loses", "scandal", "dieselgate
 
 
 score.sentiment = function(sentence, pos.words, neg.words, .progress = "none") {
-  scores = laply(sentences, function(sentence, pos.words, neg.words) {
+  scores = lapply(sentences, function(sentence, pos.words, neg.words) {
 
     sentence = gsub('https://','',sentence) # removes https://
     sentence = gsub('http://','',sentence) # removes http://
