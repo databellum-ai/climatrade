@@ -5,6 +5,7 @@
 # PTE: valorar problema de sólo 10 días hacia atrás (¿pagar? / ¿mantener predicciones corto plazo? / ¿usar otra fuente... news?) COMPROBAR NIVEL ACTUAL EN TWITTER ("Elevated?"): https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api#Access
 
 # https://www.rpubs.com/JaimeFC/415349
+# https://rstudio-pubs-static.s3.amazonaws.com/276096_5f10707713d7468fb5a3834a85c2de72.html
 
 
 install.packages("ROAuth")
