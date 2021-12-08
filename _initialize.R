@@ -19,6 +19,9 @@ if(!require(gtools)) install.packages("gtools", repos = "http://cran.us.r-projec
 if(!require(tidygeocoder)) install.packages("tidygeocoder", repos = "http://cran.us.r-project.org") # Resolve coordinates of cities/places
 if(!require(openSkies)) install.packages("openSkies", repos = "http://cran.us.r-project.org") # Air traffic data from OpenSkies
 if(!require(suncalc)) install.packages("suncalc", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
+if(!require(ROAuth)) install.packages("ROAuth", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
+if(!require(twitteR)) install.packages("twitteR", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
+if(!require(stringr)) install.packages("stringr", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
 # INSTALL SCRAPE PACKAGES:
   # + Ensure java installed
   if(!require(rvest)) install.packages("rvest", repos = "http://cran.us.r-project.org")  # to scrape static pages
