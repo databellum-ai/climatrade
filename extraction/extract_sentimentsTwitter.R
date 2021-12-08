@@ -1,159 +1,102 @@
-# Load Twitter data
+# PTE: fallo de código en línea: "tm_map(tweets_collections, content_transformer(functio...."
+# PTE: valorar problema de sólo 10 días hacia atrás (¿pagar? / ¿mantener predicciones corto plazo? / ¿usar otra fuente... news?)
 
-# https://www.rdocumentation.org/packages/twitteR/versions/1.1.9
 
-# https://analytics4all.org/2016/11/16/r-connect-to-twitter-with-r/
-
-# ~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~
-
+install.packages("ROAuth")
 install.packages("twitteR")
-install.packages("GGally")
-install.packages("devtools")
+install.packages("stringr")
+install.packages("tm")
+install.packages("wordcloud2")  # to draw tag clouds
 
 library(tidyverse)
+library(ROAuth)
 library(twitteR)
-
-
-setup_twitter_oauth(api_key,api_secret,access_token,access_token_secret)
-
-# ~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~
-
-# EXAMPLE 1:
-
-searchTwitter("#islatentaciones")
-
-resultTwits <- searchTwitter(searchString = "@potus", 
-              n = 100, 
-              lang = "en", 
-              since = NULL, 
-              until = NULL, 
-              geocode = "37.781157,-122.39720,10mi", 
-              sinceID	= NULL, maxID = NULL, resultType = "recent", retryOnRateLimit=10)
-
-
-resultTwits
-class(resultTwits)
-length(resultTwits)
-class(resultTwits[[1]])
-length(resultTwits[[1]])
-resultTwits[[1]]
-
-# ~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~
-# EXAMPLE 2:
-# https://rpubs.com/Papacosmas/sentiments
-
-
-
-library(utils)
- library(GGally)
-library(devtools)
-library(twitteR)
- library(tm)
- library(wordcloud2)
-library(plyr)
 library(stringr)
-library(data.table)
-library(dplyr)
-library(ggthemes)
-library(plotly)
-library(plotrix)
-library(httr)
- library(ROAuth)
-library(dplyr)
- library(NLP)
- library(wordcloud2)
-library(base64enc)
- library(wordcloud)
-library(plotrix)
-library(ggplot2)
-library(lattice)
-library(devtools)
-library(rjson)
-library(bit64)
+library(tm)
+library(wordcloud2)
 
+searchTerms <- c("Daimler", "@POTUS", "real oviedo")
 
-require(ROAuth)
-require(twitteR)
+# ================================
+# STEP 1: Extract words and frequency in twits
+# ================================
 
+i <- 3
+searchTerms[i]
 
-# from the twitter package we use the searchTwitter function to extract
-# tweets ..  Tweeter free api allows only the tweets of the last 10 days
-# resultType you can also change it to popular. With AND, OR you can add
-# more search keywords
+# connect to twitter API from the twitter package
+setup_twitter_oauth(twitter_api_key, twitter_api_secret, twitter_access_token, twitter_access_token_secret)
+tweets_found <- searchTwitter(searchTerms[i], n = 1000, resultType = "recent", lang = "en", retryOnRateLimit = 100)
 
-tweets_daimler = searchTwitter("Daimler", n = 10000, resultType = "mixed", lang = "en", 
-                               retryOnRateLimit = 100)
-
-# we convert the tweets_daimler from list to a data frame
-(n.tweet <- length(tweets_daimler))
-tweets_daimler.df <- twListToDF(tweets_daimler)
-head(tweets_daimler.df)
-
-require(dplyr)
-tweets_daimler.nodups.df <- distinct(tweets_daimler.df, text, .keep_all = TRUE)
-tweets_daimler.nodups.df$text <- gsub("… ", "", tweets_daimler.nodups.df$text)
+# we convert the tweets_found from list to a data frame
+tweets_found.df <- twListToDF(tweets_found)
+head(tweets_found.df)
+# We remove repeated and clean "..."
+tweets_found.nodups.df <- distinct(tweets_found.df, text, .keep_all = TRUE)
+tweets_found.nodups.df$text <- gsub("… ", "", tweets_found.nodups.df$text)
 # We change the feature created to Date
-tweets_daimler.nodups.df <- plyr::rename(tweets_daimler.nodups.df, c(created = "Date"))
-tweets_daimler.nodups.df$Date <- as.Date(tweets_daimler.nodups.df$Date)
+tweets_found.nodups.df <- plyr::rename(tweets_found.nodups.df, c(created = "Date"))
+tweets_found.nodups.df$Date <- as.Date(tweets_found.nodups.df$Date)
 # We transform from datetime to date format
-tweets_text <- lapply(tweets_daimler, function(x) x$getText())
+tweets_text <- lapply(tweets_found, function(x) x$getText())
 # We delete the (retweets)
 tweets_unique <- unique(tweets_text)
-
 # We remove the emoticons
-tweets_text <- sapply(tweets_text, function(row) iconv(row, "latin1", "ASCII", 
-                                                       sub = "byte"))
-
-require(stringr)
+tweets_text <- sapply(tweets_text, function(row) iconv(row, "latin1", "ASCII", sub = "byte"))
+# We create the tweets collection with the found tweets to use into the sentiment analysis
 functionalText = str_replace_all(tweets_text, "[^[:graph:]]", " ")
-# We create the tweets collection with the daimler tweets to use into the
-# sentiment analysis
-require(tm)
-
+# Distinct the words from the sentence to use them on word cloud plot
 tweets_collections <- Corpus(VectorSource(tweets_unique))
-# Distinct the words from the sentence to use them on word cloud plot Ignore
-# the warnings into the following scripts
-
-functionalText = str_replace_all(tweets_collections, "[^[:graph:]]", " ")
-
-tweets_collections <- tm_map(tweets_collections, content_transformer(function(x) iconv(x, 
-                                                                                       to = "latin1", "ASCII", sub = "")))
-
+functionalText <- str_replace_all(tweets_collections, "[^[:graph:]]", " ")
+# !! tweets_collections <- tm_map(tweets_collections, content_transformer(function(x) iconv(x, to = "latin1", "ASCII", sub = "")))
 # We change all words from capital to lower case
 tweets_collections <- tm_map(tweets_collections, content_transformer(tolower))
-
 # We delete all punctuations
 tweets_collections <- tm_map(tweets_collections, removePunctuation)
-
-# From tm package we use the below functions to return various kinds of
-# stopwords with support for different languages.
-tweets_collections <- tm_map(tweets_collections, function(x) removeWords(x, 
-                                                                         stopwords()))
+# From tm package we use the below functions to return various kinds of stopwords with support for different languages.
+tweets_collections <- tm_map(tweets_collections, function(x) removeWords(x, stopwords()))
 tweets_collections <- tm_map(tweets_collections, removeWords, stopwords("english"))
 tweets_collections <- tm_map(tweets_collections, removeNumbers)
 tweets_collections <- tm_map(tweets_collections, stripWhitespace)
-
-# From tm package we use the below functions to construct or coerce to a
-# term-document matrix or a document-term matrix
-term_matrix <- TermDocumentMatrix(tweets_collections, control = list(wordLengths = c(1, 
-                                                                                     Inf)))
-
+# From tm package we use the below functions to construct or coerce to a term-document matrix or a document-term matrix
+term_matrix <- TermDocumentMatrix(tweets_collections, control = list(wordLengths = c(1, Inf)))
 # view the terms
 term_matrix
-
-# From tm package we find frequencyuent terms in a document-term or
-# term-document matrix.
-(frequency.terms <- findfrequencyTerms(term_matrix, lowfrequency = 20))
+# From tm package we find frequent terms in a document-term or term-document matrix.
+(frequency.terms <- findMostFreqTerms(term_matrix, lowfrequency = 20))
 # Transform it to matrix
 term_matrix <- as.matrix(term_matrix)
-
-# We compute the frequency of the distinct words from the tweets and we sort
-# it by frequency
+term_matrix[1:10,1:25]
+# We compute the frequency of the distinct words from the tweets and we sort it by frequency
 distinctWordsfrequency <- sort(rowSums(term_matrix), decreasing = T)
-
 # Transform it to df
 distinctWordsDF <- data.frame(names(distinctWordsfrequency), distinctWordsfrequency)
 colnames(distinctWordsDF) <- c("word", "frequency")
+head(distinctWordsDF)
+
+# DRAW a TAG CLOUD
+wordcloud2(distinctWordsDF)
+
+
+# ================================
+# STEP 2: Score Sentiment Function
+# ================================
+# We create the score sentiment function in order to run it afterwards in our daimler tweets Transform the vector with the sentences to simple array of scores with plyr package Then we clean the sentences with gsub() function Then we convert the letters from capital to lower case The below function was inspired by (https://medium.com/@rohitnair_94843/analysis-of-twitter-data-using-r-part-3-sentiment-analysis-53d0e5359cb8).
+# We use the famous lexicon of posive and negative words that was created from : Liu, Bing, Minqing Hu, and Junsheng Cheng. “Opinion observer: analyzing and comparing opinions on the web.” In Proceedings of the 14th international conference on World Wide Web (WWW-2005), pp. 342-351. ACM, May 10-14, 2005. Thanks to Liu and Hu we will add more than 6500 positive phrases, idioms and quotes
+# https://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html#lexicon
+
+# We will add some extra words, that were observed inside the review of tweets We merge the above two positive lexicons
+pos.words <- c(hu.liu.positive, PositiveWordsResearch)
+# We add the extra words we noticed
+pos.words <- c(pos.words, "thanx", "awesome", "fantastic", "super", "prima", 
+               "toll", "cool", "geil", "profit", "profits", "earnings", "congrats", "prizes", 
+               "prize", "thanks", "thnx", "Grt", "gr8", "plz", "trending", "recovering", 
+               "brainstorm", "leader")
+neg.words <- c(hu.liu.negative, "avoid", "lose", "loses", "scandal", "dieselgate", 
+               "sucks", "awful", "disgusting", "negative", "wait", "waiting", "hold", "onhold", 
+               "on hold", "cancel", "spam", "spams", "cancel", "wth", "Fight", "fighting", 
+               "wtf", "arrest", "no", "not")
+
+
+
+
