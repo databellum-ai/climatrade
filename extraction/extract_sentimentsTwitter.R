@@ -2,7 +2,9 @@
 # PTE: crear lista de sinónimos de cada término
 # PTE: fallo de código en línea: "tm_map(tweets_collections, content_transformer(functio...."
 # PTE: añadir PositiveWordsResearch al prinicipio del sentiment analysis? (https://positivewordsresearch.com/list-of-positive-words/)
-# PTE: valorar problema de sólo 10 días hacia atrás (¿pagar? / ¿mantener predicciones corto plazo? / ¿usar otra fuente... news?)
+# PTE: valorar problema de sólo 10 días hacia atrás (¿pagar? / ¿mantener predicciones corto plazo? / ¿usar otra fuente... news?) COMPROBAR NIVEL ACTUAL EN TWITTER ("Elevated?"): https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api#Access
+
+# https://www.rpubs.com/JaimeFC/415349
 
 
 install.packages("ROAuth")
