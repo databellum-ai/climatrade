@@ -82,6 +82,46 @@ score.sentiment = function(sentences, pos.words, neg.words, .progress = 'none') 
 
 
 
+
+
+
+
+
+numTweetsExtract <- 50
+list_KAMs <- c("miscelaneous", "football")
+sentimentTerms <- list(c("from:potus", "Amazon", "from:sanchezcastejon"), 
+                       c("real madrid", "messi"))
+
+
+extractTermTweets <- function(term) {
+  tweetsList <- searchTwitter(term, resultType="recent", n=numTweetsExtract)
+  print(term)
+  twListToDF(tweetsList) %>% select(date = created, text)
+}
+
+extractListTweets <- function(listTerms) {
+  lapply(listTerms, function(j) extractTermTweets(j))
+}
+
+algo <- lapply(sentimentTerms, function(i) extractListTweets(i))
+
+class(algo)
+summary(algo)
+head(as_tibble(algo[[1]][[1]]))
+head(as_tibble(algo[[1]][[2]]))
+head(as_tibble(algo[[1]][[3]]))
+
+head(as_tibble(algo[[2]][[1]]))
+head(as_tibble(algo[[2]][[2]]))
+
+
+
+
+
+
+
+
+
 # ================================
 # STEP 3: Extract texts from Twitter
 # ================================
