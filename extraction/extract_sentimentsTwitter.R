@@ -13,7 +13,6 @@ searchTerms <- c("Daimler", "@POTUS", "telecinco")
 
 
 library(tidyverse)
-library(plyr)# You have loaded plyr after dplyr - this is likely to cause problems. If you need functions from both plyr and dplyr, please load plyr first, then dplyr
 library(dplyr)
 library(ROAuth)
 library(twitteR)
