@@ -21,7 +21,7 @@ if(!require(openSkies)) install.packages("openSkies", repos = "http://cran.us.r-
 if(!require(suncalc)) install.packages("suncalc", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
 if(!require(ROAuth)) install.packages("ROAuth", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
 if(!require(twitteR)) install.packages("twitteR", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
-if(!require(stringr)) install.packages("stringr", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
+if(!require(syuzhet)) install.packages("syuzhet", repos = "http://cran.us.r-project.org") # sentiment analysis
 # INSTALL SCRAPE PACKAGES:
   # + Ensure java installed
   if(!require(rvest)) install.packages("rvest", repos = "http://cran.us.r-project.org")  # to scrape static pages
