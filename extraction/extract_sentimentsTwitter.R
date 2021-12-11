@@ -87,33 +87,34 @@ score.sentiment = function(sentences, pos.words, neg.words, .progress = 'none') 
 
 
 
+
+
+
 numTweetsExtract <- 50
-list_KAMs <- c("miscelaneous", "football")
-sentimentTerms <- list(c("from:potus", "Amazon", "from:sanchezcastejon"), 
-                       c("real madrid", "messi"))
+sentimentTerms <- list("miscelaneous" = c("from:potus", "Amazon", "from:sanchezcastejon"), 
+                       "football" = c("real madrid", "messi"))
 
-
-extractTermTweets <- function(term) {
+# FUNCTIONS ============
+scoreTextSentiment <- function(t) {
+  substr(t,1,15)
+}
+extractTermTweets <- function(term, KAM) {
   tweetsList <- searchTwitter(term, resultType="recent", n=numTweetsExtract)
-  print(term)
-  twListToDF(tweetsList) %>% select(date = created, text)
+  print(paste0(KAM,"::",term))
+  twListToDF(tweetsList) %>% mutate(score=scoreTextSentiment(text), date = as.Date(created), term = term, KAM=KAM) %>% 
+    select(date, score, term, KAM)
+}
+analyzeListTerms <- function(listTerms, listName) {
+  lapply(listTerms, function(j) extractTermTweets(j, listName) %>% 
+           bind_rows())
 }
 
-extractListTweets <- function(listTerms) {
-  lapply(listTerms, function(j) extractTermTweets(j))
-}
+allTexts <- 
+  lapply(seq_along(sentimentTerms), function(i) analyzeListTerms(sentimentTerms[[i]],names(sentimentTerms)[[i]])) %>% 
+  bind_rows()
 
-algo <- lapply(sentimentTerms, function(i) extractListTweets(i))
-
-class(algo)
-summary(algo)
-head(as_tibble(algo[[1]][[1]]))
-head(as_tibble(algo[[1]][[2]]))
-head(as_tibble(algo[[1]][[3]]))
-
-head(as_tibble(algo[[2]][[1]]))
-head(as_tibble(algo[[2]][[2]]))
-
+head(allTexts)
+view(allTexts)
 
 
 
