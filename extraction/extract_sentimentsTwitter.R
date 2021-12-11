@@ -1,47 +1,41 @@
-# PTE: función de limpeza previa de los textos
-# PTE: fechas: valorar/PROBAR con Twitter problema de sólo 10 días hacia atrás...COMPROBAR NIVEL ACTUAL EN TWITTER ("Elevated?"): https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api#Access
+# =============================================
+# EXTRACT TWEETS AND ESTIMATE SENTIMENT
+# =============================================
 
-numTweetsExtract <- 50
-sentimentTerms <- list("miscelaneous" = c("from:potus", "Amazon", "from:sanchezcastejon+españa"), 
-                       "football" = c("real madrid", "psg", "messi"))
+numTweetsExtract <- 500
+
 library(tidyverse)
 library(dplyr)
 library(ROAuth)
 library(twitteR)
+library(syuzhet)
 
+print(paste("Extraction started at",Sys.time()))
 
 # connect to twitter API from the twitter package
 setup_twitter_oauth(twitter_api_key, twitter_api_secret, twitter_access_token, twitter_access_token_secret)
 
 
-# FUNCTIONS ============
+# =============================================
+# TREAT TEXT AND CALCULATE SENTIMENT
+# =============================================
+# Clean text of tweets extracted ============
 cleanTexts <- function(dfTexts) {
-  # sentence = gsub('https://','',sentence) # removes https://
-  # sentence = gsub('http://','',sentence) # removes http://
-  # sentence = gsub('[^[:graph:]]', ' ',sentence) ## removes graphic characters like emoticons
-  # sentence = str_replace_all(sentence,"[^[:graph:]]", " ")
-  # 
-  # sentence = gsub("[[:punct:]]", "", sentence) # removes punctuation (and @)
-  # sentence = gsub("[[:cntrl:]]", "", sentence) # removes control characters
-  # sentence = gsub("\\d+", "", sentence) # removes numbers
-  # sentence = tolower(sentence)
-  
-  # # remove repeated and clean "..."
-  # tweets_found.nodups.df <- distinct(tweets_found.df, text, .keep_all = TRUE)
-  # tweets_found.nodups.df$text <- gsub("… ", "", tweets_found.nodups.df$text)
-  # # change the feature created to Date
-  # tweets_found.nodups.df <- tweets_found.nodups.df %>% 
-  #   mutate(created = as.Date(tweets_found.nodups.df$created)) 
-  # names(tweets_found.nodups.df)[names(tweets_found.nodups.df) == "created"] <- "date"
-  # # transform from datetime to date format
-  # tweets_text <- lapply(tweets_found, function(x) x$getText())
-  # # delete the (retweets)
-  # tweets_unique <- unique(tweets_text) c
-  dfTexts
+  dfTexts$text <- gsub('https://','',dfTexts$text) # removes https://
+  dfTexts$text <- gsub('http://','',dfTexts$text) # removes http://
+  dfTexts$text <- gsub('[^[:graph:]]', ' ',dfTexts$text) ## removes graphic characters like emoticons
+  dfTexts$text <- str_replace_all(dfTexts$text,"[^[:graph:]]", " ")
+  dfTexts$text <- gsub("[[:punct:]]", "", dfTexts$text) # removes punctuation (and @)
+  dfTexts$text <- gsub("[[:cntrl:]]", "", dfTexts$text) # removes control characters
+  dfTexts$text <- gsub("\\d+", "", dfTexts$text) # removes numbers
+  dfTexts$text <- tolower(dfTexts$text)
+  dfTexts$text <- gsub("… ", "", dfTexts$text) # clean "..."
+  dfTexts <- distinct(dfTexts, screenName, .keep_all = TRUE) # remove repeated 
 }
+# Extract tweets texts ============
 extractTermTweets <- function(term, KAM) {
   tweetsList <- searchTwitter(term, resultType="recent", n=numTweetsExtract)
-  print(paste0("RetriEving tweets related with ",KAM,"::",term))
+  print(paste0("Retrieving tweets related with ",KAM,"::",term))
   if (length(tweetsList) >0) {
     twListToDF(tweetsList) %>% 
       cleanTexts() %>% 
@@ -53,7 +47,7 @@ extractTermTweets <- function(term, KAM) {
   } else {
     data.frame()
   }
-
+# Process list of terms within each KAM (Key Assets to Manage) ============
 }
 analyzeListTerms <- function(listTerms, listName) {
   lapply(listTerms, function(j) extractTermTweets(j, listName) %>% 
@@ -61,14 +55,14 @@ analyzeListTerms <- function(listTerms, listName) {
 }
 
 # =============================================
-# TREAT TEXT AND CALCULATE SENTIMENT
+# CALL TEXTS EXTRACTION AND CALCULATE SENTIMENT
 # =============================================
 allTexts.df <- 
   lapply(seq_along(sentimentTerms), function(i) analyzeListTerms(sentimentTerms[[i]],names(sentimentTerms)[[i]])) %>% 
   bind_rows() %>% 
   group_by(date, term, KAM) %>% 
   summarise(score=mean(score))
-
+head(allTexts.df)
 
 # =============================================
 # READ THE TIDY VERSION AS BASE FOR INCREMENTAL ADDITION
@@ -77,6 +71,7 @@ historicSentiment <- readRDS("data/data_twitterSentiment_tidy.rds")
 historicSentiment
 newTotalData <- rbind(historicSentiment,allTexts.df)
 newTotalData
+
 # =============================================
 # SAVE A TIDY VERSION FOR INCREMENTAL ADDITION
 # =============================================
@@ -88,9 +83,12 @@ newTotalData_ts <- newTotalData %>%
   group_by(date, KAM) %>% 
   summarise(score = mean(score)) %>% 
   spread(key=KAM, value=score, fill=NA)
+head(newTotalData_ts)
 saveRDS(newTotalData_ts,"data/data_twitterSentiment_ts.rds")
 
-newTotalData_ts
+print(paste("Extraction finished succesfully at",Sys.time()))
+
+
 
 
 

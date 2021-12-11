@@ -4,28 +4,29 @@
 # DATA WE EXTRACT:
 # ----------------
 # Assets values, indexes, outcomes:
-# -STOCK&ASSETS PRICES [daily | . | ?? | YahooFinance] 
-# --OECD CLI, BCI, CCI leading indicators [monthly | by_country | 1960 | OECD]
+# !-STOCK&ASSETS PRICES [daily | . | ?? | YahooFinance] 
+# -OECD CLI, BCI, CCI leading indicators [monthly | by_country | 1960 | OECD]
 #
 # Social symptoms/indicators:
 # -Twitter POST SENTIMENTS value for given list of concepts [daily | global, by_concept | ?? | Twitter]
-# -SEARCHES RELATIVE-VOLUME OVER TIME [daily | global, by_concept | ?? | GoogleTrends]
-# --AIR TRAFFIC [daily | by_city | 2016 | openSkies]
-# --MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
-# --FOOTBALL RANKING OF COUNTRIES [monthly | by_country&region | 1992 | FIFA]
+# !-SEARCHES RELATIVE-VOLUME OVER TIME [daily | global, by_concept | ?? | GoogleTrends]
+# -AIR TRAFFIC [daily | by_city | 2016 | openSkies]
+# -MUSIC STYLE of steams [daily | per_country | 2017 | Spotify]
+# -FOOTBALL RANKING OF COUNTRIES [monthly | by_country&region | 1992 | FIFA]
 #
 # Earth influence on facts:
-# --MOON PHASES, SUNRISE/SUNSET/NIGHTHOURS [daily | NYC | 1960 | suncalc]
-# --DAILY WEATHER in key worldwide cities  [daily | by_city | 1989 | NOAA]
+# -MOON PHASES, SUNRISE/SUNSET/NIGHTHOURS [daily | NYC | 1960 | suncalc]
+# -DAILY WEATHER in key worldwide cities  [daily | by_city | 1989 | NOAA]
 #
 # Causality hypothesis ("seed")
-# -KAM (Key Asset to Model)
-# -KCH (KAM Causality Hypothesis)
+# !-KAM (Key Asset to Model)
+# !-KCH (KAM Causality Hypothesis)
 #
 #
 #
 # FUTURE DEVELOPMENTS:
 # --------------------
+# -Twitter-fechas: valorar/PROBAR con Twitter problema de sólo 10 días hacia atrás...COMPROBAR NIVEL ACTUAL EN TWITTER ("Elevated?"): https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api#Access
 # -Separate Google searches per country
 # -Separate Twitter posts per country
 # -Twitter posts volume (currently using Google searchs for it)
@@ -35,90 +36,57 @@
 
 
 
-# =========================================
-
-# Declare our relevant cities
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+# Extraction parameters ("seed")
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+#============ Relevant cities for weather and air traffic data
 cities <- c("NewYork", "Paris", "HongKong", "London", "Beijing", "Madrid", "Tokyo")
 addresses <- c("New York City, US", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Tokyo, Japan")
 countries <- c("US", "FR", "CH", "UK", "CH", "SP", "JP")
 airports <- c("KJFK", "LFPG", "VHHH", "EGLL", "ZBAA", "LEMD", "RJTT")
+#============ Term for sentiment analysis:
+sentimentTerms <- list("global politics" = 
+                         c("from:potus", "brexit", "from:sanchezcastejon+españa"), 
+                       "football" = 
+                         c("real madrid", "psg", "messi"))
+
+#============ Searches parameters (Google Trends):
+search_concept_gral <- "Banks"
+search_concepts <- c("unicaja", "bbva", "santander")
+search_places = c("ES", "ES", "ES") # ("" for all)
+search_period <- "today 12-m" # Examples: "all" for all (since 1jan2004 monthly), "today+5-y" for last five years (default, weekly), "today 12-m" for 12 month from today (weekly), "today 3-m" for 3 months from today (daily), "now 7-d" for last week (hourly), "now 1-d" for last 24h (every 8 minutes), "now 4-H" for last 4h (every 5 minutes), "now 4-H" for last 60min UTC (every minute), "Y-m-d Y-m-d" for time span between two dates)
+#============ Prices parameters (Yahoo! Finance):
+chosenTickers = c("AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
+endDateTicker = as.Date(today())
+startingDateTicker = endDateTicker - 365 # also as... "2021-01-01"
+
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 # Data extraction from miscelaneous sources
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+source("extraction/extract_searchsGTrends.R")# Extract searches from Google Trends
+source("extraction/extract_stocksPrices.R") # Extract stock prices from Yahoo Finance
+source("extraction/extract_musicSPOTIFY.R") # Extract music trends from SPOTIFY
+source("extraction/extract_rankingFIFA.R")# Extract from FIFA Ranking
+source("extraction/extract_indicatorsOECD.R")# Extract leading indicators from OECD
+source("extraction/extract_weatherNOAA.R")# Extract weather from NOAA
+source("extraction/extract_airTraffic.R")# Extract air traffic data
+source("extraction/extract_moonSunData.R")# Extract Moon and Sun related data (phase, night hours)
+source("extraction/extract_sentimentsTwitter.R")# Extract Twitter posts sentiment data
 
 
-# =========================================
-# Extract music trends from SPOTIFY
-# =========================================
-source("extraction/extract_musicSPOTIFY.R") 
-
-
-# =========================================
-# Extract from FIFA Ranking
-# =========================================
-source("extraction/extract_rankingFIFA.R")
-
-
-# =========================================
-# Extract leading indicators from OECD
-# =========================================
-source("extraction/extract_indicatorsOECD.R")
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
+# EDA
+# -----------------------------------------------------------------
+# -----------------------------------------------------------------
 # Chart
 leadingIndicatorsOECD %>%
   ggplot(aes(as_date(Date), OECD_CLI, color=Country)) + geom_line()
-
-
-
-# =========================================
-# Extract weather from NOAA
-# =========================================
-source("extraction/extract_weatherNOAA.R")
-
-
-# =========================================
-# Extract air traffic data
-# =========================================
-source("extraction/extract_airTraffic.R")
-
-
-# =========================================
-# Extract Moon and Sun related data (phase, night hours)
-# =========================================
-source("extraction/extract_moonSunData.R")
-
-
-# =========================================
-# Extract Twitter posts sentiment data
-# =========================================
-source("extraction/extract_sentimentsTwitter.R")
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-# =========================================
-# Extract stock prices from Yahoo Finance
-# =========================================
-# Prices parameters:
-chosenTickers = c("AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
-endDateTicker = as.Date(today())
-startingDateTicker = endDateTicker - 365 # also as... "2021-01-01"
-source("extraction/extract_stocksPrices.R")
-
-
-# =========================================
-# Extract searches from Google Trends
-# =========================================
-# Searches parameters:
-search_concept_gral <- "Banks"
-search_concepts <- c("unicaja", "bbva", "santander")
-search_places = c("ES", "ES", "ES") # ("" for all)
-search_period <- "today 12-m" # Examples: "all" for all (since 1jan2004 monthly), "today+5-y" for last five years (default, weekly), "today 12-m" for 12 month from today (weekly), "today 3-m" for 3 months from today (daily), "now 7-d" for last week (hourly), "now 1-d" for last 24h (every 8 minutes), "now 4-H" for last 4h (every 5 minutes), "now 4-H" for last 60min UTC (every minute), "Y-m-d Y-m-d" for time span between two dates)
-source("extraction/extract_searchsGTrends.R")
 
 
 
