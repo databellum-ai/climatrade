@@ -1,8 +1,11 @@
+# PTE: decidir si utilizo "popular", "recent" o "mixed"
+
 # =============================================
 # EXTRACT TWEETS AND ESTIMATE SENTIMENT
 # =============================================
+# https://www.rdocumentation.org/packages/twitteR/versions/1.1.9
 
-numTweetsExtract <- 500
+numTweetsExtract <- 1000
 
 library(tidyverse)
 library(dplyr)
@@ -34,7 +37,7 @@ cleanTexts <- function(dfTexts) {
 }
 # Extract tweets texts ============
 extractTermTweets <- function(term, KAM) {
-  tweetsList <- searchTwitter(term, resultType="recent", n=numTweetsExtract)
+  tweetsList <- searchTwitter(term, resultType="popular", n=numTweetsExtract)
   print(paste0("Retrieving tweets related with ",KAM,"::",term))
   if (length(tweetsList) >0) {
     twListToDF(tweetsList) %>% 

@@ -26,6 +26,8 @@
 #
 # FUTURE DEVELOPMENTS:
 # --------------------
+# -GoogleTrends: analyze related search terms, not only interest-over-time
+# -GoogleTrends: distinguish search results by country ("geo")
 # -Twitter-fechas: valorar/PROBAR con Twitter problema de sólo 10 días hacia atrás...COMPROBAR NIVEL ACTUAL EN TWITTER ("Elevated?"): https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api#Access
 # -Separate Google searches per country
 # -Separate Twitter posts per country
@@ -47,16 +49,13 @@ addresses <- c("New York City, US", "Paris, France", "Hong Kong", "London, Engla
 countries <- c("US", "FR", "CH", "UK", "CH", "SP", "JP")
 airports <- c("KJFK", "LFPG", "VHHH", "EGLL", "ZBAA", "LEMD", "RJTT")
 #============ Term for sentiment analysis:
-sentimentTerms <- list("global politics" = 
-                         c("from:potus", "brexit", "from:sanchezcastejon+españa"), 
-                       "football" = 
-                         c("real madrid", "psg", "messi"))
-
+sentimentTerms <- list("spanish_banks" = c("unicaja", "bbva", "banco santander"), 
+                       "global_politics" = c("from:potus", "brexit", "from:borisjohnson"), 
+                       "football" = c("real madrid", "psg", "messi"))
 #============ Searches parameters (Google Trends):
-search_concept_gral <- "Banks"
-search_concepts <- c("unicaja", "bbva", "santander")
-search_places = c("ES", "ES", "ES") # ("" for all)
-search_period <- "today 12-m" # Examples: "all" for all (since 1jan2004 monthly), "today+5-y" for last five years (default, weekly), "today 12-m" for 12 month from today (weekly), "today 3-m" for 3 months from today (daily), "now 7-d" for last week (hourly), "now 1-d" for last 24h (every 8 minutes), "now 4-H" for last 4h (every 5 minutes), "now 4-H" for last 60min UTC (every minute), "Y-m-d Y-m-d" for time span between two dates)
+searchTerms <- list("spanish_banks" = c("unicaja", "bbva", "banco santander"), 
+                    "global_politics" = c("potus", "brexit", "boris johnson"), 
+                    "football" = c("real madrid", "psg", "messi"))
 #============ Prices parameters (Yahoo! Finance):
 chosenTickers = c("AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
 endDateTicker = as.Date(today())
