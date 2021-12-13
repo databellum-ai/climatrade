@@ -83,7 +83,14 @@ source("extraction/extract_sentimentsTwitter.R")# Extract Twitter posts sentimen
 # EDA
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-# Chart
+# Chart of interest over time for each search "concept"
+all_searches %>% 
+  ggplot(aes(x = date, y = hits)) +
+  geom_line(colour = "darkblue", size = 1.5) +
+  facet_wrap(~keyword) +
+  ggthemes::theme_economist() + labs(title = "Interest over Time", subtitle = "Google Trends Report", caption = "By databellum®")
+
+# Chart OECD
 leadingIndicatorsOECD %>%
   ggplot(aes(as_date(Date), OECD_CLI, color=Country)) + geom_line()
 

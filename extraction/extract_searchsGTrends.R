@@ -5,6 +5,7 @@
 # ===============================================
 # https://www.rdocumentation.org/packages/gtrendsR/versions/1.3.5/topics/gtrends
 
+library(tidyverse)
 library(gtrendsR)
 library(ggthemes)
 
@@ -52,15 +53,6 @@ head(all_searches_ts)
 # SAVE RESULTS
 # ===============================================
 saveRDS(all_searches_ts, "data/data_searchesGoogle_ts.rds")
-
-# ----------
-# CHARTS
-# Chart of interest over time for each search "concept"
-all_searches %>% 
-  ggplot(aes(x = date, y = hits)) +
-  geom_line(colour = "darkblue", size = 1.5) +
-  facet_wrap(~keyword) +
-  ggthemes::theme_economist() + labs(title = "Interest over Time", subtitle = "Google Trends Report", caption = "By databellum®")
 
 
 
