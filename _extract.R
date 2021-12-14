@@ -56,7 +56,7 @@ sentimentTerms <- list("spanish_banks" = c("unicaja", "bbva", "banco santander")
 searchTerms <- list("spanish_banks" = c("unicaja", "bbva", "banco santander"), 
                     "global_politics" = c("potus", "brexit", "boris johnson"), 
                     "football" = c("real madrid", "psg", "messi"),
-                    "cinema" = c("veronica forque"))
+                    "cinema" = c("veronica forque", "victoria abril"))
 #============ Prices parameters (Yahoo! Finance):
 chosenTickers = c("AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
 endDateTicker = as.Date(today())

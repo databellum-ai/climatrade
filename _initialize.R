@@ -10,7 +10,6 @@ if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-
 if(!require(tidyquant)) install.packages("tidyquant", repos = "http://cran.us.r-project.org") # To get stock data
 if(!require(gtrendsR)) install.packages("gtrendsR", repos = "http://cran.us.r-project.org") # To get GoogleTrends data
 if(!require(ggthemes)) install.packages("ggthemes", repos = "http://cran.us.r-project.org") # To get GoogleTrends data
-
 if(!require(jsonlite)) install.packages("jsonlite", repos = "http://cran.us.r-project.org")
 if(!require(spotifyr)) install.packages("spotifyr", repos = "http://cran.us.r-project.org")
 if(!require(rnoaa)) install.packages("rnoaa", repos = "http://cran.us.r-project.org")
@@ -30,17 +29,6 @@ if(!require(syuzhet)) install.packages("syuzhet", repos = "http://cran.us.r-proj
   # + Install chromedriver with function chrome() of package "wdman":
   # cDrv <- chrome()
 
-# ===============
-# LIBRARIES
-# ---------------
-library(tidyverse)
-library(tidyquant) # To get stock data
-library(gtrendsR) # To get GoogleTrends data
-library(ggthemes)
-library(jsonlite)
-library(readr)
-library(data.table)
-library(stringr)
 
 # ===============
 # KEYS
