@@ -29,8 +29,3 @@ if(!require(syuzhet)) install.packages("syuzhet", repos = "http://cran.us.r-proj
   # + Install chromedriver with function chrome() of package "wdman":
   # cDrv <- chrome()
 
-
-# ===============
-# KEYS
-# ---------------
-source("keys_APIs.R")

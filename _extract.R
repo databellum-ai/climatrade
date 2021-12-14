@@ -38,6 +38,12 @@
 
 
 
+# ===============
+# KEYS
+# ---------------
+source("keys_APIs.R")
+
+
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 # Extraction parameters ("seed")
@@ -86,9 +92,9 @@ source("extraction/extract_sentimentsTwitter.R")# Extract Twitter posts sentimen
 # -----------------------------------------------------------------
 # Chart of interest over time for each search "concept"
 all_searches %>% 
-  ggplot(aes(x = date, y = hits)) +
+  ggplot(aes(x = date, y = nSearches)) +
   geom_line(colour = "darkblue", size = 1.5) +
-  facet_wrap(~keyword) +
+  facet_wrap(~KAM) +
   ggthemes::theme_economist() + labs(title = "Interest over Time", subtitle = "Google Trends Report", caption = "By databellum®")
 
 # Chart OECD

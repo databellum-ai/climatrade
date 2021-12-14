@@ -1,4 +1,5 @@
-# PTE: criterio de agrupación con los varios periodos de resolución: OJO conversión de porcentajes(!)
+# PTE: Comprobar normalización de los periodos recientes de más resolución (hits VS normHits)
+# PTE: revisar velocidad de la función de normalización
 
 # ===============================================
 # Extract search trends from Google Trends
@@ -10,7 +11,7 @@ library(lubridate)
 library(gtrendsR)
 library(ggthemes)
 
-search_periods <- c("all", "today+5-y", "today 3-m", "now 7-d") 
+search_periods <- c("all", "today+5-y", "today 3-m") 
 # Examples: "all" for all (since 1jan2004 monthly), "today+5-y" for last five years (default, weekly), "today 12-m" for 12 month from today (weekly), "today 3-m" for 3 months from today (daily), "now 7-d" for last week (hourly), "now 1-d" for last 24h (every 8 minutes), "now 4-H" for last 4h (every 5 minutes), "now 4-H" for last 60min UTC (every minute), "Y-m-d Y-m-d" for time span between two dates)
 
 all_searches <- data.frame()
@@ -38,7 +39,8 @@ for (i in c(1:length(searchTerms))) { # loop "vectors of terms" (KAM) within mai
 
 head(all_searches)
 
-# ======================
+# ==================================================================
+# ==================================================================
 # Resolutions balancing
 # We are mixing data from different resolutions to optimize full picture granularity. We'll balance the higher resolutions based of the full picture weight for that specific period, so percentages are more consistent
 tmpRanges_3m <- all_searches %>% 
@@ -59,48 +61,58 @@ tmpRangesHighResol <- all_searches %>%
 tmpRangesLowResol
 tmpRangesHighResol
 
+# The general one-line formula to linearly rescale data values having observed min and max into a new arbitrary range min' to max' is
+# newvalue= (max'-min')/(max-min)*(value-max)+max'
+#   or
+# newvalue= (max'-min')/(max-min)*(value-min)+min'
+normalizeToLowResol <- function(t_time, t_KAM, t_hits) {
+  if (t_time %in% c("today 3-m", "today+5-y")) {
+    from_hiLo <- tmpRangesHighResol %>% filter(time == t_time, KAM == t_KAM) %>% select(time, low, high)
+    to_hiLo <- tmpRangesLowResol %>% filter(time == t_time, KAM == t_KAM) %>% select(time, low, high)
+    newHits = (to_hiLo$high - to_hiLo$low) / (from_hiLo$high - from_hiLo$low) * (t_hits - to_hiLo$low) + to_hiLo$low
+    return(newHits) 
+  } else {
+    return(t_hits)
+  }
+}
 
+all_searches <- all_searches %>% 
+  rowwise() %>% 
+  mutate(
+    normHits = normalizeToLowResol(time, KAM, hits))
 
+head(all_searches)
 
+# t_time <- "today 3-m"
+# t_KAM <- "global_politics"
+# t_hits <- 67
+# normalizeToLowResol(t_time, t_KAM, t_hits)
 
-# lowResolLast3months_mean <- 
-#   all_searches %>% filter(time == "all" & date >= (as.Date(Sys.time()) %m-% months(3))) %>% pull(hits) %>% mean()
-# higherResolLast3months_mean <- 
-#   all_searches %>% filter(time == "today 3-m") %>%  pull(hits) %>% mean()
-# lowResolLast5years_mean <- 
-#   all_searches %>% filter(time == "all" & date >= (as.Date(Sys.time()) %m-% years(5))) %>% pull(hits) %>% mean()
-# higherResolLast5years_mean <- 
-#   all_searches %>% filter(time == "today+5-y") %>% pull(hits) %>% mean()
-# diffResolsMean3months <- higherResolLast3months_mean - lowResolLast3months_mean
-# diffResolsMean5years <- higherResolLast5years_mean - lowResolLast5years_mean
-# diffResolsMean3months
-# diffResolsMean5years
-# # Now we just correct relative, recent data to weight them according to full picture for those periods
-# all_searches <- all_searches %>% 
+# 
+# all_searches %>%
 #   mutate(hits = case_when(
 #     time=="now 7-d" ~ (hits),
-#     time=="today 3-m" ~ (hits - diffResolsMean3months), 
-#     time=="today+5-y" ~ (hits - diffResolsMean5years),
-#     time=="all" ~ (hits)))
-# # The problem is each resolution is obtained ranges [0:100], but after balancing, the full range expands from <0 to >100. We want to keep [0:100], so we'll scale
-# max(all_searches$hits)
-# min(all_searches$hits)
+#     time=="today 3-m" ~ (normalize(KAM, hits)),
+#     time=="today+5-y" ~ (normalize(KAM, hits)),
+#     TRUE ~ (hits))) %>% filter(time == "today 3-m")
 
 
+# ==================================================================
+# ==================================================================
 
 
-
-
+# group by date and KAM
 all_searches <- all_searches %>% 
   mutate(date =  as.Date(date)) %>% 
   group_by(date, KAM) %>% 
-  summarise(hits = mean(hits))
+  summarise(nSearches = mean(normHits))
 head(all_searches_ts)
 
 # spread
 all_searches_ts <- all_searches %>% 
-  spread(key=KAM, value=hits)
+  spread(key=KAM, value=nSearches)
 head(all_searches_ts)
+
 # ===============================================
 # SAVE RESULTS
 # ===============================================
