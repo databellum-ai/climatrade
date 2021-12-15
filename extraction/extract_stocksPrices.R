@@ -2,8 +2,23 @@
 # Extract stock data
 # ================================
 
+
+# https://cran.r-project.org/web/packages/BatchGetSymbols/vignettes/BatchGetSymbols-vignette.html
+# https://www.sqlservercentral.com/articles/how-to-download-stocks-on-schedule-using-r
+
+
+
+
+
+
+
+
+
+
+
+
 # PTE:
-#-REvisar el warning
+#-Revisar el warning
 tq_get_options()
 tq_get("AAPL")
 

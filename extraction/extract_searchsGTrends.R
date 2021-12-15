@@ -1,5 +1,3 @@
-# PTE: Comprobar gráficamente normalización de los periodos recientes de más resolución (hits VS normHits)
-
 # ===============================================
 # Extract search trends from Google Trends
 # ===============================================
@@ -71,26 +69,6 @@ all_searches <- all_searches %>%
   select(date, KAM, keyword, time, hits, normHits, low, high)
 
 head(all_searches)
-
-
-
-
-
-
-
-
-# Chart of interest over time for each search "concept"
-all_searches %>% 
-  ggplot(aes(x = date, y = hits)) +
-  geom_point(colour = "darkblue", size = 0.5) +
-  facet_wrap(~time)
-
-
-
-
-
-
-
 
 
 # ===============================================

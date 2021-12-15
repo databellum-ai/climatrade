@@ -56,4 +56,4 @@ geo_FIFA <- historicalRankingFIFA %>% group_by(CountryCode,CountryName) %>% summ
 
 # Save to RDS
 saveRDS(historicalRankingFIFA, "data/data_FIFA_ts.rds")
-saveRDS(historicalRankingFIFA, "data/geo_FIFA.rds")
+saveRDS(geo_FIFA, "data/geo_FIFA.rds")
