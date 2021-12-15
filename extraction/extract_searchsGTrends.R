@@ -73,6 +73,26 @@ all_searches <- all_searches %>%
 head(all_searches)
 
 
+
+
+
+
+
+
+# Chart of interest over time for each search "concept"
+all_searches %>% 
+  ggplot(aes(x = date, y = hits)) +
+  geom_point(colour = "darkblue", size = 0.5) +
+  facet_wrap(~time)
+
+
+
+
+
+
+
+
+
 # ===============================================
 # PREPARE OUTPUTS
 # ===============================================
