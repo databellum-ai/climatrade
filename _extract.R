@@ -1,5 +1,14 @@
 ## PTE: backup incorporado de los datos al principio de la extraccion
 
+
+library(tidyverse)
+library(openxlsx)
+
+# ===============
+# KEYS
+# ---------------
+source("keys_APIs.R")
+
 # =========================================
 # DATA WE EXTRACT:
 # ----------------
@@ -42,12 +51,6 @@ library(lubridate)
 library(ggthemes)
 
 
-# ===============
-# KEYS
-# ---------------
-source("keys_APIs.R")
-
-
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 # Extraction parameters ("seed")
@@ -88,60 +91,16 @@ source("extraction/extract_airTraffic.R")# Extract air traffic data
 source("extraction/extract_moonSunData.R")# Extract Moon and Sun related data (phase, night hours)
 source("extraction/extract_sentimentsTwitter.R")# Extract Twitter posts sentiment data
 
-
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-# STANDARDIZE THE GEOGRAPHIC LOCATIONS FROM EACH EXTRACTED DATASET
+# Generate editable geography codes proposal and read its revised (manually edited) version
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-# PTE: acabar left-join para crear campos de estándar (falta el stdCountryName)
-# PTE: entrada "manual" de los códigos estándar
-# PTE: guardar versión .XLS para "read-only"
+source("extraction/extract_standardizeGeography.R") # Prepare a standard geography proposal ("userEdition/standardGeography_DRAFT.xlsx") coding to mix data from disparate sources
+# NOW users edits the draft and saves as "userEdition/standardGeography.xlsx":
+std_geo <- read.xlsx("userEdition/standardGeography.xlsx") # Read user-edited version ("userEdition/standardGeography.xlsx") 
 
-geo_airTraffic <- readRDS("data/geo_airTraffic.rds")
-geo_FIFA <- readRDS("data/geo_FIFA.rds")
-geo_moonSun <- readRDS("data/geo_moonSun.rds")
-geo_music <- readRDS("data/geo_music.rds")
-geo_OECD <- readRDS("data/geo_OECD.rds")
-geo_weather <- readRDS("data/geo_weather.rds")
 
-head(geo_airTraffic)
-head(geo_FIFA)
-head(geo_moonSun)
-head(geo_music)
-head(geo_OECD)
-head(geo_weather)
-
-geo_airTraffic <- geo_airTraffic %>% 
-  mutate(source="AirTraffic") %>% select(source, countryCode)
-geo_FIFA <- geo_FIFA %>% 
-  mutate(source="Football", CountryCode = toupper(CountryCode), countryName = CountryName, regionCode = Region) %>% 
-  rename(countryCode = CountryCode) %>% 
-  select(source, countryName, regionCode)
-geo_moonSun <- geo_moonSun %>% 
-  mutate(source="MoonSun", countryCode=toupper(countryCode)) %>% select(source, countryCode)
-geo_music <- geo_music %>% 
-  mutate(source="Music", countryCode=toupper(countryCode), countryName = country) %>% select(source, countryCode, countryName)
-geo_OECD <- geo_OECD %>% 
-  mutate(source="OECD", countryCode = toupper(LocationId), countryName = LocationName) %>% select(source, countryCode, countryName)
-geo_weather <- geo_weather %>% 
-  mutate(source="Weather", countryCode = toupper(countryId)) %>% select(source, countryCode)
-
-# We bind all lists of codes
-std_geo <- data.frame()
-std_geo <- std_geo %>% 
-  bind_rows(geo_airTraffic) %>% 
-  bind_rows(geo_FIFA) %>% 
-  bind_rows(geo_moonSun) %>% 
-  bind_rows(geo_music) %>% 
-  bind_rows(geo_OECD) %>% 
-  bind_rows(geo_weather) %>% 
-  arrange(countryCode, source)
-view(std_geo)
-head(std_geo)
-
-tmp_std <- std_geo %>% filter(source=="Football") %>% select(stdCountryCode = countryCode, stdCountryName = countryName)
-std_geo %>% left_join(tmp_std, by = c("countryCode" = "stdCountryName"))
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
@@ -154,12 +113,9 @@ all_searches %>% group_by(KAM) %>%
   geom_point(size = 1) +
   facet_wrap(~KAM) +
   ggthemes::theme_economist() + labs(title = "Interest over Time", subtitle = "Google Trends Report", caption = "By databellum®")
-
 # Chart OECD
 leadingIndicatorsOECD %>%
   ggplot(aes(as_date(Date), OECD_CLI, color=Country)) + geom_line()
-
-
 
 
 

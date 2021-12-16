@@ -8,15 +8,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
 # PTE:
 #-Revisar el warning
 tq_get_options()

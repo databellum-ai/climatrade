@@ -4,6 +4,11 @@
 # rm(list = ls())
 
 # ===============
+# KEYS
+# ---------------
+source("keys_APIs.R")
+
+# ===============
 # PACKAGES REQUIRED
 # ---------------
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
@@ -21,6 +26,7 @@ if(!require(suncalc)) install.packages("suncalc", repos = "http://cran.us.r-proj
 if(!require(ROAuth)) install.packages("ROAuth", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
 if(!require(twitteR)) install.packages("twitteR", repos = "http://cran.us.r-project.org") # Moon and Sun daily data
 if(!require(syuzhet)) install.packages("syuzhet", repos = "http://cran.us.r-project.org") # sentiment analysis
+if(!require(openxlsx)) install.packages("openxlsx", repos = "http://cran.us.r-project.org") # import/export Excel
 # INSTALL SCRAPE PACKAGES:
   # + Ensure java installed
   if(!require(rvest)) install.packages("rvest", repos = "http://cran.us.r-project.org")  # to scrape static pages
