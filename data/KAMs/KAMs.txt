@@ -1,0 +1,18 @@
+IBEX 35... (^IBEX)
+Global X DAX Germany ETF (DAX)
+FTSE 100 (^FTSE)
+S&P 500 (^GSPC)
+CBOE Volatility Index (^VIX)
+
+Currencies:
+EUR/USD (EURUSD=X)
+GBP/USD (GBPUSD=X)
+
+
+
+
+
+
+
+
+
