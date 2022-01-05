@@ -4,11 +4,6 @@
 # rm(list = ls())
 
 # ===============
-# KEYS
-# ---------------
-source("keys_APIs.R")
-
-# ===============
 # PACKAGES REQUIRED
 # ---------------
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")

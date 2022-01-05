@@ -1,6 +1,3 @@
-# PTE: prueba de volumen de symbols
-
-
 # ================================
 # Extract stock data
 # ================================

@@ -1,13 +1,29 @@
-## PTE: backup incorporado de los datos al principio de la extraccion
-
 
 library(tidyverse)
 library(openxlsx)
+library(lubridate)
+library(ggthemes)
+
 
 # ===============
 # KEYS
 # ---------------
 source("keys_APIs.R")
+
+
+# ===============
+# DATA BACKUP BEFORE NEW EXTRACTION
+# ---------------
+# We use a new directory named by date and time to store current .RDS files, etc. (all content)
+dir_from <- "data"
+dir_to   <- str_remove_all(paste0("dataExtracted_", as.character(Sys.time())), "[-: ]")
+dir_to <- file.path("backup", dir_to)
+dir.create(dir_to)
+file.copy(list.files(dir_from, full.names = TRUE), 
+          dir_to, 
+          recursive = TRUE)
+
+
 
 # =========================================
 # DATA WE EXTRACT:
@@ -47,9 +63,6 @@ source("keys_APIs.R")
 # -Use points instead of ranking in the FIFA classification
 
 
-library(tidyverse)
-library(lubridate)
-library(ggthemes)
 
 
 # -----------------------------------------------------------------
@@ -83,6 +96,7 @@ chosenTickers <- c("^IBEX", "DAX", "^FTSE", "^GSPC", "^VIX", "EURUSD=X", "GBPUSD
 # -----------------------------------------------------------------
 source("extraction/extract_searchsGTrends.R")# Extract searches from Google Trends
 source("extraction/extract_stocksPrices.R") # Extract stock prices from Yahoo Finance
+
 source("extraction/extract_musicSPOTIFY.R") # Extract music trends from SPOTIFY
 source("extraction/extract_rankingFIFA.R")# Extract from FIFA Ranking
 source("extraction/extract_indicatorsOECD.R")# Extract leading indicators from OECD
@@ -111,18 +125,16 @@ std_geo <- read.xlsx("userEdition/standardGeography.xlsx") # Read user-edited ve
 # -----------------------------------------------------------------
 # Google searches chart
 all_searches %>% group_by(KAM) %>%
-  ggplot(aes(x = date, y = normHits, color = time)) +
+  ggplot(aes(x = date, y = nSearches, color = date)) +
   geom_point(size = 1) +
   facet_wrap(~KAM) +
   ggthemes::theme_economist() + labs(title = "Interest over Time", subtitle = "Google Trends Report", caption = "By databellum®")
 
-# OECD chart
-leadingIndicatorsOECD %>%
-  ggplot(aes(as_date(Date), OECD_CLI, color=Country)) + geom_line()
+
 
 # Stocks price chart
-stocksClosePrice_tidy %>%
-  ggplot(aes(x = date, y = close, color = symbol)) +
+stocksData %>%
+  ggplot(aes(x = date, y = value, color = symbol)) +
   geom_line() +
   facet_wrap(~symbol,scales = 'free_y') +
   theme_classic() +
@@ -133,8 +145,8 @@ stocksClosePrice_tidy %>%
                date_labels = "%b\n%y") + 
   ggthemes::theme_economist()
 # Stocks volume chart
-stocksVolume_tidy %>%
-  ggplot(aes(x = date, y = volume, color = symbol)) +
+stocksVolume %>%
+  ggplot(aes(x = date, y = value, color = symbol)) +
   geom_line() +
   facet_wrap(~symbol,scales = 'free_y') +
   theme_classic() +
@@ -146,7 +158,9 @@ stocksVolume_tidy %>%
   ggthemes::theme_economist()
 
 
-
+# OECD chart
+leadingIndicatorsOECD %>%
+  ggplot(aes(as_date(Date), OECD_CLI, color=Country)) + geom_line()
 
 
 
