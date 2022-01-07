@@ -12,6 +12,7 @@ library(spotifyr)# For certain functions and applications, you’ll need to log 
 
 numTopTracks <- 3 # how many tracks we extract per day/week
 lotSize <- 90  # dates processed in a run. If not enough, just repeat run
+versionChrome <- "97.0.4692.71" # RSelenium requires current version of Chrome browser to launch it
 
 # ================================
 # STEP 1: Determine countries and dates we need to collect
@@ -53,13 +54,10 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   # ================================
   
   # Start RSelenium server
-  list_versions("chromedriver")  # uses binman package
-  # -> No version specified
-  driver <- rsDriver(version = "latest", browser=c("chrome"))  # ensute correct chrome version
   #-> PCs no DP:
   # driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")  # ensute correct chrome version
   # -> PC DP:
-  # driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "97.0.4692.71")  # ensute correct chrome version
+  driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = versionChrome)  # ensute correct chrome version
   remote_driver <- driver[["client"]]
   
   # Page initialization prepartion (login + accept cookies)
