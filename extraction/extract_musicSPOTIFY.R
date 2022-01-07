@@ -57,7 +57,7 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   #-> PCs no DP:
   # driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")  # ensute correct chrome version
   # -> PC DP:
-  driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = versionChrome)  # ensute correct chrome version
+  driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = versionChrome)  # ensure correct chrome version
   remote_driver <- driver[["client"]]
   
   # Page initialization prepartion (login + accept cookies)
@@ -226,3 +226,4 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   geo_music
   saveRDS(geo_music,"data/geo_music.rds")
 }
+
