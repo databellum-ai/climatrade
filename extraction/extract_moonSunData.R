@@ -2,7 +2,6 @@
 # EXTRACTION OF MOON PHASE, SUNRISE/SUNSET/NIGHT_HOURS AND TIDES
 # =====================================================
 
-
 library(tidyverse)
 library(lubridate)
 library(tidygeocoder) # Resolve coordinates of cities/places

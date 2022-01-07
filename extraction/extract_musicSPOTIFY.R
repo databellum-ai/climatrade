@@ -54,7 +54,12 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   
   # Start RSelenium server
   list_versions("chromedriver")  # uses binman package
-  driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")  # ensute correct chrome version
+  # -> No version specified
+  driver <- rsDriver(version = "latest", browser=c("chrome"))  # ensute correct chrome version
+  #-> PCs no DP:
+  # driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "96.0.4664.45")  # ensute correct chrome version
+  # -> PC DP:
+  # driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = "97.0.4692.71")  # ensute correct chrome version
   remote_driver <- driver[["client"]]
   
   # Page initialization prepartion (login + accept cookies)

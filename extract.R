@@ -94,14 +94,15 @@ chosenTickers <- c("^IBEX", "DAX", "^FTSE", "^GSPC", "^VIX", "EURUSD=X", "GBPUSD
 # -----------------------------------------------------------------
 source("extraction/extract_searchsGTrends.R")# Extract searches from Google Trends
 source("extraction/extract_stocksPrices.R") # Extract stock prices from Yahoo Finance
-source("extraction/extract_indicatorsOECD.R")# Extract leading indicators from OECD
-
 source("extraction/extract_weatherNOAA.R")# Extract weather from NOAA
 source("extraction/extract_airTraffic.R")# Extract air traffic data
+source("extraction/extract_indicatorsOECD.R")# Extract leading indicators from OECD
 source("extraction/extract_moonSunData.R")# Extract Moon and Sun related data (phase, night hours)
 source("extraction/extract_sentimentsTwitter.R")# Extract Twitter posts sentiment data
 source("extraction/extract_rankingFIFA.R")# Extract from FIFA Ranking
+
 source("extraction/extract_musicSPOTIFY.R") # Extract music trends from SPOTIFY
+
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
