@@ -100,7 +100,6 @@ source("extraction/extract_indicatorsOECD.R")# Extract leading indicators from O
 source("extraction/extract_moonSunData.R")# Extract Moon and Sun related data (phase, night hours)
 source("extraction/extract_sentimentsTwitter.R")# Extract Twitter posts sentiment data
 source("extraction/extract_rankingFIFA.R")# Extract from FIFA Ranking
-
 source("extraction/extract_musicSPOTIFY.R") # Extract music trends from SPOTIFY
 
 
