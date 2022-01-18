@@ -32,20 +32,21 @@ head(geo_music)
 head(geo_OECD)
 head(geo_weather)
 
+
 geo_airTraffic <- geo_airTraffic %>% 
-  mutate(source="AirTraffic") %>% select(source, countryCode)
+  mutate(source="airTraffic") %>% select(source, countryCode)
 geo_FIFA <- geo_FIFA %>% 
-  mutate(source="Football", CountryCode = toupper(CountryCode), countryName = CountryName, regionCode = Region) %>% 
+  mutate(source="FIFA", CountryCode = toupper(CountryCode), countryName = CountryName, regionCode = Region) %>% 
   rename(countryCode = CountryCode) %>% 
   select(source, countryName, regionCode)
 geo_moonSun <- geo_moonSun %>% 
-  mutate(source="MoonSun", countryCode=toupper(countryCode)) %>% select(source, countryCode)
+  mutate(source="moonSun", countryCode=toupper(countryCode)) %>% select(source, countryCode)
 geo_music <- geo_music %>% 
-  mutate(source="Music", countryCode=toupper(countryCode), countryName = country) %>% select(source, countryCode, countryName)
+  mutate(source="music", countryCode=toupper(countryCode), countryName = country) %>% select(source, countryCode, countryName)
 geo_OECD <- geo_OECD %>% 
   mutate(source="OECD", countryCode = toupper(LocationId), countryName = LocationName) %>% select(source, countryCode, countryName)
 geo_weather <- geo_weather %>% 
-  mutate(source="Weather", countryCode = toupper(countryId)) %>% select(source, countryCode)
+  mutate(source="weather", countryCode = toupper(countryId)) %>% select(source, countryCode)
 
 # we bind all lists of codes
 all_geo <- data.frame()
@@ -61,7 +62,7 @@ head(all_geo)
 
 # we use as draft values the most complete list (FIFA football) 
 tmp_std <- all_geo %>% 
-  filter(source=="Football") %>% 
+  filter(source=="FIFA") %>% 
   mutate(stdCountryCode = countryCode, stdCountryName = countryName) %>% 
   group_by(countryCode) %>% summarise(stdCountryCode = first(stdCountryCode), stdCountryName = first(stdCountryName)) %>% 
   select(countryCode, stdCountryCode,stdCountryName)
