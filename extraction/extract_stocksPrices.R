@@ -28,7 +28,7 @@ head(stocksData_ts)
 
 
 # Save to RDS
-saveRDS(stocksData, "data/stocksData_tidy.rds")
-saveRDS(stocksData_ts, "data/stocksData_ts.rds")
+saveRDS(stocksData, "data/data_stocksData_tidy.rds")
+saveRDS(stocksData_ts, "data/data_stocksData_ts.rds")
 
 print("Stock prices and volumes process FINISHED")

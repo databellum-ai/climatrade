@@ -210,19 +210,19 @@ head(allStationsData)
 # ---------------------------------------------
 # FINAL STEP: Save
 # ---------------------------------------------
+
+# Spread columns per indicator
+allStationsData <- allStationsData %>% spread(key = indicator, value = value)
+head(allStationsData)
 # Save to RDS (times-series format)
-saveRDS(allStationsData, "data/data_weather_ts.rds")
+saveRDS(as_tibble(allStationsData), "data/data_weather_ts.rds")
 # Save geographic detail (cities used and countries)
 geo_weather <- data.frame(city = cities, countryId = countries)
 saveRDS(geo_weather, "data/geo_weather.rds")
 
-# # Spread columns per indicator
-# allStationsData <- allStationsData %>% spread(key = indicator, value = value)
-# head(allStationsData)
+
 # # Create columns combining indicator and place as suffix  
 # allStationsData <- allStationsData %>% pivot_wider(names_from = stationPlace, values_from = c("TMIN", "TMAX", "TAVG", "PRCP"), names_sep=".",names_sort=TRUE)
 # head(allStationsData)
-# # Save to RDS (spread format)
-# saveRDS(allStationsData, "data/data_weather_sp.rds")
 
 

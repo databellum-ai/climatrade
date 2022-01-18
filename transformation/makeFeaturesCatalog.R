@@ -1,83 +1,52 @@
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-# STANDARDIZE THE GEOGRAPHIC LOCATIONS FROM EACH EXTRACTED DATASET
+# READ EXTRACTED DATA
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 # 
-# This code is used to standardize the country/geography codes coming from each source
-# Approach is to generate a DRAT file contiing all codes merged in a singles list specifying their origin. This list includes also two new columns (standard code and country name) that will contain the standardized values:
-#  Step 1: we generate a draft list in an Excel files called "/userEdition/standardGeography_DRAFT.xlsx"
-#  Step 2: an authorized user fill standard unified values for new columns and saves populated list as file as "/userEdition/standardGeography_DRAFT.xlsx"
-#  Step 3: list contained in the new file will solve the correspondence between country codes in each original dataset and standard codes
-#  
-# NOTE: we use an extended meaning of country that combines countrys, nations or even groups of countries. Eg: for FIFA data we get England or Wales, for OECD data we get countries or groups like NAFTA or G7, even for FIFA data, we have a different column for group (UEFA, CONCACAF)
-# NOTE: regions/groups of countries are ignored now. In other pieces of code, regions could be used as aggregators, wether for regions already contained in the initial file (eg FIFA), or by using other external table to aggregate single records in current list
-
 
 library(tidyverse)
-library(openxlsx)
 
-geo_airTraffic <- readRDS("data/geo_airTraffic.rds")
-geo_FIFA <- readRDS("data/geo_FIFA.rds")
-geo_moonSun <- readRDS("data/geo_moonSun.rds")
-geo_music <- readRDS("data/geo_music.rds")
-geo_OECD <- readRDS("data/geo_OECD.rds")
-geo_weather <- readRDS("data/geo_weather.rds")
+data_airTraffic_ts <- readRDS("data/data_airTraffic_ts.rds")
+data_FIFA_ts <- readRDS("data/data_FIFA_ts.rds")
+data_moonSun_ts <- readRDS("data/data_moonSun_ts.rds")
+data_music_ts <- readRDS("data/data_music_ts.rds")
+data_OECD_ts <- readRDS("data/data_OECD_ts.rds")
+data_searchesGoogle_ts <- readRDS("data/data_searchesGoogle_ts.rds")
+data_twitterSentiment_ts <- readRDS("data/data_twitterSentiment_ts.rds")
+data_weather_ts <- readRDS("data/data_weather_ts.rds")
+data_stocksData_ts <- readRDS("data/data_stocksData_ts.rds")
 
-head(geo_airTraffic)
-head(geo_FIFA)
-head(geo_moonSun)
-head(geo_music)
-head(geo_OECD)
-head(geo_weather)
+head(data_airTraffic_ts)
+head(data_FIFA_ts)
+head(data_moonSun_ts)
+head(data_music_ts)
+head(data_OECD_ts)
+head(data_searchesGoogle_ts)
+head(data_twitterSentiment_ts)
+head(data_weather_ts)
+head(data_stocksData_ts)
 
-geo_airTraffic <- geo_airTraffic %>% 
-  mutate(source="AirTraffic") %>% select(source, countryCode)
-geo_FIFA <- geo_FIFA %>% 
-  mutate(source="Football", CountryCode = toupper(CountryCode), countryName = CountryName, regionCode = Region) %>% 
-  rename(countryCode = CountryCode) %>% 
-  select(source, countryName, regionCode)
-geo_moonSun <- geo_moonSun %>% 
-  mutate(source="MoonSun", countryCode=toupper(countryCode)) %>% select(source, countryCode)
-geo_music <- geo_music %>% 
-  mutate(source="Music", countryCode=toupper(countryCode), countryName = country) %>% select(source, countryCode, countryName)
-geo_OECD <- geo_OECD %>% 
-  mutate(source="OECD", countryCode = toupper(LocationId), countryName = LocationName) %>% select(source, countryCode, countryName)
-geo_weather <- geo_weather %>% 
-  mutate(source="Weather", countryCode = toupper(countryId)) %>% select(source, countryCode)
+airTraffic_features <- data_airTraffic_ts %>% select (-c(date, countryCode)) %>% names()
+FIFA_features <- data_FIFA_ts %>% select (-c(Date)) %>% names()
+moonSun_features <- data_moonSun_ts %>% select (-c(date, countryCode)) %>% names()
+music_features <- data_music_ts %>% select (-c(date, country, countryCode)) %>% names()
+OECD_features <- data_OECD_ts %>% select (-c(Date, Country)) %>% names()
+searchesGoogle_features <- data_searchesGoogle_ts %>% select (-c(date)) %>% names()
+twitterSentiment_features <- data_twitterSentiment_ts %>% select (-c(date)) %>% names()
+weather_features <- data_weather_ts %>% select (-c(date, stationPlace)) %>% names()
+stocksData_features <- data_stocksData_ts %>% select (-c(date)) %>% names()
 
-# we bind all lists of codes
-all_geo <- data.frame()
-all_geo <- all_geo %>% 
-  bind_rows(geo_airTraffic) %>% 
-  bind_rows(geo_FIFA) %>% 
-  bind_rows(geo_moonSun) %>% 
-  bind_rows(geo_music) %>% 
-  bind_rows(geo_OECD) %>% 
-  bind_rows(geo_weather) %>% 
-  arrange(countryCode, source)
-head(all_geo)
+all_features <- c(airTraffic_features, 
+  FIFA_features, 
+  moonSun_features, 
+  music_features, 
+  OECD_features, 
+  searchesGoogle_features, 
+  twitterSentiment_features, 
+  weather_features, 
+  stocksData_features)
 
-# we use as draft values the most complete list (FIFA football) 
-tmp_std <- all_geo %>% 
-  filter(source=="Football") %>% 
-  mutate(stdCountryCode = countryCode, stdCountryName = countryName) %>% 
-  group_by(countryCode) %>% summarise(stdCountryCode = first(stdCountryCode), stdCountryName = first(stdCountryName)) %>% 
-  select(countryCode, stdCountryCode,stdCountryName)
-nrow(tmp_std)
-head(tmp_std)
-
-# we add new draft standard columns (stdCountryCode, stdCountryName) as a proposal for further manual edition
-std_geo <- all_geo %>% left_join(tmp_std, by = "countryCode")
-nrow(std_geo)
-head(std_geo)
-
-# save a DRAFT (standardGeography_DRAFT.xlsx) so an administrator/user can use as reference to generate final file (standardGeography.xlsx)
-write.xlsx(std_geo, "userEdition/standardGeography_DRAFT.xlsx", overwrite = TRUE)
-
-
-
-
-
+all_features
 

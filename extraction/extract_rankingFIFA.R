@@ -53,5 +53,5 @@ geo_FIFA <- historicalRankingFIFA %>% group_by(CountryCode,CountryName) %>% summ
 historicalRankingFIFA <- historicalRankingFIFA %>% spread(key = CountryCode, value = Rank, fill = NA) %>% arrange(desc(Date))
 
 # Save to RDS
-saveRDS(historicalRankingFIFA, "data/data_FIFA_ts.rds")
+saveRDS(as_tibble(historicalRankingFIFA), "data/data_FIFA_ts.rds")
 saveRDS(geo_FIFA, "data/geo_FIFA.rds")

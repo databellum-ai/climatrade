@@ -97,7 +97,7 @@ if (length(unProcessedDates) > 0) {
   # SAVE
   # ================================
   # # Save dataset
-  saveRDS(historicDailyFlights,"data/data_airTraffic_ts.rds")
+  saveRDS(as_tibble(historicDailyFlights),"data/data_airTraffic_ts.rds")
   # # Save also countries and codes for further consolidation with other data
   geo_airTraffic <- historicDailyFlights %>% group_by(countryCode) %>% summarise() %>% arrange(countryCode)
   geo_airTraffic

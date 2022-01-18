@@ -89,7 +89,7 @@ head(all_searches_ts)
 # ===============================================
 # SAVE RESULTS
 # ===============================================
-saveRDS(all_searches_ts, "data/data_searchesGoogle_ts.rds")
+saveRDS(as_tibble(all_searches_ts), "data/data_searchesGoogle_ts.rds")
 
 
 

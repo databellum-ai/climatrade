@@ -87,7 +87,7 @@ newTotalData_ts <- newTotalData %>%
   summarise(score = mean(score)) %>% 
   spread(key=KAM, value=score, fill=NA)
 head(newTotalData_ts)
-saveRDS(newTotalData_ts,"data/data_twitterSentiment_ts.rds")
+saveRDS(as_tibble(newTotalData_ts),"data/data_twitterSentiment_ts.rds")
 
 print(paste("Extraction finished succesfully at",Sys.time()))
 
