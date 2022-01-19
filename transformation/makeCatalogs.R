@@ -1,6 +1,6 @@
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-# 
+# Extract Features and Geography Catalogs
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 
@@ -68,9 +68,7 @@ std_geo_list <- unique(std_geo_revised$stdCountryName)
 # Print obtained catalogs
 # ------------------------------------------------------
 
-print("AVAILABLE FEATURES:")
-print(all_features)
-print("AVAILABLE GEOGRAPHY DIMENSIONS:")
+all_features
 head(std_geo_revised)
-print(std_geo_list)
+std_geo_list
 
