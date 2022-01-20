@@ -72,3 +72,7 @@ all_features
 head(std_geo_revised)
 std_geo_list
 
+# ------------------------------------------------------
+# save for reference a spreadsheet containing catalog of available Features
+# ------------------------------------------------------
+write.xlsx(as_tibble(all_features), "userEdition/featuresCatalog_output.xlsx", overwrite = TRUE, colNames = FALSE)
