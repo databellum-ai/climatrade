@@ -33,7 +33,7 @@ head(weather)
 head(stocks)
 
 airTraffic_features <- paste0("airTraffic.", airTraffic %>% select (-c(date, countryCode)) %>% names())
-FIFA_features <- paste0("airTraffic.", FIFA %>% select (-c(Date)) %>% names())
+FIFA_features <- paste0("FIFA.", FIFA %>% select (-c(Date, CountryCode)) %>% names())
 moonSun_features <- paste0("moonSun.", moonSun %>% select (-c(date, countryCode)) %>% names())
 music_features <- paste0("music.", music %>% select (-c(date, country, countryCode)) %>% names())
 OECD_features <- paste0("OECD.", OECD %>% select (-c(Date, Country)) %>% names())

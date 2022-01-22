@@ -50,7 +50,7 @@ historicalRankingFIFA <- historicalRankingFIFA %>% group_by(Date, CountryCode) %
 # We also extract countries and regions for standardization in further steps
 geo_FIFA <- historicalRankingFIFA %>% group_by(CountryCode,CountryName) %>% summarise(Region = first(idRegion))
 # Spread format as output
-historicalRankingFIFA <- historicalRankingFIFA %>% spread(key = CountryCode, value = Rank, fill = NA) %>% arrange(desc(Date))
+# historicalRankingFIFA <- historicalRankingFIFA %>% spread(key = CountryCode, value = Rank, fill = NA) %>% arrange(desc(Date))
 
 # Save to RDS
 saveRDS(as_tibble(historicalRankingFIFA), "data/data_FIFA_ts.rds")
