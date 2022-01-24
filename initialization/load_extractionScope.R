@@ -59,3 +59,4 @@ searchTerms <- list("spanish_banks" = c("unicaja", "bbva", "banco santander"),
 #============ Prices parameters (Yahoo! Finance):
 chosenTickers <- c("^IBEX", "DAX", "^FTSE", "^GSPC", "^VIX", "EURUSD=X", "GBPUSD=X", 
                    "AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
+

@@ -40,7 +40,7 @@ OECD_features <- paste0("OECD.", OECD %>% select (-c(Date, Country)) %>% names()
 searchesGoogle_features <- paste0("searchesGoogle.", searchesGoogle %>% select (-c(date)) %>% names())
 twitterSentiment_features <- paste0("twitterSentiment.", twitterSentiment %>% select (-c(date)) %>% names())
 weather_features <- paste0("weather.", weather %>% select (-c(date, stationPlace)) %>% names())
-stocks_features <- paste0("stocks.", stocksData %>% select (-c(date)) %>% names())
+stocks_features <- paste0("stocks.", stocks %>% select (-c(date)) %>% names())
 
 all_features <- c(
   airTraffic_features, 

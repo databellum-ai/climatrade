@@ -61,9 +61,9 @@ head(leadingIndicatorsOECD)
 
 # Final makeup (rename indicators, spread)
 leadingIndicatorsOECD <- leadingIndicatorsOECD %>% 
-  mutate(Indicator = replace(Indicator, Indicator == "LOLITOAA", "OECD_CLI"), 
-         Indicator = replace(Indicator, Indicator == "BSCICP03", "OECD_BCI"), 
-         Indicator = replace(Indicator, Indicator == "CSCICP03", "OECD_CCI")) %>% 
+  mutate(Indicator = replace(Indicator, Indicator == "LOLITOAA", "CLI"), 
+         Indicator = replace(Indicator, Indicator == "BSCICP03", "BCI"), 
+         Indicator = replace(Indicator, Indicator == "CSCICP03", "CCI")) %>% 
   spread(key = Indicator, value = Value)
 
 

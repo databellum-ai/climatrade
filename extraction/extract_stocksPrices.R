@@ -5,7 +5,7 @@
 library(tidyquant)
 library(tidyverse)
 
-print("Extracting stock prices and volumes")
+print("Extracting stocks")
 
 endDateTicker <- today()
 startingDateTicker <- "1900-01-01"
@@ -20,7 +20,10 @@ stocksClosePrice <- stocksData %>% select(date, symbol, value = close) %>% arran
 # we distinguish volume values and add a suffix to asset name
 stocksVolume <- stocksData %>% mutate(symbol=paste0(symbol,"_vol")) %>% select(date,symbol, value=volume) %>% arrange(desc(date))
 # joining close prices and volumes (with suffix ".vol" in the asset name)
-stocksData <- rbind(stocksClosePrice, stocksVolume)
+
+# stocksData <- rbind(stocksClosePrice, stocksVolume)
+stocksData <- stocksClosePrice
+
 stocksData_ts <- stocksData %>% spread(key=symbol, value = value) %>% arrange(desc(date))
 
 head(stocksData)
@@ -31,4 +34,4 @@ head(stocksData_ts)
 saveRDS(stocksData, "data/data_stocks_tidy.rds")
 saveRDS(stocksData_ts, "data/data_stocks_ts.rds")
 
-print("Stock prices and volumes process FINISHED")
+print("Stocks values extraction process FINISHED")
