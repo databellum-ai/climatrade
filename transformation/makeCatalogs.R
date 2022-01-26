@@ -19,7 +19,6 @@ music <- readRDS("data/data_music_ts.rds")
 OECD <- readRDS("data/data_OECD_ts.rds")
 searchesGoogle <- readRDS("data/data_searchesGoogle_ts.rds")
 twitterSentiment <- readRDS("data/data_twitterSentiment_ts.rds")
-weather <- readRDS("data/data_weather_ts.rds")
 stocks <- readRDS("data/data_stocks_ts.rds")
 
 head(airTraffic)
@@ -29,17 +28,15 @@ head(music)
 head(OECD)
 head(searchesGoogle)
 head(twitterSentiment)
-head(weather)
 head(stocks)
 
-airTraffic_features <- paste0("airTraffic.", airTraffic %>% select (-c(date, countryCode)) %>% names())
+airTraffic_features <- paste0("airTraffic.", airTraffic %>% select (-c(date)) %>% names())
 FIFA_features <- paste0("FIFA.", FIFA %>% select (-c(Date, CountryCode)) %>% names())
 moonSun_features <- paste0("moonSun.", moonSun %>% select (-c(date, countryCode)) %>% names())
 music_features <- paste0("music.", music %>% select (-c(date, country, countryCode)) %>% names())
 OECD_features <- paste0("OECD.", OECD %>% select (-c(Date, Country)) %>% names())
 searchesGoogle_features <- paste0("searchesGoogle.", searchesGoogle %>% select (-c(date)) %>% names())
 twitterSentiment_features <- paste0("twitterSentiment.", twitterSentiment %>% select (-c(date)) %>% names())
-weather_features <- paste0("weather.", weather %>% select (-c(date, stationPlace)) %>% names())
 stocks_features <- paste0("stocks.", stocks %>% select (-c(date)) %>% names())
 
 all_features <- c(
@@ -50,7 +47,6 @@ all_features <- c(
   OECD_features, 
   searchesGoogle_features, 
   twitterSentiment_features, 
-  weather_features, 
   stocks_features)
 
 all_features

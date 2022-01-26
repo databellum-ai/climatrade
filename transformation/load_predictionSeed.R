@@ -4,10 +4,34 @@
 
 library(tidyverse)
 
+# ------------------------------------------------------
+# Extract Features 
+# ------------------------------------------------------
 
+airTraffic <- readRDS("data/data_airTraffic_ts.rds")
+FIFA <- readRDS("data/data_FIFA_ts.rds")
+moonSun <- readRDS("data/data_moonSun_ts.rds")
+music <- readRDS("data/data_music_ts.rds")
+OECD <- readRDS("data/data_OECD_ts.rds")
+searchesGoogle <- readRDS("data/data_searchesGoogle_ts.rds")
+twitterSentiment <- readRDS("data/data_twitterSentiment_ts.rds")
+stocks <- readRDS("data/data_stocks_ts.rds")
+
+head(airTraffic)
+head(FIFA)
+head(moonSun)
+head(music)
+head(OECD)
+head(searchesGoogle)
+head(twitterSentiment)
+head(stocks)
+
+
+# ------------------------------------------------------
 # Create seed as a list of features specifying for each: the geography applying, related concepts/terms 
+# ------------------------------------------------------
 
-# Initialize with dummie row
+# Initialize with dummy row
 seed_1 <- data.frame(
   featureCode = c(""), 
   geo_std = c(""), 

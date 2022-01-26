@@ -18,45 +18,34 @@
 library(tidyverse)
 library(openxlsx)
 
-geo_airTraffic <- readRDS("data/geo_airTraffic.rds")
 geo_FIFA <- readRDS("data/geo_FIFA.rds")
 geo_moonSun <- readRDS("data/geo_moonSun.rds")
 geo_music <- readRDS("data/geo_music.rds")
 geo_OECD <- readRDS("data/geo_OECD.rds")
-geo_weather <- readRDS("data/geo_weather.rds")
 
-head(geo_airTraffic)
 head(geo_FIFA)
 head(geo_moonSun)
 head(geo_music)
 head(geo_OECD)
-head(geo_weather)
 
-
-geo_airTraffic <- geo_airTraffic %>% 
-  mutate(source="airTraffic") %>% select(source, countryCode)
 geo_FIFA <- geo_FIFA %>% 
   mutate(source="FIFA", CountryCode = toupper(CountryCode), countryName = CountryName, regionCode = Region) %>% 
   rename(countryCode = CountryCode) %>% 
-  select(source, countryName, regionCode)
+  select(source, countryCode, countryName, regionCode)
 geo_moonSun <- geo_moonSun %>% 
   mutate(source="moonSun", countryCode=toupper(countryCode)) %>% select(source, countryCode)
 geo_music <- geo_music %>% 
   mutate(source="music", countryCode=toupper(countryCode), countryName = country) %>% select(source, countryCode, countryName)
 geo_OECD <- geo_OECD %>% 
   mutate(source="OECD", countryCode = toupper(LocationId), countryName = LocationName) %>% select(source, countryCode, countryName)
-geo_weather <- geo_weather %>% 
-  mutate(source="weather", countryCode = toupper(countryId)) %>% select(source, countryCode)
 
 # we bind all lists of codes
 all_geo <- data.frame()
 all_geo <- all_geo %>% 
-  bind_rows(geo_airTraffic) %>% 
   bind_rows(geo_FIFA) %>% 
   bind_rows(geo_moonSun) %>% 
   bind_rows(geo_music) %>% 
   bind_rows(geo_OECD) %>% 
-  bind_rows(geo_weather) %>% 
   arrange(countryCode, source)
 head(all_geo)
 

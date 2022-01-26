@@ -78,7 +78,7 @@ newTotalData
 # =============================================
 # SAVE A TIDY VERSION FOR INCREMENTAL ADDITION
 # =============================================
-saveRDS(newTotalData,"data/data_twitterSentiment_tidy.rds")
+# saveRDS(newTotalData,"data/data_twitterSentiment_tidy.rds")
 # =============================================
 # SAVE A WORKING TIME SERIES VERSION
 # =============================================

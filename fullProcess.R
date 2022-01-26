@@ -20,9 +20,6 @@ source("initialization/load_extractionScope.R")
 
 
 
-
-
-
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 # RAW DATA EXTRACTION
@@ -69,13 +66,12 @@ print(std_geo_list[1:50])
 # ===============
 # Determine what specific data we need to transform
 # ---------------
-source("transformation/load_predictionHyphotesis.R") 
+source("transformation/load_predictionSeed.R") 
 
 # ===============
 # Data in .RDS files is preprocessed for use (consolidation, geography dimensioning, imputation, normalization)
 # ---------------
 source("transformation/buildDataset.R") 
-
 
 
 

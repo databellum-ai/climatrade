@@ -31,7 +31,7 @@ head(stocksData_ts)
 
 
 # Save to RDS
-saveRDS(stocksData, "data/data_stocks_tidy.rds")
+# saveRDS(stocksData, "data/data_stocks_tidy.rds")
 saveRDS(stocksData_ts, "data/data_stocks_ts.rds")
 
 print("Stocks values extraction process FINISHED")

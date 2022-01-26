@@ -9,6 +9,15 @@ library(lubridate)  # function ymd(), etc.
 library(rnoaa)
 library(tidygeocoder) # Resolve coordinates of cities/places
 
+# ===============
+# KEYS
+# ---------------
+source("keys_APIs.R")
+
+#============ Relevant cities to extract weather from
+cities <- c("NewYork", "Paris", "HongKong", "London", "Beijing", "Madrid", "Tokyo")
+addresses <- c("New York City, US", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Tokyo, Japan")
+
 # ---------------------------------------------
 # STEP 1: get optimal stations near relevant cities
 # ---------------------------------------------
@@ -31,9 +40,9 @@ relevantCities
 measureTypes <- c("TMAX", "TMIN", "TAVG", "PRCP") # indicators we want to read
 
 # Read available stations
-station_data <- readRDS("data/aux_stations_NOAA.rds")
+station_data <- readRDS("extraction_other/aux_stations_NOAA.rds")
 # station_data <- ghcnd_stations() # Takes a while to run
-# saveRDS(station_data, "data/aux_stations_NOAA.rds") # Save to RDS
+# saveRDS(station_data, "extraction_other/aux_stations_NOAA.rds") # Save to RDS
 
 station_data
 stationsPeriods <- station_data %>% 
@@ -215,10 +224,10 @@ head(allStationsData)
 allStationsData <- allStationsData %>% spread(key = indicator, value = value)
 head(allStationsData)
 # Save to RDS (times-series format)
-saveRDS(as_tibble(allStationsData), "data/data_weather_ts.rds")
+saveRDS(as_tibble(allStationsData), "extraction_other/data_weather_ts.rds")
 # Save geographic detail (cities used and countries)
 geo_weather <- data.frame(city = cities, countryId = countries)
-saveRDS(geo_weather, "data/geo_weather.rds")
+saveRDS(geo_weather, "extraction_other/geo_weather.rds")
 
 
 # # Create columns combining indicator and place as suffix  

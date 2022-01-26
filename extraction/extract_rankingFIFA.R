@@ -1,7 +1,10 @@
 # =======================
-# FIFA RAnking extraction
+# FIFA Ranking extraction
 # =======================
 
+library(tidyverse)
+library(rvest)
+library(jsonlite)
 
 # Let's obtain available dates with their associated ids for each URL "issue"
 fifa_teams <- read_html("https://www.fifa.com/fifa-world-ranking/men")
@@ -45,13 +48,12 @@ for(i in 1:length(ids_datesAvailable)) {
 
 head(historicalRankingFIFA)
 
-# Prepare data per date and country
-historicalRankingFIFA <- historicalRankingFIFA %>% group_by(Date, CountryCode) %>% summarise(Rank = mean(Rank))
-# We also extract countries and regions for standardization in further steps
+# We extract countries and regions for standardization in further steps
 geo_FIFA <- historicalRankingFIFA %>% group_by(CountryCode,CountryName) %>% summarise(Region = first(idRegion))
-# Spread format as output
-# historicalRankingFIFA <- historicalRankingFIFA %>% spread(key = CountryCode, value = Rank, fill = NA) %>% arrange(desc(Date))
+# Prepare data per date and country
+historicalRankingFIFA <- historicalRankingFIFA %>% select(Date, CountryCode, Rank)
+
 
 # Save to RDS
 saveRDS(as_tibble(historicalRankingFIFA), "data/data_FIFA_ts.rds")
-saveRDS(geo_FIFA, "data/geo_FIFA.rds")
+saveRDS(as_tibble(geo_FIFA), "data/geo_FIFA.rds")

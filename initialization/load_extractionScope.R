@@ -24,7 +24,9 @@
 #
 # FUTURE DEVELOPMENTS:
 # --------------------
-# Scheduled extraction (https://www.sqlservercentral.com/articles/how-to-download-stocks-on-schedule-using-r)
+# -Scheduled extraction (https://www.sqlservercentral.com/articles/how-to-download-stocks-on-schedule-using-r)
+# -Weather: use existing code in directory extraction_other/ to extract data by city
+# -Air traffic: use existing code in directory extraction_other/ to extract also data by city
 # -GoogleTrends: analyze related search terms, not only interest-over-time
 # -GoogleTrends: distinguish search results by country ("geo")
 # -Twitter-fechas: valorar/PROBAR con Twitter problema de sólo 10 días hacia atrás...COMPROBAR NIVEL ACTUAL EN TWITTER ("Elevated?"): https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api#Access
@@ -38,14 +40,9 @@
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-# Extraction parameters ("seed")
+# Extraction parameters
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-#============ Relevant cities for weather and air traffic data
-cities <- c("NewYork", "Paris", "HongKong", "London", "Beijing", "Madrid", "Tokyo")
-addresses <- c("New York City, US", "Paris, France", "Hong Kong", "London, England", "Beijing, China", "Madrid, Spain", "Tokyo, Japan")
-countries <- c("US", "FR", "CH", "UK", "CH", "SP", "JP")
-airports <- c("KJFK", "LFPG", "VHHH", "EGLL", "ZBAA", "LEMD", "RJTT")
 #============ Term for sentiment analysis:
 sentimentTerms <- list("spanish_banks" = c("unicaja", "bbva", "banco santander"), 
                        "global_politics" = c("from:potus", "brexit", "from:borisjohnson"), 
@@ -57,6 +54,5 @@ searchTerms <- list("spanish_banks" = c("unicaja", "bbva", "banco santander"),
                     "football" = c("real madrid", "psg", "messi"),
                     "cinema" = c("tarantino", "woody allen"))
 #============ Prices parameters (Yahoo! Finance):
-chosenTickers <- c("^IBEX", "DAX", "^FTSE", "^GSPC", "^VIX", "EURUSD=X", "GBPUSD=X", 
-                   "AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
+chosenTickers <- c("^IBEX", "DAX", "^FTSE", "^GSPC", "^VIX", "EURUSD=X", "GBPUSD=X", "AAPL", "NFLX", "AMZN", "AAIC", "MSFT", "AAN")
 
