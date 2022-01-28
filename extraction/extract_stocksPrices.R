@@ -5,6 +5,12 @@
 library(tidyquant)
 library(tidyverse)
 
+#============ Prices parameters to extract (Yahoo! Finance):
+print("Loading seed")
+chosenTickers <- allFeatures_df %>% filter(source %in% c("stocks")) %>% select(feature)
+chosenTickers <- chosenTickers$feature
+chosenTickers
+
 print("Extracting stocks")
 
 endDateTicker <- today()

@@ -14,9 +14,9 @@ source("initialization/initialize.R")
 # ===============
 # ESTABLISH WHAT DATA WE NEED TO EXTRACT
 # ---------------
-# Determine what stocks, concepts and geography locations we want to extract in next phase.
+# Determine what stocks, feautres, concepts and geography locations we want to extract in next phase.
 # This is an extensive "raw" that will be narrowed in further phases
-source("initialization/load_extractionScope.R")
+source("initialization/obtainSeedSpecs.R")
 
 
 

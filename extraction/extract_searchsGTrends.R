@@ -8,6 +8,14 @@ library(lubridate)
 library(gtrendsR)
 library(ggthemes)
 
+# ============ Load search parameters seed (Google Trends):
+allFeatures_df <- readRDS("data/featuresSeed.rds")
+searchTerms <- allFeatures_df %>% filter(source %in% c("searchesGoogle"))
+tmpItems <- as.list(searchTerms$termsDetailed)
+names(tmpItems) <- searchTerms$feature
+searchTerms <- tmpItems
+searchTerms
+
 search_periods <- c("all", "today+5-y", "today 3-m") 
 # Examples: "all" for all (since 1jan2004 monthly), "today+5-y" for last five years (default, weekly), "today 12-m" for 12 month from today (weekly), "today 3-m" for 3 months from today (daily), "now 7-d" for last week (hourly), "now 1-d" for last 24h (every 8 minutes), "now 4-H" for last 4h (every 5 minutes), "now 4-H" for last 60min UTC (every minute), "Y-m-d Y-m-d" for time span between two dates)
 
@@ -16,6 +24,13 @@ print("Getting searches")
 for (i in c(1:length(searchTerms))) { # loop "vectors of terms" (KAM) within main list
   search_KAM <- names(searchTerms)[i]
   search_term <- searchTerms[[i]]
+  search_term <- unlist(str_split(search_term,", ")) # convert to vector
+  if (search_term[1]=="") {   # assume concept term (KAM) if no detailed list of terms supplied
+    search_term <- search_KAM
+  }
+  if (length(search_term) > 5) {   # limit to 5 terms
+    search_term <- search_term[1:5]
+  }
   print(paste(search_KAM,"::",search_term))
   for (j in c(1:length(search_periods))) { # loop resolutions to cover all possible values
     print(paste("...",search_periods[j]))

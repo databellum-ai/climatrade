@@ -5,6 +5,7 @@
 library(tidyverse)
 library(rvest)
 library(jsonlite)
+library(lubridate)
 
 # Let's obtain available dates with their associated ids for each URL "issue"
 fifa_teams <- read_html("https://www.fifa.com/fifa-world-ranking/men")
@@ -49,7 +50,7 @@ for(i in 1:length(ids_datesAvailable)) {
 head(historicalRankingFIFA)
 
 # We extract countries and regions for standardization in further steps
-geo_FIFA <- historicalRankingFIFA %>% group_by(CountryCode,CountryName) %>% summarise(Region = first(idRegion))
+geo_FIFA <- historicalRankingFIFA %>% group_by(CountryCode) %>% summarise(CountryName = first(CountryName), Region = first(idRegion))
 # Prepare data per date and country
 historicalRankingFIFA <- historicalRankingFIFA %>% select(Date, CountryCode, Rank)
 

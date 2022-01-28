@@ -15,6 +15,14 @@ library(syuzhet)
 
 print(paste("Extraction started at",Sys.time()))
 
+# ============ Load sentiment parameters seed (Google Trends):
+allFeatures_df <- readRDS("data/featuresSeed.rds")
+sentimentTerms <- allFeatures_df %>% filter(source %in% c("twitterSentiment"))
+tmpItems <- as.list(sentimentTerms$termsDetailed)
+names(tmpItems) <- sentimentTerms$feature
+sentimentTerms <- tmpItems
+sentimentTerms
+
 # connect to twitter API from the twitter package
 setup_twitter_oauth(twitter_api_key, twitter_api_secret, twitter_access_token, twitter_access_token_secret)
 
@@ -37,7 +45,10 @@ cleanTexts <- function(dfTexts) {
 }
 # Extract tweets texts ============
 extractTermTweets <- function(term, KAM) {
-  tweetsList <- searchTwitter(term, resultType="popular", n=numTweetsExtract)
+  if (term=="") {   #!!!!!
+    term <- KAM
+  }
+  tweetsList <- searchTwitter(term, resultType="mixed", n=numTweetsExtract)
   print(paste0("Retrieving tweets related with ",KAM,"::",term))
   if (length(tweetsList) >0) {
     twListToDF(tweetsList) %>% 
@@ -70,6 +81,8 @@ head(allTexts.df)
 # =============================================
 # READ THE TIDY VERSION AS BASE FOR INCREMENTAL ADDITION
 # =============================================
+# In case features change, we re-start storing historical archive:
+# saveRDS(as_tibble(allTexts.df),"data/data_twitterSentiment_tidy.rds")  # when terms change we re-create historic file
 historicSentiment <- readRDS("data/data_twitterSentiment_tidy.rds")
 historicSentiment
 newTotalData <- rbind(historicSentiment,allTexts.df)
