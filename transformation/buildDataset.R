@@ -28,37 +28,65 @@ stocks <- readRDS("data/data_stocks_ts.rds")
 
 
 # ------------------------------------------------------
-# Convert locations to standard and field names
+# Convert locations align field names, add geo field if not present
 # ------------------------------------------------------
+
+# Get standard geo codes and align field names
 reduced_std_geo <- std_geo %>% select(source, countryCode, stdCountryCode)
 
-# Create standard geolocations, align field names
 music <- music %>% 
   mutate(countryCode = toupper(countryCode)) %>% 
   left_join((reduced_std_geo %>% filter(source=="music")), by = "countryCode") %>% 
   select(-c("countryCode", "country"))
 
-# Create standard geolocations, align field names
 FIFA <- FIFA %>% 
   mutate(CountryCode = toupper(CountryCode)) %>% 
   left_join((reduced_std_geo %>% filter(source=="FIFA")), by = c("CountryCode" = "countryCode")) %>% 
   rename("date" = "Date") %>% 
   select(-c("CountryCode", "source"))
   
-# Create standard geolocations, align field names
 moonSun <- moonSun %>% 
   mutate(countryCode = toupper(countryCode)) %>% 
   left_join((reduced_std_geo %>% filter(source=="moonSun")), by = "countryCode") %>% 
   select(-c("countryCode", "source"))
 moonSun %>% filter(date =="1960-01-01")
 
-# Create standard geolocations, align field names
 OECD <- OECD %>% 
   mutate(countryCode = toupper(Country)) %>% 
   left_join((reduced_std_geo %>% filter(source=="OECD")), by = c("Country" = "countryCode")) %>% 
   rename("date" = "Date") %>% 
   select(-c("countryCode", "Country", "source"))
 
+
+# Add geo field (as NA) if not present, to facilitate merge
+airTraffic <- airTraffic %>% mutate(stdCountryCode = NA)
+searchesGoogle <- searchesGoogle %>% mutate(stdCountryCode = NA)
+twitterSentiment <- twitterSentiment %>% mutate(stdCountryCode = NA)
+stocks <- stocks %>% mutate(stdCountryCode = NA)
+
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+test1 <- data.frame(
+  date=c("2021/12/20", "2021/12/20", "2021/12/19", "2021/12/19", "2021/12/18", "2021/12/18"),
+  vbleA=c(23, 48, 55, 83, 39, 7), 
+  vbleB=c(123, 148, 155, 183, 139, 17),
+  stdCountryCode=c(NA, NA, NA, NA, NA, NA))
+test2 <- data.frame(
+  date=c("2021/12/20", "2021/12/20", "2021/12/19", "2021/12/19", "2021/12/18", "2021/12/18"),
+  vbleJ=c(2300, 4800, 5500, 8300, 3900, 700), 
+  vbleK=c(12300, 14800, 15500, 18300, 13900, 1700),
+  stdCountryCode=c("ESP", "US", "ESP", "US", "ESP", "US"))
+
+test1
+test2
+
+
+
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
 head(airTraffic)
