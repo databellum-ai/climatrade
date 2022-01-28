@@ -65,28 +65,35 @@ twitterSentiment <- twitterSentiment %>% mutate(stdCountryCode = NA)
 stocks <- stocks %>% mutate(stdCountryCode = NA)
 
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-test1 <- data.frame(
-  date=c("2021/12/20", "2021/12/20", "2021/12/19", "2021/12/19", "2021/12/18", "2021/12/18"),
-  vbleA=c(23, 48, 55, 83, 39, 7), 
-  vbleB=c(123, 148, 155, 183, 139, 17),
-  stdCountryCode=c(NA, NA, NA, NA, NA, NA))
-test2 <- data.frame(
-  date=c("2021/12/20", "2021/12/20", "2021/12/19", "2021/12/19", "2021/12/18", "2021/12/18"),
-  vbleJ=c(2300, 4800, 5500, 8300, 3900, 700), 
-  vbleK=c(12300, 14800, 15500, 18300, 13900, 1700),
-  stdCountryCode=c("ESP", "US", "ESP", "US", "ESP", "US"))
-
-test1
-test2
-
+# ------------------------------------------------------
+# Merge a dataset based specifically in the seed (hypothesis)
+# ------------------------------------------------------
 
 
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# test1 <- data.frame(
+#   date=c("2021/12/20", "2021/12/20", "2021/12/19", "2021/12/19", "2021/12/18", "2021/12/18", "2021/12/17", "2021/12/17"),
+#   vbleJ=c(2300, 4800, 5500, 8300, 3900, 700, 900, 1300), 
+#   vbleK=c(12300, 14800, 15500, 18300, 13900, 1700, 9100, 12800), 
+#   vbleL=c(3, 3, 3, 5, 6, 8, 5, 7),
+#   stdCountryCode=c("ESP", "US", "ESP", "US", "FR", "US", "ESP", "FR"))
+# test2 <- data.frame(
+#   date=c("2021/12/20", "2021/12/20", "2021/12/19", "2021/12/19", "2021/12/18", "2021/12/18"),
+#   vbleA=c(23, 48, 55, 83, 39, 7), 
+#   vbleB=c(123, 148, 155, 183, 139, 17),
+#   stdCountryCode=c("ESP", NA, NA, NA, NA, "FR"))
+# test1
+# test2
+# 
+# # Outer Join: 
+# merge(test1, test2, by = c("date", "stdCountryCode"), all=TRUE)
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 
 
 head(airTraffic)
@@ -97,16 +104,40 @@ head(OECD)
 head(searchesGoogle)
 head(twitterSentiment)
 head(stocks)
-
-
-
 head(twitterSentiment)
 head(OECD)
 
+fullDataset_raw <- merge(airTraffic, FIFA, by = c("date", "stdCountryCode"), all=TRUE)
+fullDataset_raw <- merge(fullDataset_raw, moonSun, by = c("date", "stdCountryCode"), all=TRUE)
+fullDataset_raw <- merge(fullDataset_raw, music, by = c("date", "stdCountryCode"), all=TRUE)
+fullDataset_raw <- merge(fullDataset_raw, OECD, by = c("date", "stdCountryCode"), all=TRUE)
+fullDataset_raw <- merge(fullDataset_raw, searchesGoogle, by = c("date", "stdCountryCode"), all=TRUE)
+fullDataset_raw <- merge(fullDataset_raw, twitterSentiment, by = c("date", "stdCountryCode"), all=TRUE)
+fullDataset_raw <- merge(fullDataset_raw, stocks, by = c("date", "stdCountryCode"), all=TRUE)
+
 
 # ------------------------------------------------------
-# Merge a dataset based specifically in the seed (hypothesis)
+# Save consolidated dataset, still to refine
 # ------------------------------------------------------
+saveRDS(fullDataset_raw,"data/dataset_raw.rds")
+
+
+
+# ============================================================================
+# ============================================================================
+
+
+# ------------------------------------------------------
+# Load consolidated dataset, still to refine
+# ------------------------------------------------------
+fullDataset_raw <- readRDS("data/dataset_raw.rds")
+head(fullDataset_raw)
+
+
+
+fullDataset_raw %>% filter(is.na(stdCountryCode)) %>% arrange(desc(date))
+fullDataset_raw %>% filter(!is.na(stdCountryCode)) %>% arrange(desc(date))
+
 
 
 
