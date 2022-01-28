@@ -1,3 +1,5 @@
+# Comprobar en profundidad datos consolidados (merge) de: fullDataset_raw
+
 
 library(tidyverse)
 library(openxlsx)
@@ -117,28 +119,30 @@ fullDataset_raw <- merge(fullDataset_raw, stocks, by = c("date", "stdCountryCode
 
 
 # ------------------------------------------------------
-# Save consolidated dataset, still to refine
+# Save consolidated raw dataset, still to refine
 # ------------------------------------------------------
 saveRDS(fullDataset_raw,"data/dataset_raw.rds")
 
 
-
+# ============================================================================
+# ============================================================================
 # ============================================================================
 # ============================================================================
 
 
 # ------------------------------------------------------
-# Load consolidated dataset, still to refine
+# Load consolidated raw dataset, still to refine
 # ------------------------------------------------------
 fullDataset_raw <- readRDS("data/dataset_raw.rds")
 head(fullDataset_raw)
-
 
 
 fullDataset_raw %>% filter(is.na(stdCountryCode)) %>% arrange(desc(date))
 fullDataset_raw %>% filter(!is.na(stdCountryCode)) %>% arrange(desc(date))
 
 
-
+# ------------------------------------------------------
+# Remove not applying features and keep only defined geo-filters
+# ------------------------------------------------------
 
 
