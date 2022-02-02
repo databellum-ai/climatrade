@@ -111,6 +111,18 @@ fullDataset_raw <- merge(fullDataset_raw, stocks, by = c("date", "stdCountryCode
 std_geo <- read.xlsx("userEdition/standardGeography.xlsx")
 head(std_geo)
 
+
+# Extract seed (features and locations to use as hypothesis)
+allFeatures_df <- readRDS("data/featuresSeed.rds")
+head(allFeatures_df)
+# Extract header names of the seed features
+seedVbles <- allFeatures_df %>% 
+  filter(source != "locations") %>% 
+  mutate(vbleName = paste0(source, ".", variable)) %>% 
+  pull(vbleName)
+seedVbles
+
+
 # convert country names from seed in standard codes
 geoCodesSeed <- allFeatures_df %>% 
   filter(source=="locations") %>% select(variable) %>% 
@@ -139,19 +151,10 @@ saveRDS(fullDataset_raw,"data/dataset_raw.rds")
 fullDataset_raw <- readRDS("data/dataset_raw.rds")
 head(fullDataset_raw)
 
-
-
-# Extract seed (features and locations to use as hypothesis)
-allFeatures_df <- readRDS("data/featuresSeed.rds")
-head(allFeatures_df)
-# Extract header names of the seed features
-seedVbles <- allFeatures_df %>% 
-  filter(source != "locations") %>% 
-  mutate(vbleName = paste0(source, ".", variable)) %>% 
-  pull(vbleName)
-
 seedVbles
 names(fullDataset_raw)
+
+
 
 
 
