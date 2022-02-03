@@ -20,6 +20,20 @@ stocks <- readRDS("data/data_stocks_ts.rds")
 # Convert locations align field names, add geo field if not present
 # ------------------------------------------------------
 
+# ------------------------------------------------------
+# Load standard geography (previously validated by user)
+std_geo <- read.xlsx("userEdition/standardGeography.xlsx")
+head(std_geo)
+# Extract seed (features and locations to use as hypothesis)
+allFeatures_df <- readRDS("data/featuresSeed.rds")
+head(allFeatures_df)
+# Extract header names of the seed features
+seedVbles <- allFeatures_df %>% 
+  filter(source != "locations") %>% 
+  mutate(vbleName = paste0(source, ".", variable)) %>% 
+  pull(vbleName)
+seedVbles
+
 # Get standard geo codes and align field names
 reduced_std_geo <- std_geo %>% select(source, countryCode, stdCountryCode)
 
@@ -104,25 +118,6 @@ fullDataset_raw <- merge(fullDataset_raw, twitterSentiment, by = c("date", "stdC
 fullDataset_raw <- merge(fullDataset_raw, stocks, by = c("date", "stdCountryCode"), all=TRUE)
 
 
-# ------------------------------------------------------
-# Keep only data related to defined geo-filters
-# ------------------------------------------------------
-# Load standard geography (previously validated by user)
-std_geo <- read.xlsx("userEdition/standardGeography.xlsx")
-head(std_geo)
-
-
-# Extract seed (features and locations to use as hypothesis)
-allFeatures_df <- readRDS("data/featuresSeed.rds")
-head(allFeatures_df)
-# Extract header names of the seed features
-seedVbles <- allFeatures_df %>% 
-  filter(source != "locations") %>% 
-  mutate(vbleName = paste0(source, ".", variable)) %>% 
-  pull(vbleName)
-seedVbles
-
-
 # convert country names from seed in standard codes
 geoCodesSeed <- allFeatures_df %>% 
   filter(source=="locations") %>% select(variable) %>% 
@@ -153,7 +148,6 @@ head(fullDataset_raw)
 
 seedVbles
 names(fullDataset_raw)
-
 
 
 

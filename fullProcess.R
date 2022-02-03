@@ -49,24 +49,6 @@ source("extraction/extract_standardizeGeography.R") # Prepare a standard geograp
 # We transform into a single requested dataset
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
-# ===============
-# CATALOGS GENERATION
-# ---------------
-# For information purposes, we read from the .RDS files to create two catalogs of Features and Standard Geolocations
-source("transformation/makeCatalogs.R") 
-print("SOME FEATURES:")
-print(all_features[1:50])
-print("SOME DIMENSIONS:")
-head(std_geo_revised)
-print(std_geo_list[1:50])
-# Spreadsheet files available for reference (they are just outputs) at:
-# "userEdition/standardGeography.xlsx"
-# "userEdition/featuresCatalog_output.xlsx"
-
-# ===============
-# Determine what specific data we need to transform
-# ---------------
-source("transformation/load_predictionSeed.R") 
 
 # ===============
 # Data in .RDS files is preprocessed for use (consolidation, geography dimensioning, imputation, normalization)
