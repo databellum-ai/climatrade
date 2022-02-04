@@ -3,6 +3,7 @@
 
 library(tidyverse)
 library(openxlsx)
+library(data.table)  # For dcast() to spread multiple columns
 
 # ------------------------------------------------------
 # Get data from extracted .RDS files
@@ -143,15 +144,45 @@ saveRDS(fullDataset_raw,"data/dataset_raw.rds")
 # ------------------------------------------------------
 # Load consolidated raw dataset, still to refine
 fullDataset_raw <- readRDS("data/dataset_raw.rds")
-head(fullDataset_raw)
 
-seedVbles
-names(fullDataset_raw)
+# Reduce features to those in seed and also in actually obtained data
+seedVbles <- seedVbles[seedVbles %in% names(fullDataset_raw)]
+# Keep remaining columns not forgetting to include date and geo dimensions
+seedDataset <- fullDataset_raw %>% select(date, stdCountryCode, seedVbles)
 
 
 
-seedVbles %in% names(fullDataset_raw)
 
+# Spread geo locations for each one of the features
+
+# https://stackoverflow.com/questions/26019915/how-to-spread-or-cast-multiple-values-in-r
+data <- data.frame(x=rep(c("red","blue","green"),each=4), y=rep(letters[1:4],3), value.1 = 1:12, value.2 = 13:24)
+data %>%
+  gather(Var, val, starts_with("value")) %>% 
+  unite(Var1,Var, y) %>% 
+  spread(Var1, val)
+
+dcast(setDT(data), x~y, value.var=c('value.1', 'value.2'))
+
+library(reshape2)
+data1 <- melt(data, id.vars = c("x", "y"))
+dcast(data1, x ~ variable + y)
+
+
+
+dcast(setDT(seedDataset), date~stdCountryCode, value.var=seedVbles)
+
+data2 <- melt(seedDataset, id.vars = c("date", "stdCountryCode"))
+dcast(data2, date ~ variable + stdCountryCode)
+
+
+
+
+
+# ------------------------------------------------------
+# Save transformed dataset
+# ------------------------------------------------------
+saveRDS(seedDataset,"data/dataset_seed.rds")
 
 
 
