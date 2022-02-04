@@ -1,3 +1,4 @@
+# PTE: ampliar rango de fecha de la API o usar GDELT
 # PTE: decidir si utilizo "popular", "recent" o "mixed"
 
 # =============================================
@@ -15,11 +16,11 @@ library(syuzhet)
 
 print(paste("Extraction started at",Sys.time()))
 
-# ============ Load sentiment parameters seed (Google Trends):
+# ============ Load sentiment parameters seed:
 allFeatures_df <- readRDS("data/featuresSeed.rds")
 sentimentTerms <- allFeatures_df %>% filter(source %in% c("twitterSentiment"))
 tmpItems <- as.list(sentimentTerms$termsDetailed)
-names(tmpItems) <- sentimentTerms$feature
+names(tmpItems) <- sentimentTerms$variable
 sentimentTerms <- tmpItems
 sentimentTerms
 

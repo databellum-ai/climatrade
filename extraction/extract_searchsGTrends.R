@@ -12,7 +12,7 @@ library(ggthemes)
 allFeatures_df <- readRDS("data/featuresSeed.rds")
 searchTerms <- allFeatures_df %>% filter(source %in% c("searchesGoogle"))
 tmpItems <- as.list(searchTerms$termsDetailed)
-names(tmpItems) <- searchTerms$feature
+names(tmpItems) <- searchTerms$variable
 searchTerms <- tmpItems
 searchTerms
 

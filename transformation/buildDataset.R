@@ -122,7 +122,6 @@ fullDataset_raw <- merge(fullDataset_raw, stocks, by = c("date", "stdCountryCode
 geoCodesSeed <- allFeatures_df %>% 
   filter(source=="locations") %>% select(variable) %>% 
   left_join(std_geo, by = c("variable" = "countryName")) %>% pull(stdCountryCode)
-
 # filter only geolocations specidfied in the seed
 fullDataset_raw <- fullDataset_raw %>% filter(stdCountryCode %in% c(NA, geoCodesSeed))
 
@@ -151,7 +150,7 @@ names(fullDataset_raw)
 
 
 
-
+seedVbles %in% names(fullDataset_raw)
 
 
 
