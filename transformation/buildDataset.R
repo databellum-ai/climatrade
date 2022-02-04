@@ -156,11 +156,38 @@ seedDataset <- fullDataset_raw %>% select(date, stdCountryCode, seedVbles)
 # Spread geo locations for each one of the features
 
 # https://stackoverflow.com/questions/26019915/how-to-spread-or-cast-multiple-values-in-r
+# https://stackoverflow.com/questions/33051386/dcast-warning-aggregation-function-missing-defaulting-to-length
 data <- data.frame(x=rep(c("red","blue","green"),each=4), y=rep(letters[1:4],3), value.1 = 1:12, value.2 = 13:24)
+
 data %>%
-  gather(Var, val, starts_with("value")) %>% 
+  gather(Var, val, c("value.1", "value.2")) %>% 
   unite(Var1,Var, y) %>% 
   spread(Var1, val)
+
+
+
+
+data9 <- seedDataset[,]
+vbles9 <- seedVbles[]
+data1 <- melt(data9, id.vars = c("date", "stdCountryCode"))
+data1 <- data1 %>% filter(!is.na(value))
+test9 <- dcast(data1, date ~ variable + stdCountryCode)
+test9$date
+test9$music.tempo_ARG[test9$music.tempo_ARG != 0]
+names(test9)
+
+
+
+
+
+
+data1 %>%
+  gather(Var, val, vbles9) %>% 
+  unite(Var1,Var, stdCountryCode) %>% 
+  spread(Var1, val)
+
+
+
 
 dcast(setDT(data), x~y, value.var=c('value.1', 'value.2'))
 
@@ -169,11 +196,12 @@ data1 <- melt(data, id.vars = c("x", "y"))
 dcast(data1, x ~ variable + y)
 
 
+head(seedDataset)
+dcast(setDT(seedDataset), date ~ stdCountryCode, value.var=seedVbles)
 
-dcast(setDT(seedDataset), date~stdCountryCode, value.var=seedVbles)
 
-data2 <- melt(seedDataset, id.vars = c("date", "stdCountryCode"))
-dcast(data2, date ~ variable + stdCountryCode)
+
+
 
 
 
