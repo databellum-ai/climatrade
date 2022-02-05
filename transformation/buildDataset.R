@@ -1,9 +1,10 @@
 # Comprobar en profundidad datos consolidados (merge) de: fullDataset_raw
-
+# Decidir cómo incorporaré features categóricas (p.e. moonSum.weekday) que no están en la seed
 
 library(tidyverse)
 library(openxlsx)
 library(data.table)  # For dcast() to spread multiple columns
+library(reshape2)  # For dcast() to spread multiple columns
 
 # ------------------------------------------------------
 # Get data from extracted .RDS files
@@ -73,27 +74,26 @@ names(OECD) <- paste0("OECD.", names(OECD))
 OECD <- OECD %>% rename(date = OECD.date)
 OECD <- OECD %>% rename(stdCountryCode = OECD.stdCountryCode)
 
-# Add geo field (as NA) if not present, to facilitate merge
-airTraffic <- airTraffic %>% mutate(stdCountryCode = NA)
+# Add geo field (as "GLOBAL") if not present, to facilitate merge
+airTraffic <- airTraffic %>% mutate(stdCountryCode = "GLOBAL")
 names(airTraffic) <- paste0("airTraffic.", names(airTraffic))
 airTraffic <- airTraffic %>% rename(date = airTraffic.date)
 airTraffic <- airTraffic %>% rename(stdCountryCode = airTraffic.stdCountryCode)
 
-searchesGoogle <- searchesGoogle %>% mutate(stdCountryCode = NA)
+searchesGoogle <- searchesGoogle %>% mutate(stdCountryCode = "GLOBAL")
 names(searchesGoogle) <- paste0("searchesGoogle.", names(searchesGoogle))
 searchesGoogle <- searchesGoogle %>% rename(date = searchesGoogle.date)
 searchesGoogle <- searchesGoogle %>% rename(stdCountryCode = searchesGoogle.stdCountryCode)
 
-twitterSentiment <- twitterSentiment %>% mutate(stdCountryCode = NA)
+twitterSentiment <- twitterSentiment %>% mutate(stdCountryCode = "GLOBAL")
 names(twitterSentiment) <- paste0("twitterSentiment.", names(twitterSentiment))
 twitterSentiment <- twitterSentiment %>% rename(date = twitterSentiment.date)
 twitterSentiment <- twitterSentiment %>% rename(stdCountryCode = twitterSentiment.stdCountryCode)
 
-stocks <- stocks %>% mutate(stdCountryCode = NA)
+stocks <- stocks %>% mutate(stdCountryCode = "GLOBAL")
 names(stocks) <- paste0("stocks.", names(stocks))
 stocks <- stocks %>% rename(date = stocks.date)
 stocks <- stocks %>% rename(stdCountryCode = stocks.stdCountryCode)
-
 
 # ------------------------------------------------------
 # Merge a dataset based specifically in the seed (hypothesis)
@@ -119,12 +119,12 @@ fullDataset_raw <- merge(fullDataset_raw, twitterSentiment, by = c("date", "stdC
 fullDataset_raw <- merge(fullDataset_raw, stocks, by = c("date", "stdCountryCode"), all=TRUE)
 
 
-# convert country names from seed in standard codes
+# convert country names from seed into standard codes
 geoCodesSeed <- allFeatures_df %>% 
   filter(source=="locations") %>% select(variable) %>% 
   left_join(std_geo, by = c("variable" = "countryName")) %>% pull(stdCountryCode)
 # filter only geolocations specidfied in the seed
-fullDataset_raw <- fullDataset_raw %>% filter(stdCountryCode %in% c(NA, geoCodesSeed))
+fullDataset_raw <- fullDataset_raw %>% filter(stdCountryCode %in% c("GLOBAL", geoCodesSeed))
 
 
 # ------------------------------------------------------
@@ -144,73 +144,31 @@ saveRDS(fullDataset_raw,"data/dataset_raw.rds")
 # ------------------------------------------------------
 # Load consolidated raw dataset, still to refine
 fullDataset_raw <- readRDS("data/dataset_raw.rds")
-
 # Reduce features to those in seed and also in actually obtained data
 seedVbles <- seedVbles[seedVbles %in% names(fullDataset_raw)]
 # Keep remaining columns not forgetting to include date and geo dimensions
 seedDataset <- fullDataset_raw %>% select(date, stdCountryCode, seedVbles)
-
-
-
-
 # Spread geo locations for each one of the features
-
-# https://stackoverflow.com/questions/26019915/how-to-spread-or-cast-multiple-values-in-r
-# https://stackoverflow.com/questions/33051386/dcast-warning-aggregation-function-missing-defaulting-to-length
-data <- data.frame(x=rep(c("red","blue","green"),each=4), y=rep(letters[1:4],3), value.1 = 1:12, value.2 = 13:24)
-
-data %>%
-  gather(Var, val, c("value.1", "value.2")) %>% 
-  unite(Var1,Var, y) %>% 
-  spread(Var1, val)
-
-
-
-
-data9 <- seedDataset[,]
-vbles9 <- seedVbles[]
-data1 <- melt(data9, id.vars = c("date", "stdCountryCode"))
-data1 <- data1 %>% filter(!is.na(value))
-test9 <- dcast(data1, date ~ variable + stdCountryCode)
-test9$date
-test9$music.tempo_ARG[test9$music.tempo_ARG != 0]
-names(test9)
-
-
-
-
-
-
-data1 %>%
-  gather(Var, val, vbles9) %>% 
-  unite(Var1,Var, stdCountryCode) %>% 
-  spread(Var1, val)
-
-
-
-
-dcast(setDT(data), x~y, value.var=c('value.1', 'value.2'))
-
-library(reshape2)
-data1 <- melt(data, id.vars = c("x", "y"))
-dcast(data1, x ~ variable + y)
-
+seedDataset <- melt(seedDataset, id.vars = c("date", "stdCountryCode"))
+seedDataset <- seedDataset %>% filter(!is.na(value)) %>% mutate(value = as.numeric(value))
+seedDataset <- reshape2::dcast(seedDataset, date ~ variable + stdCountryCode, 
+                               fun.aggregate = function(x) if(length(x) == 0) NA_real_ else sum(x, na.rm = TRUE))
 
 head(seedDataset)
-dcast(setDT(seedDataset), date ~ stdCountryCode, value.var=seedVbles)
-
-
-
-
-
-
-
-
-
 # ------------------------------------------------------
 # Save transformed dataset
 # ------------------------------------------------------
 saveRDS(seedDataset,"data/dataset_seed.rds")
+
+
+
+
+seedDataset %>% arrange(desc(date))
+
+
+
+
+
 
 
 
