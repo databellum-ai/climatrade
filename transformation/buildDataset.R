@@ -1,10 +1,13 @@
-# Comprobar en profundidad datos consolidados (merge) de: fullDataset_raw
-# Decidir cómo incorporaré features categóricas (p.e. moonSum.weekday) que no están en la seed
+# Estandarizar los esquemas y nomenclatura de los .RDS de datos de origen + Eliminar los .RDS "geo" y calcular a partir de los datos
+# Imputation y Normalization (OJO los stocks sin base diaria)
 
 library(tidyverse)
 library(openxlsx)
+library(lubridate)  # To create absolute list of dates
 library(data.table)  # For dcast() to spread multiple columns
 library(reshape2)  # For dcast() to spread multiple columns
+
+absoluteInitialDate <- "1960-01-01"
 
 # ------------------------------------------------------
 # Get data from extracted .RDS files
@@ -26,16 +29,6 @@ stocks <- readRDS("data/data_stocks_ts.rds")
 # Load standard geography (previously validated by user)
 std_geo <- read.xlsx("userEdition/standardGeography.xlsx")
 head(std_geo)
-# Extract seed (features and locations to use as hypothesis)
-allFeatures_df <- readRDS("data/featuresSeed.rds")
-head(allFeatures_df)
-# Extract header names of the seed features
-seedVbles <- allFeatures_df %>% 
-  filter(source != "locations") %>% 
-  mutate(vbleName = paste0(source, ".", variable)) %>% 
-  pull(vbleName)
-seedVbles
-
 # Get standard geo codes and align field names
 reduced_std_geo <- std_geo %>% select(source, countryCode, stdCountryCode)
 
@@ -107,9 +100,8 @@ head(OECD)
 head(searchesGoogle)
 head(twitterSentiment)
 head(stocks)
-head(twitterSentiment)
-head(OECD)
 
+fullDataset_raw <- data.frame()
 fullDataset_raw <- merge(airTraffic, FIFA, by = c("date", "stdCountryCode"), all=TRUE)
 fullDataset_raw <- merge(fullDataset_raw, moonSun, by = c("date", "stdCountryCode"), all=TRUE)
 fullDataset_raw <- merge(fullDataset_raw, music, by = c("date", "stdCountryCode"), all=TRUE)
@@ -118,7 +110,15 @@ fullDataset_raw <- merge(fullDataset_raw, searchesGoogle, by = c("date", "stdCou
 fullDataset_raw <- merge(fullDataset_raw, twitterSentiment, by = c("date", "stdCountryCode"), all=TRUE)
 fullDataset_raw <- merge(fullDataset_raw, stocks, by = c("date", "stdCountryCode"), all=TRUE)
 
-
+# Extract seed (features and locations to use as hypothesis)
+allFeatures_df <- readRDS("data/featuresSeed.rds")
+allFeatures_df
+# Extract header names of the seed features
+seedVbles <- allFeatures_df %>% 
+  filter(source != "locations") %>% 
+  mutate(vbleName = paste0(source, ".", variable)) %>% 
+  pull(vbleName)
+seedVbles
 # convert country names from seed into standard codes
 geoCodesSeed <- allFeatures_df %>% 
   filter(source=="locations") %>% select(variable) %>% 
@@ -150,25 +150,39 @@ seedVbles <- seedVbles[seedVbles %in% names(fullDataset_raw)]
 seedDataset <- fullDataset_raw %>% select(date, stdCountryCode, seedVbles)
 # Spread geo locations for each one of the features
 seedDataset <- melt(seedDataset, id.vars = c("date", "stdCountryCode"))
-seedDataset <- seedDataset %>% filter(!is.na(value)) %>% mutate(value = as.numeric(value))
+# Remove combinations with NA value and convert existing values into numeric
+seedDataset <- seedDataset %>% 
+  filter(!is.na(value)) %>% 
+  mutate(value = as.numeric(value))
+# Spread with existing geolocation as suffix
 seedDataset <- reshape2::dcast(seedDataset, date ~ variable + stdCountryCode, 
                                fun.aggregate = function(x) if(length(x) == 0) NA_real_ else sum(x, na.rm = TRUE))
-
 head(seedDataset)
+
+# Ensure there are records for all possible dates, even if they have no value o any feature
+allAbsoluteDates <- as_tibble(as.Date(seq(ymd(absoluteInitialDate, tz = "UTC"), as.POSIXct(Sys.Date()), by="days")))
+colnames(allAbsoluteDates) <- c("date")
+seedDataset <- seedDataset %>% 
+  right_join(allAbsoluteDates, by = "date")
+seedDataset <- seedDataset %>% arrange(desc(date))
+
 # ------------------------------------------------------
 # Save transformed dataset
 # ------------------------------------------------------
 saveRDS(seedDataset,"data/dataset_seed.rds")
 
 
+# ============================================================================
+# ============================================================================
+# ============================================================================
+# ============================================================================
 
 
-seedDataset %>% arrange(desc(date))
-
-
-
-
-
-
+# ------------------------------------------------------
+# Imputation (interpolate missing values) and normlization
+# ------------------------------------------------------
+# Load dataset
+seedDataset <- readRDS("data/dataset_seed.rds")
+head(seedDataset)
 
 

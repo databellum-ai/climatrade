@@ -1,3 +1,6 @@
+# Decidir cómo incorporaré features categóricas (p.e. moonSum.weekday) que no están en la seed
+
+
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 # INITIALIZATION

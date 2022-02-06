@@ -12,6 +12,7 @@ fifa_teams <- read_html("https://www.fifa.com/fifa-world-ranking/men")
 jsonRawDates <- (fifa_teams %>% html_nodes("#__NEXT_DATA__") %>% html_text())
 jsonRawDates <- fromJSON(jsonRawDates, flatten=TRUE)
 tmpdates <- jsonRawDates$props$pageProps$pageData$ranking$dates
+tmpdates$text <- str_replace(tmpdates$text, "Sept", "Sep")  # Month must be corrected to 3 letter for compatibility
 currentDate_id <- jsonRawDates$props$pageProps$pageData$ranking$selectedDate$id
 currentDate <- jsonRawDates$props$pageProps$pageData$ranking$selectedDate$text
 currentDate <- as.Date(parse_date_time(currentDate, orders = "d b Y", locale = "us"))
@@ -58,3 +59,4 @@ historicalRankingFIFA <- historicalRankingFIFA %>% select(Date, CountryCode, Ran
 # Save to RDS
 saveRDS(as_tibble(historicalRankingFIFA), "data/data_FIFA_ts.rds")
 saveRDS(as_tibble(geo_FIFA), "data/geo_FIFA.rds")
+
