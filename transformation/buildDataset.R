@@ -3,6 +3,7 @@ library(openxlsx)
 library(lubridate)  # To create absolute list of dates
 library(data.table)  # For dcast() to spread multiple columns
 library(reshape2)  # For dcast() to spread multiple columns
+library(imputeTS)  # To impute missing values with imputeTS()
 
 
 # ------------------------------------------------------
@@ -72,5 +73,36 @@ saveRDS(seedDataset,"data/dataset_seed1.rds")
 seedDataset <- readRDS("data/dataset_seed1.rds")
 head(seedDataset)
 
-view(seedDataset)
+# Function to detect start and endof time serie values and apply interpolation to fill missing values (NAs)
+# Missing Values Very recent (nor yet extracted) or very old (before historic availability) will remain NA 
+# On imputation function: https://cran.r-project.org/web/packages/imputeTS/imputeTS.pdf
+imputeFeatureWithinExistingInterval <- function(tsValues) {
+  start <- which.min(is.na(tsValues))
+  end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1]))
+  imputedWithinExistingInterval <- na_interpolation(tsValues[start:end])
+  tsValues[start:end] <- imputedWithinExistingInterval
+  tsValues
+}
+
+tmp_df_noDate <- seedDataset[,!(colnames(seedDataset) == "date")] 
+class(tmp_df_noDate) <- apply(tmp_df_noDate,
+                       MARGIN=2,
+                       FUN=imputeFeatureWithinExistingInterval)
+
+tmp_df_noDate <- apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval)
+
+names(seedDataset)[176]
+seedDataset$twitterSentiment.bolzonaro_GLOBAL
+tsValues2 <- seedDataset[,176]
+tsValues2
+apply(tsValues2, MARGIN=2, FUN=imputeFeatureWithinExistingInterval)
+imputeFeatureWithinExistingInterval(tsValues2)
+
+
+
+# ------------------------------------------------------
+# Normalization (convert values to range 1 to 100)
+# ------------------------------------------------------
+
+
 
