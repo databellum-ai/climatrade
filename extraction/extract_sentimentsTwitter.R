@@ -1,5 +1,4 @@
-# PTE: ampliar rango de fecha de la API o usar GDELT
-# PTE: decidir si utilizo "popular", "recent" o "mixed"
+
 
 # =============================================
 # EXTRACT TWEETS AND ESTIMATE SENTIMENT

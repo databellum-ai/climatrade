@@ -50,7 +50,6 @@ colnames(allAbsoluteDates) <- c("date")
 seedDataset <- seedDataset %>% 
   right_join(allAbsoluteDates, by = "date")
 seedDataset <- seedDataset %>% arrange(desc(date))
-
 head(seedDataset)
 
 # ------------------------------------------------------
@@ -71,7 +70,7 @@ saveRDS(seedDataset,"data/dataset_seed1.rds")
 # Load dataset
 seedDataset <- readRDS("data/dataset_seed1.rds")
 
-# Function to detect start and endof time serie values and apply interpolation to fill missing values (NAs)
+# Function to detect start and end of time serie values and apply interpolation to fill missing values (NAs)
 # Missing Values Very recent (nor yet extracted) or very old (before historic availability) will remain NA 
 # On imputation function: https://cran.r-project.org/web/packages/imputeTS/imputeTS.pdf
 imputeFeatureWithinExistingInterval <- function(tsValues) {
@@ -81,14 +80,33 @@ imputeFeatureWithinExistingInterval <- function(tsValues) {
   tsValues[start:end] <- imputedWithinExistingInterval
   tsValues
 }
-# Remove colums with <= 2 valid values to avoid imputation issues
+# Function to normalize data to a range 1:100
+normalizeTo100 <- function(tsValues) {
+  start <- which.min(is.na(tsValues))
+  end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1]))
+  normalizedWithinExistingInterval <- round((100-1)/(max(tsValues[start:end])-min(tsValues[start:end]))*(tsValues[start:end]-max(tsValues[start:end]))+100, digits = 0)
+  tsValues[start:end] <- normalizedWithinExistingInterval
+  tsValues
+}
+
+# Remove columns with <= 2 valid values to avoid imputation issues
 empty_columns <- sapply(seedDataset, function(x) sum(!is.na(x)) <= 2)
 seedDataset <- seedDataset[, !empty_columns]
 # Temporarily remove "date" column to call function that makes massive imputation
 tmp_df_noDate <- seedDataset[,!(colnames(seedDataset) == "date")]
 # Perform massive imputation to numeric time series (features)
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval))
-class(tmp_df_noDate)
+
+
+
+
+# Perform data normalization to range 1:100
+tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=normalizeTo100))
+
+view(seedDataset[1:2000,])
+
+
+
 # Add again "date" to processed file
 seedDataset <- cbind(date = seedDataset$date, as.data.frame(tmp_df_noDate))
 head(seedDataset)
@@ -96,24 +114,11 @@ names(seedDataset)
 ncol(seedDataset)
 
 # ------------------------------------------------------
-# Normalization (convert values to range 1 to 100)
-# ------------------------------------------------------
-
-
-# ------------------------------------------------------
 # Save transformed dataset
 # ------------------------------------------------------
 saveRDS(seedDataset,"data/dataset_seed1_proc.rds")
 
 
-# ************************************************
-# ************************************************
-chequeo <- readRDS("data/dataset_seed1.rds")
-orig <- music %>% filter(stdCountryCode == "ESP" & date == "2021-11-30") %>% pull(music.danceability)
-proc <- chequeo %>% filter(date == "2021-11-30") %>% pull(music.danceability_ESP)
-
-orig
-proc
 
 
 

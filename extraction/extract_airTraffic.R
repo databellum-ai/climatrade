@@ -11,7 +11,7 @@ library(lubridate)
 
 startDate <- "2016-01-01"
 # !!!!!!!!!!!!!!!
-startDate <- "2022-01-31"
+startDate <- "2021-11-30"
 yesterdayRefDate <- Sys.Date()-1
 
 # ================================
@@ -73,5 +73,4 @@ if (length(unProcessedDates) > 0) {
   saveRDS(as_tibble(historicDailyFlights),"data/data_airTraffic_ts.rds")
   
 }
-
 

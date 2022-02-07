@@ -1,7 +1,10 @@
-# Decidir cómo incorporaré features categóricas (p.e. moonSum.weekday) que no están en la seed
-# Estandarizar los esquemas y nomenclatura de los .RDS de datos de origen + Eliminar los .RDS "geo" y calcular a partir de los datos
-# Imputation y Normalization (OJO los stocks sin base diaria)
-# Multiseed
+# PTE: Normalization (OJO los stocks sin base diaria)
+# PTE: ampliar rango de fecha de la API o usar GDELT para sentiments
+# PTE: decidir cómo incorporaré features categóricas (p.e. moonSum.weekday) que no están en la seed
+# PTE:  estandarizar los esquemas y nomenclatura de los .RDS de datos de origen + Eliminar los .RDS "geo" y calcular a partir de los datos
+# PTE: multiseed
+# PTE: decidir si utilizo "popular", "recent" o "mixed" al leer de Twitter
+
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
