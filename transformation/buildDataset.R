@@ -44,7 +44,6 @@ seedDataset <- seedDataset %>%
 seedDataset <- reshape2::dcast(
   seedDataset, date ~ variable + stdCountryCode, 
   fun.aggregate = function(x) if(length(x) == 0) NA_real_ else sum(x, na.rm = TRUE))
-head(seedDataset)
 # Ensure there are records for all possible dates, even if they have no value o any feature
 allAbsoluteDates <- as_tibble(as.Date(seq(ymd(absoluteInitialDate, tz = "UTC"), as.POSIXct(Sys.Date()), by="days")))
 colnames(allAbsoluteDates) <- c("date")
@@ -71,7 +70,6 @@ saveRDS(seedDataset,"data/dataset_seed1.rds")
 # ------------------------------------------------------
 # Load dataset
 seedDataset <- readRDS("data/dataset_seed1.rds")
-head(seedDataset)
 
 # Function to detect start and endof time serie values and apply interpolation to fill missing values (NAs)
 # Missing Values Very recent (nor yet extracted) or very old (before historic availability) will remain NA 
@@ -83,27 +81,41 @@ imputeFeatureWithinExistingInterval <- function(tsValues) {
   tsValues[start:end] <- imputedWithinExistingInterval
   tsValues
 }
-
-tmp_df_noDate[c("searchesGoogle.brexit_GLOBAL", "twitterSentiment.bolzonaro_GLOBAL")]
-
-tmp_df_noDate <- seedDataset[,!(colnames(seedDataset) == "date")] 
-
-tmp_df_noDate <- seedDataset[,2:177] 
-tmp_df_noDate <- apply(tmp_df_noDate,
-                       MARGIN=2,
-                       FUN=imputeFeatureWithinExistingInterval)
-
-
-names(seedDataset)[178]
-seedDataset[178]
-
-imputeFeatureWithinExistingInterval(seedDataset[,178])
-
-
+# Remove colums with <= 2 valid values to avoid imputation issues
+empty_columns <- sapply(seedDataset, function(x) sum(!is.na(x)) <= 2)
+seedDataset <- seedDataset[, !empty_columns]
+# Temporarily remove "date" column to call function that makes massive imputation
+tmp_df_noDate <- seedDataset[,!(colnames(seedDataset) == "date")]
+# Perform massive imputation to numeric time series (features)
+tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval))
+class(tmp_df_noDate)
+# Add again "date" to processed file
+seedDataset <- cbind(date = seedDataset$date, as.data.frame(tmp_df_noDate))
+head(seedDataset)
+names(seedDataset)
+ncol(seedDataset)
 
 # ------------------------------------------------------
 # Normalization (convert values to range 1 to 100)
 # ------------------------------------------------------
+
+
+# ------------------------------------------------------
+# Save transformed dataset
+# ------------------------------------------------------
+saveRDS(seedDataset,"data/dataset_seed1_proc.rds")
+
+
+# ************************************************
+# ************************************************
+chequeo <- readRDS("data/dataset_seed1.rds")
+orig <- music %>% filter(stdCountryCode == "ESP" & date == "2021-11-30") %>% pull(music.danceability)
+proc <- chequeo %>% filter(date == "2021-11-30") %>% pull(music.danceability_ESP)
+
+orig
+proc
+
+
 
 
 
