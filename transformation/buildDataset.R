@@ -84,19 +84,20 @@ imputeFeatureWithinExistingInterval <- function(tsValues) {
   tsValues
 }
 
+tmp_df_noDate[c("searchesGoogle.brexit_GLOBAL", "twitterSentiment.bolzonaro_GLOBAL")]
+
 tmp_df_noDate <- seedDataset[,!(colnames(seedDataset) == "date")] 
-class(tmp_df_noDate) <- apply(tmp_df_noDate,
+
+tmp_df_noDate <- seedDataset[,2:177] 
+tmp_df_noDate <- apply(tmp_df_noDate,
                        MARGIN=2,
                        FUN=imputeFeatureWithinExistingInterval)
 
-tmp_df_noDate <- apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval)
 
-names(seedDataset)[176]
-seedDataset$twitterSentiment.bolzonaro_GLOBAL
-tsValues2 <- seedDataset[,176]
-tsValues2
-apply(tsValues2, MARGIN=2, FUN=imputeFeatureWithinExistingInterval)
-imputeFeatureWithinExistingInterval(tsValues2)
+names(seedDataset)[178]
+seedDataset[178]
+
+imputeFeatureWithinExistingInterval(seedDataset[,178])
 
 
 
