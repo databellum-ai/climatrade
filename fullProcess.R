@@ -1,5 +1,7 @@
 # Decidir cómo incorporaré features categóricas (p.e. moonSum.weekday) que no están en la seed
-
+# Estandarizar los esquemas y nomenclatura de los .RDS de datos de origen + Eliminar los .RDS "geo" y calcular a partir de los datos
+# Imputation y Normalization (OJO los stocks sin base diaria)
+# Multiseed
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -11,13 +13,6 @@
 # ===============
 # Initialize environment. Load all packages required
 source("initialization/initialize.R") 
-# ===============
-# Establish what data we need to extract
-# Determine what stocks, feautres, concepts and geography locations we want to extract in next phase.
-# This is an extensive "raw" that will be narrowed in further phases
-source("initialization/obtainSeedSpecs.R")
-
-
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -55,7 +50,9 @@ source("extraction/extract_musicSPOTIFY.R") # Extract music trends from SPOTIFY
 # Based on all extracted data (.RDS files), we generate editable geography codes proposal and read its revised (manually edited) version
 source("extraction/extract_standardizeGeography.R") # Prepare a standard geography proposal ("userEdition/standardGeography_DRAFT.xlsx") coding to mix data from disparate sources
 # Now, an authorized administrator edits the draft and saves as "userEdition/standardGeography.xlsx"
-
+# ===============
+# Merge all extracted data into a single raw file, still to refine
+source("extraction/mergeExtractedData.R") 
 
 
 
@@ -66,6 +63,11 @@ source("extraction/extract_standardizeGeography.R") # Prepare a standard geograp
 # We transform into a single requested dataset
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
+# ===============
+# Establish what data we need to extract
+# Determine what stocks, feautres, concepts and geography locations we want to extract in next phase.
+# This is an extensive "raw" that will be narrowed in further phases
+source("transformation/obtainSeedSpecs.R")
 # ===============
 # Data in .RDS files is preprocessed for use (consolidation, geography dimensioning, imputation, normalization)
 source("transformation/buildDataset.R") 

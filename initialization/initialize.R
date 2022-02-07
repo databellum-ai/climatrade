@@ -4,6 +4,11 @@
 # rm(list = ls())
 
 # ===============
+# Environment constants
+# ---------------
+absoluteInitialDate <- "1960-01-01"
+
+# ===============
 # PACKAGES REQUIRED
 # ---------------
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
