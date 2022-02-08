@@ -95,11 +95,11 @@ saveRDS(seedDataset3,"data/dataset_seed1_p3.rds")  # Dataset adding conversion t
 
 
 
-view(seedDataset[1:2000,1:50])
-view(seedDataset2[1:2000,1:50])
-view(seedDataset3[1:2000,1:50])
-write.xlsx(seedDataset, "data/dataset_seed1_p1.xlsx")
-write.xlsx(seedDataset2, "data/dataset_seed1_p2.xlsx")
-write.xlsx(seedDataset3, "data/dataset_seed1_p3.xlsx")
+# view(seedDataset[1:2000,1:50])
+# view(seedDataset2[1:2000,1:50])
+# view(seedDataset3[1:2000,1:50])
+# write.xlsx(seedDataset, "data/dataset_seed1_p1.xlsx")
+# write.xlsx(seedDataset2, "data/dataset_seed1_p2.xlsx")
+# write.xlsx(seedDataset3, "data/dataset_seed1_p3.xlsx")
 
 
