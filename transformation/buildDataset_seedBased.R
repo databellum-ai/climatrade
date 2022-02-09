@@ -78,22 +78,32 @@ tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithi
 seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
 
 
+
+
+
+test <- c(25,35,260,26,28,27)
+
+test <- tmp_df_noDate$'stocks.JPYEUR=X_GLOBAL'[1920:1925]
+test
+ifelse(c(1,diff(test))==0,0,1)
+
+ifelse( (abs(test-lag(test))) %in% c(NA, FALSE), test-lag(test), 0)
+
+test
+diff(lag = 1, test)
+diff(lag = 2, test)
+
+
+
+
+
+
 # ------------------------------------------------------
 # Normalization to a range
 # ------------------------------------------------------
 # Load dataset to prepare changes
 seedDataset3 <- seedDataset2
 
-# Function to normalize data to a range [-1000:0:1000]
-# normalizeTo1000 <- function(tsValues) {
-#   start <- which.min(is.na(tsValues))
-#   end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1]))
-#   normalizedWithinExistingInterval <- round(
-#     (1000-0)/(max(tsValues[start:end])-min(tsValues[start:end]))*(tsValues[start:end]-max(tsValues[start:end]))+1000, 
-#     digits = 0)
-#   tsValues[start:end] <- normalizedWithinExistingInterval
-#   tsValues
-# }
 normalizeTo1000 <- function(tsValues) {
   start <- which.min(is.na(tsValues))
   end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
@@ -109,22 +119,6 @@ tmp_df_noDate <- seedDataset3[,!(colnames(seedDataset3) == "date")]
 # Perform data normalization to range 1:100
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=normalizeTo1000))
 seedDataset3 <- cbind(date = seedDataset3$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
-
-
-# seedDataset3 <- seedDataset2
-# tsValues <- seedDataset3$twitterSentiment.china_GLOBAL
-# tsValues <- seedDataset3$searchesGoogle.bitcoin_GLOBAL
-# tsValues <- seedDataset3$searchesGoogle.indexes_GLOBAL
-# 
-# start <- which.min(is.na(tsValues))
-# end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
-# normalizedWithinExistingInterval <- round(
-#   (1000-0)/(max(abs(tsValues[start:end]))-min(abs(tsValues[start:end])))*(abs(tsValues[start:end])-max(abs(tsValues[start:end])))+1000, 
-#   digits = 0)
-# tsValues[(end-35):end]
-# normalizedWithinExistingInterval[(end-35):end]
-
-
 
 
 # ------------------------------------------------------
