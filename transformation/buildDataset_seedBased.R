@@ -1,3 +1,5 @@
+# - OUTLIER-STOCKS: (>ABS(10x)/día): eliminar dato (antes de generar _p1)
+
 library(tidyverse)
 library(openxlsx)
 library(lubridate)  # To create absolute list of dates
@@ -65,14 +67,6 @@ imputeFeatureWithinExistingInterval <- function(tsValues) {
   tsValues[start:end] <- imputedWithinExistingInterval
   tsValues
 }
-# Function to normalize data to a range 1:100
-normalizeTo1000 <- function(tsValues) {
-  start <- which.min(is.na(tsValues))
-  end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1]))
-  normalizedWithinExistingInterval <- round((1000-1)/(max(tsValues[start:end])-min(tsValues[start:end]))*(tsValues[start:end]-max(tsValues[start:end]))+1000, digits = 0)
-  tsValues[start:end] <- normalizedWithinExistingInterval
-  tsValues
-}
 
 # Remove columns with <= 2 valid values to avoid imputation issues
 empty_columns <- sapply(seedDataset2, function(x) sum(!is.na(x)) <= 2)
@@ -82,9 +76,56 @@ tmp_df_noDate <- seedDataset2[,!(colnames(seedDataset2) == "date")]
 # Perform massive imputation to numeric time series (features)
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval))
 seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
+
+
+# ------------------------------------------------------
+# Normalization to a range
+# ------------------------------------------------------
+# Load dataset to prepare changes
+seedDataset3 <- seedDataset2
+
+# Function to normalize data to a range [-1000:0:1000]
+# normalizeTo1000 <- function(tsValues) {
+#   start <- which.min(is.na(tsValues))
+#   end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1]))
+#   normalizedWithinExistingInterval <- round(
+#     (1000-0)/(max(tsValues[start:end])-min(tsValues[start:end]))*(tsValues[start:end]-max(tsValues[start:end]))+1000, 
+#     digits = 0)
+#   tsValues[start:end] <- normalizedWithinExistingInterval
+#   tsValues
+# }
+normalizeTo1000 <- function(tsValues) {
+  start <- which.min(is.na(tsValues))
+  end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
+  normalizedWithinExistingInterval <- round(
+    (1000-0)/(max(abs(tsValues[start:end]))-min(abs(tsValues[start:end])))*(abs(tsValues[start:end])-max(abs(tsValues[start:end])))+1000, 
+    digits = 0)
+  tsValues[start:end] <- normalizedWithinExistingInterval * sign(tsValues[start:end])
+  tsValues
+}
+
+# Temporarily remove "date" column to call function that makes massive imputation
+tmp_df_noDate <- seedDataset3[,!(colnames(seedDataset3) == "date")]
 # Perform data normalization to range 1:100
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=normalizeTo1000))
-seedDataset3 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
+seedDataset3 <- cbind(date = seedDataset3$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
+
+
+# seedDataset3 <- seedDataset2
+# tsValues <- seedDataset3$twitterSentiment.china_GLOBAL
+# tsValues <- seedDataset3$searchesGoogle.bitcoin_GLOBAL
+# tsValues <- seedDataset3$searchesGoogle.indexes_GLOBAL
+# 
+# start <- which.min(is.na(tsValues))
+# end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
+# normalizedWithinExistingInterval <- round(
+#   (1000-0)/(max(abs(tsValues[start:end]))-min(abs(tsValues[start:end])))*(abs(tsValues[start:end])-max(abs(tsValues[start:end])))+1000, 
+#   digits = 0)
+# tsValues[(end-35):end]
+# normalizedWithinExistingInterval[(end-35):end]
+
+
+
 
 # ------------------------------------------------------
 # Save transformed datasets
@@ -94,8 +135,13 @@ saveRDS(seedDataset2,"data/dataset_seed1_p2.rds")  # Dataset including imputatio
 saveRDS(seedDataset3,"data/dataset_seed1_p3.rds")  # Dataset adding conversion to 1:1000 range
 
 
-
-
+# view(seedDataset[1:2000,170:180])
+view(seedDataset[1:2000,175:179])
+view(seedDataset2[1:2000,175:179])
+view(seedDataset3[1:2000,175:179])
+write.xlsx(seedDataset, "data/dataset_seed1_p1.xlsx")
+write.xlsx(seedDataset2, "data/dataset_seed1_p2.xlsx")
+write.xlsx(seedDataset3, "data/dataset_seed1_p3.xlsx")
 
 
 
