@@ -81,18 +81,60 @@ seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # 
 
 
 
-test <- c(25,35,260,26,28,27)
 
-test <- tmp_df_noDate$'stocks.JPYEUR=X_GLOBAL'[1920:1925]
+
+
+# test <- seedDataset$'music.tempo_USA'
+# test <- c(25,25,260,26,28,27)
+# test <- seedDataset$'stocks.JPYEUR=X_GLOBAL'[1920:1925]
+# 
+# Q <- quantile(test, probs=c(.25, .75), na.rm = TRUE)
+# iqr <- IQR(test, na.rm = TRUE)
+# low <- Q[1]-1.5*iqr # Lower Range
+# up <-  Q[2]+1.5*iqr # Upper Range  
+# Q
+# iqr
+# low 
+# up
+# test[!(between(test,low,up) %in% c(NA,TRUE))]
+# 
+# 
+# ifelse( (abs(test-lag(test))) %in% c(NA, FALSE), test-lag(test), 0)
+# diff(lag = 1, test)
+# diff(lag = 2, test)
+# 
+# clearOutliers <- function(tsValues) {
+#   start <- which.min(is.na(tsValues))
+#   end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
+#   tsValues[start:end] <- ifelse(c(1,diff(tsValues)) < (tsValues / 10), tsValues, NA)
+#   tsValues
+# }
+# 
+# clearOutliers(test)
+
+
+clearOutliers <- function(tsValues) {
+  start <- which.min(is.na(tsValues))
+  end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
+  gapPrevious <- (c(diff(tsValues, lag = 1),NA))
+  gapPrevious2 <- c(diff(tsValues, lag = 2),NA,NA)
+  gapPrevious <- (tsValues / (tsValues + gapPrevious)) > 5
+  gapPrevious2 <- (tsValues / (tsValues + gapPrevious2)) > 5
+  outliers <- gapPrevious & gapPrevious2
+  cleanValues <- ifelse(outliers, NA, tsValues)
+  tsValues[start:end] <- cleanValues
+  tsValues
+}
+
+test <- c(25,25,260,26,28,27)
+test <- seedDataset$'stocks.JPYEUR=X_GLOBAL'[1920:1925]
+test <- seedDataset$'music.tempo_USA'
+names(seedDataset)
+seedDataset %>% filter(date == "2016-10-28") %>% pull('stocks.JPYEUR=X_GLOBAL')
+
 test
-ifelse(c(1,diff(test))==0,0,1)
-
-ifelse( (abs(test-lag(test))) %in% c(NA, FALSE), test-lag(test), 0)
-
-test
-diff(lag = 1, test)
-diff(lag = 2, test)
-
+clearOutliers(test)
+test == clearOutliers(test)
 
 
 
