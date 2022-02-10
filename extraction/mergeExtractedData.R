@@ -62,25 +62,32 @@ OECD <- OECD %>% rename(date = OECD.date)
 OECD <- OECD %>% rename(stdCountryCode = OECD.stdCountryCode)
 
 # Add geo field (as "GLOBAL") if not present, to facilitate merge
-airTraffic <- airTraffic %>% mutate(stdCountryCode = "GLOBAL")
-names(airTraffic) <- paste0("airTraffic.", names(airTraffic))
-airTraffic <- airTraffic %>% rename(date = airTraffic.date)
-airTraffic <- airTraffic %>% rename(stdCountryCode = airTraffic.stdCountryCode)
-
-searchesGoogle <- searchesGoogle %>% mutate(stdCountryCode = "GLOBAL")
-names(searchesGoogle) <- paste0("searchesGoogle.", names(searchesGoogle))
-searchesGoogle <- searchesGoogle %>% rename(date = searchesGoogle.date)
-searchesGoogle <- searchesGoogle %>% rename(stdCountryCode = searchesGoogle.stdCountryCode)
-
 twitterSentiment <- twitterSentiment %>% mutate(stdCountryCode = "GLOBAL")
 names(twitterSentiment) <- paste0("twitterSentiment.", names(twitterSentiment))
 twitterSentiment <- twitterSentiment %>% rename(date = twitterSentiment.date)
 twitterSentiment <- twitterSentiment %>% rename(stdCountryCode = twitterSentiment.stdCountryCode)
 
-stocks <- stocks %>% mutate(stdCountryCode = "GLOBAL")
+
+
+
+# Standard approach
+airTraffic <- airTraffic %>% 
+  mutate(stdCountryCode = ifelse(is.na(countryCode), "GLOBAL", countryCode)) %>% select(-countryCode)
+names(airTraffic) <- paste0("airTraffic.", names(airTraffic))
+airTraffic <- airTraffic %>% rename(date = airTraffic.date)
+airTraffic <- airTraffic %>% rename(stdCountryCode = airTraffic.stdCountryCode)
+
+stocks <- stocks %>% mutate(stdCountryCode = ifelse(is.na(countryCode), "GLOBAL", countryCode)) %>% select(-countryCode)
 names(stocks) <- paste0("stocks.", names(stocks))
 stocks <- stocks %>% rename(date = stocks.date)
 stocks <- stocks %>% rename(stdCountryCode = stocks.stdCountryCode)
+
+searchesGoogle <- searchesGoogle %>% mutate(stdCountryCode = ifelse(is.na(countryCode), "GLOBAL", countryCode)) %>% select(-countryCode)
+names(searchesGoogle) <- paste0("searchesGoogle.", names(searchesGoogle))
+searchesGoogle <- searchesGoogle %>% rename(date = searchesGoogle.date)
+searchesGoogle <- searchesGoogle %>% rename(stdCountryCode = searchesGoogle.stdCountryCode)
+
+
 
 # ------------------------------------------------------
 # Merge a dataset based specifically in the seed (hypothesis)

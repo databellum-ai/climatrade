@@ -10,8 +10,7 @@ library(openSkies)
 library(lubridate)
 
 startDate <- "2016-01-01"
-# !!!!!!!!!!!!!!!
-startDate <- "2021-11-30"
+startDate <- "2022-02-07"
 yesterdayRefDate <- Sys.Date()-1
 
 # ================================
@@ -51,7 +50,8 @@ if (length(unProcessedDates) > 0) {
     numFlightsWorld <- round(length(numFlightsWorld) / coef_00to02_UTCtoTotal)  # Flights estimated full day
     print(paste0("World flights on ",dateStart, ": ", numFlightsWorld))
     tmpRecord <- data.frame(
-      date = as.Date(dateStart),
+      date = as.Date(dateStart), 
+      countryCode = NA, 
       worldFlights = numFlightsWorld)
     # We store only y flights have values
     if (numFlightsWorld != 0) {

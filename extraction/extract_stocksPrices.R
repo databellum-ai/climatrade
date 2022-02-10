@@ -7,8 +7,8 @@ library(tidyverse)
 
 #============ Prices parameters to extract (Yahoo! Finance):
 print("Loading seed")
-chosenTickers <- allFeatures_df %>% filter(source %in% c("stocks")) %>% select(feature)
-chosenTickers <- chosenTickers$feature
+chosenTickers <- allFeatures_df %>% filter(source %in% c("stocks")) %>% select(variable)
+chosenTickers <- chosenTickers$variable
 chosenTickers
 
 print("Extracting stocks")
@@ -30,11 +30,12 @@ stocksVolume <- stocksData %>% mutate(symbol=paste0(symbol,"_vol")) %>% select(d
 # stocksData <- rbind(stocksClosePrice, stocksVolume)
 stocksData <- stocksClosePrice
 
-stocksData_ts <- stocksData %>% spread(key=symbol, value = value) %>% arrange(desc(date))
+stocksData_ts <- stocksData %>% 
+  spread(key=symbol, value = value) %>% mutate(countryCode = NA) %>% 
+  arrange(desc(date))
 
 head(stocksData)
 head(stocksData_ts)
-
 
 # Save to RDS
 # saveRDS(stocksData, "data/data_stocks_tidy.rds")

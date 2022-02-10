@@ -98,7 +98,7 @@ head(all_searches)
 
 # spread
 all_searches_ts <- all_searches %>% 
-  spread(key=KAM, value=nSearches)
+  spread(key=KAM, value=nSearches) %>% mutate(countryCode = NA)
 head(all_searches_ts)
 
 # ===============================================
