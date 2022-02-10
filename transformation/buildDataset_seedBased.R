@@ -1,5 +1,3 @@
-# - OUTLIER-STOCKS: (>ABS(10x)/día): eliminar dato (antes de generar _p1)
-
 library(tidyverse)
 library(openxlsx)
 library(lubridate)  # To create absolute list of dates
@@ -68,76 +66,27 @@ imputeFeatureWithinExistingInterval <- function(tsValues) {
   tsValues
 }
 
-# Remove columns with <= 2 valid values to avoid imputation issues
-empty_columns <- sapply(seedDataset2, function(x) sum(!is.na(x)) <= 2)
-seedDataset2 <- seedDataset2[, !empty_columns]
-# Temporarily remove "date" column to call function that makes massive imputation
-tmp_df_noDate <- seedDataset2[,!(colnames(seedDataset2) == "date")]
-# Perform massive imputation to numeric time series (features)
-tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval))
-seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
-
-
-
-
-
-
-
-
-# test <- seedDataset$'music.tempo_USA'
-# test <- c(25,25,260,26,28,27)
-# test <- seedDataset$'stocks.JPYEUR=X_GLOBAL'[1920:1925]
-# 
-# Q <- quantile(test, probs=c(.25, .75), na.rm = TRUE)
-# iqr <- IQR(test, na.rm = TRUE)
-# low <- Q[1]-1.5*iqr # Lower Range
-# up <-  Q[2]+1.5*iqr # Upper Range  
-# Q
-# iqr
-# low 
-# up
-# test[!(between(test,low,up) %in% c(NA,TRUE))]
-# 
-# 
-# ifelse( (abs(test-lag(test))) %in% c(NA, FALSE), test-lag(test), 0)
-# diff(lag = 1, test)
-# diff(lag = 2, test)
-# 
-# clearOutliers <- function(tsValues) {
-#   start <- which.min(is.na(tsValues))
-#   end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
-#   tsValues[start:end] <- ifelse(c(1,diff(tsValues)) < (tsValues / 10), tsValues, NA)
-#   tsValues
-# }
-# 
-# clearOutliers(test)
-
-
-clearOutliers <- function(tsValues) {
-  start <- which.min(is.na(tsValues))
-  end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
-  gapPrevious <- (c(diff(tsValues, lag = 1),NA))
-  gapPrevious2 <- c(diff(tsValues, lag = 2),NA,NA)
-  gapPrevious <- (tsValues / (tsValues + gapPrevious)) > 5
-  gapPrevious2 <- (tsValues / (tsValues + gapPrevious2)) > 5
-  outliers <- gapPrevious & gapPrevious2
-  cleanValues <- ifelse(outliers, NA, tsValues)
-  tsValues[start:end] <- cleanValues
+# Function to remove outliers based in 1.5 times distance between percentiles 1 and 99 (pretty conservative)
+# For these outliers, value is moved to NA, and it will be in next step imputated (linearly)
+removeOutliers <- function(tsValues) {
+  Q <- quantile(tsValues, probs=c(.001, .999), na.rm = TRUE)
+  iqr <- IQR(tsValues, na.rm = TRUE)
+  low <- Q[1]-1.5*iqr # Lower Range
+  up <-  Q[2]+1.5*iqr # Upper Range
+  tsValues <- ifelse(!(between(tsValues,low,up)),NA,tsValues)
   tsValues
 }
 
-test <- c(25,25,260,26,28,27)
-test <- seedDataset$'stocks.JPYEUR=X_GLOBAL'[1920:1925]
-test <- seedDataset$'music.tempo_USA'
-names(seedDataset)
-seedDataset %>% filter(date == "2016-10-28") %>% pull('stocks.JPYEUR=X_GLOBAL')
-
-test
-clearOutliers(test)
-test == clearOutliers(test)
-
-
-
+# Remove columns with <= 2 valid values to avoid imputation issues
+empty_columns <- sapply(seedDataset2, function(x) sum(!is.na(x)) <= 2)
+seedDataset2 <- seedDataset2[, !empty_columns]
+# Temporarily remove "date" column to call functions that remove outliers and make massive imputation
+tmp_df_noDate <- seedDataset2[,!(colnames(seedDataset2) == "date")]
+# Perform outliers removal
+tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=removeOutliers))
+# Perform massive imputation to numeric time series (features)
+tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval))
+seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
 
 
 # ------------------------------------------------------
@@ -146,6 +95,7 @@ test == clearOutliers(test)
 # Load dataset to prepare changes
 seedDataset3 <- seedDataset2
 
+# Function to nomalize to a -1000 to 1000 range (using only one of the interval extremes)
 normalizeTo1000 <- function(tsValues) {
   start <- which.min(is.na(tsValues))
   end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
@@ -171,13 +121,12 @@ saveRDS(seedDataset2,"data/dataset_seed1_p2.rds")  # Dataset including imputatio
 saveRDS(seedDataset3,"data/dataset_seed1_p3.rds")  # Dataset adding conversion to 1:1000 range
 
 
-# view(seedDataset[1:2000,170:180])
-view(seedDataset[1:2000,175:179])
-view(seedDataset2[1:2000,175:179])
-view(seedDataset3[1:2000,175:179])
-write.xlsx(seedDataset, "data/dataset_seed1_p1.xlsx")
-write.xlsx(seedDataset2, "data/dataset_seed1_p2.xlsx")
-write.xlsx(seedDataset3, "data/dataset_seed1_p3.xlsx")
+# view(seedDataset[1:2000,1:45])
+# view(seedDataset2[1:2000,1:45])
+# view(seedDataset3[1:2000,1:45])
+# write.xlsx(seedDataset, "data/dataset_seed1_p1.xlsx")
+# write.xlsx(seedDataset2, "data/dataset_seed1_p2.xlsx")
+# write.xlsx(seedDataset3, "data/dataset_seed1_p3.xlsx")
 
 
 
