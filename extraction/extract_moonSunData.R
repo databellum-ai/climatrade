@@ -7,6 +7,12 @@ library(lubridate)
 library(tidygeocoder) # Resolve coordinates of cities/places
 library(suncalc)
 
+
+# ============ Load cities and addresses:
+allFeatures_df <- readRDS("data/scopeExtraction.rds")
+cities <- allFeatures_df$variable[allFeatures_df$type == "city"]
+addresses <- allFeatures_df$termsDetailed[allFeatures_df$type == "city"]
+
 # Obtain coordinates of relevant cities
 relevantCitiesCoordinates <- data.frame(name = cities, addr = addresses) %>% 
   geocode(addr) %>% 
@@ -48,14 +54,12 @@ for (i in (1:nrow(relevantCitiesCoordinates))) {
                                   lat = relevantCitiesCoordinates$latitude[i], 
                                   lon = relevantCitiesCoordinates$longitude[i], 
                                   tz = "UTC")
-  print(countries[i])
+  print(relevantCitiesCoordinates$id[i])
   tmpCitySunData <- tmpCitySunData %>% 
-    mutate(nightHours = (sunset-sunrise), countryCode = countries[i]) %>% select(-lat, -lon)
+    mutate(nightHours = (sunset-sunrise), countryCode = relevantCitiesCoordinates$id[i]) %>% select(-lat, -lon)
   citySunData <- rbind(citySunData, tmpCitySunData)
 }
 citySunData
-
-
 
 # =====================================================
 # JOIN MOON AND SUN DATA INTO A SINGLE DATASET

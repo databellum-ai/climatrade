@@ -1,7 +1,7 @@
-# -- FIFA es un ranking: 1) su evolución no es significativa + 2) estaría invertido (mejor es 1 y sólo hay ~200 países)
-# -- MUSICA/OECD/FIFA: ¿debe compararse sólo consigo mismos o también respecto al GLOBAL/MEDIANA?
-# -- Reducir scope temporal: "2002-01-01"?
-
+# PTE: FIFA es un ranking: 1) su evolución no es significativa + 2) estaría invertido (mejor es 1 y sólo hay ~200 países)
+# PTE: MUSICA/OECD/FIFA: ¿debe compararse sólo consigo mismos o también respecto al GLOBAL/MEDIANA?
+# PTE: Reducir scope temporal: "2002-01-01"?
+# PTE: decidir cómo incorporaré features categóricas (p.e. moonSum.weekday) que no están en la seed
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------

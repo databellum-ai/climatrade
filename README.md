@@ -37,3 +37,5 @@
 # -Analysis ("tag cloud", etc.) of related term-searches to list given
 # -News combined/coexisting terms (in same article) volume and sentiment
 # -Use points instead of ranking in the FIFA classification
+# PTE: multiseed
+# PTE: decidir si utilizo "popular", "recent" o "mixed" al leer de Twitter
