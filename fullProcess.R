@@ -17,9 +17,8 @@
 source("initialization/initialize.R") 
 # ===============
 # Establish what data we need to extract
-# Determine what stocks, feautres, concepts and geography locations we want to extract in next phase.
-# This is an extensive "raw" that will be narrowed in further phases
-source("initialization/obtainSeedSpecs.R")
+# This is an extensive "raw" that will be narrowed in further phases (filtered to seeds, etc.)
+source("initialization/obtainScopeExtraction.R")
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -70,6 +69,10 @@ source("extraction/mergeExtractedData.R")
 # We transform into a single requested dataset
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
+# ===============
+# Establish what data we need to extract according to given seed
+# Determine what stocks, feautres, concepts and geography locations we want to extract in next phase.
+source("transformation/obtainSeedSpecs.R")
 # ===============
 # Data in .RDS files is preprocessed for use (consolidation, geography dimensioning, imputation, normalization)
 source("transformation/buildDataset_seedBased.R") 

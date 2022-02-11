@@ -9,7 +9,7 @@
 library(tidyverse)
 library(openxlsx)
 
-seed <- read.xlsx("userEdition/seed1.xlsx")
+seed <- read.xlsx("userEdition/ScopeExtraction.xlsx")
 names(seed)
 
 goalFeatures <- seed$FeatureCode
@@ -51,5 +51,5 @@ allFeatures_df
 # ------------------------------------------------------
 # Save seed converted to dataframe to use during Extraction and Transformation
 # ------------------------------------------------------
-saveRDS(allFeatures_df,"data/featuresSeed.rds")
+saveRDS(allFeatures_df,"data/scopeExtraction.rds")
 

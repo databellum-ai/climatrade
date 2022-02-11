@@ -16,7 +16,7 @@ library(syuzhet)
 print(paste("Extraction started at",Sys.time()))
 
 # ============ Load sentiment parameters seed:
-allFeatures_df <- readRDS("data/featuresSeed.rds")
+allFeatures_df <- readRDS("data/scopeExtraction.rds")
 sentimentTerms <- allFeatures_df %>% filter(source %in% c("twitterSentiment"))
 tmpItems <- as.list(sentimentTerms$termsDetailed)
 names(tmpItems) <- sentimentTerms$variable
