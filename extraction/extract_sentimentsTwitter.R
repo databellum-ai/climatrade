@@ -91,14 +91,15 @@ newTotalData
 # =============================================
 # SAVE A TIDY VERSION FOR INCREMENTAL ADDITION
 # =============================================
-# saveRDS(newTotalData,"data/data_twitterSentiment_tidy.rds")
+saveRDS(newTotalData,"data/data_twitterSentiment_tidy.rds")
 # =============================================
 # SAVE A WORKING TIME SERIES VERSION
 # =============================================
 newTotalData_ts <- newTotalData %>% 
   group_by(date, KAM) %>% 
   summarise(score = mean(score)) %>% 
-  spread(key=KAM, value=score, fill=NA)
+  spread(key=KAM, value=score, fill=NA) %>% 
+  mutate(countryCode=NA)
 head(newTotalData_ts)
 saveRDS(as_tibble(newTotalData_ts),"data/data_twitterSentiment_ts.rds")
 

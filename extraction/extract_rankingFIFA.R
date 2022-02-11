@@ -32,15 +32,15 @@ for(i in 1:length(ids_datesAvailable)) {
   jsonListTeams <- fromJSON(pageAtDate, flatten=TRUE)
   currentMonthRanking <- jsonListTeams$rankings
   currentMonthRanking <- currentMonthRanking %>% 
-    mutate(Date = as.Date(parse_date_time(datesAvailable[i], orders = "d b Y", locale = "us")), 
+    mutate(date = as.Date(parse_date_time(datesAvailable[i], orders = "d b Y", locale = "us")), 
            Rank = rankingItem.rank, 
-           CountryName = rankingItem.name, 
+           countryName = rankingItem.name, 
            Points = rankingItem.totalPoints, 
-           CountryCode = rankingItem.countryCode, 
+           countryCode = rankingItem.countryCode, 
            idRegion = tag.id, 
            lastIssue = currentDate_id, 
            lastIssueDate = currentDate) %>% 
-    select(Date, Rank, CountryName, Points, CountryCode, idRegion, lastIssue, lastIssueDate)
+    select(date, Rank, countryName, Points, countryCode, idRegion, lastIssue, lastIssueDate)
   if(i==1) {
     historicalRankingFIFA <- currentMonthRanking
   } else {
@@ -51,9 +51,9 @@ for(i in 1:length(ids_datesAvailable)) {
 head(historicalRankingFIFA)
 
 # We extract countries and regions for standardization in further steps
-geo_FIFA <- historicalRankingFIFA %>% group_by(CountryCode) %>% summarise(CountryName = first(CountryName), Region = first(idRegion))
+geo_FIFA <- historicalRankingFIFA %>% group_by(countryCode) %>% summarise(countryName = first(countryName), Region = first(idRegion))
 # Prepare data per date and country
-historicalRankingFIFA <- historicalRankingFIFA %>% select(Date, CountryCode, Rank)
+historicalRankingFIFA <- historicalRankingFIFA %>% select(date, countryCode, Rank)
 
 
 # Save to RDS

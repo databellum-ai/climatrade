@@ -14,11 +14,6 @@
 library(tidyverse)
 library(OECD) # To get OECD.org indicators
 
-# Collect countries (not online updated. See: https://fgeerolf.com/data/oecd/MEI_CLI.html)
-# Load RDS:
-countries_OECD <- readRDS("data/geo_OECD.rds")
-head(countries_OECD)
-
 # ===========================
 # Historical data (1960-2020) calculation
 # Let's add historical data archived: EVENTUAL extraction of data 1960-2020: not necessary to run query, instead, data are read from archived .RDS
@@ -31,9 +26,9 @@ leadingIndicatorsOECD_1960_2020 <- readRDS("data/historical_OECD_1960_2020.rds")
 #                                      end_time = "2020")
 # leadingIndicatorsOECD_1960_2020 <- leadingIndicatorsOECD %>% 
 #   mutate(obsDate = paste(obsTime, "-15", sep = "")) %>% 
-#   select(Date = obsDate,
+#   select(date = obsDate,
 #          Indicator = SUBJECT, 
-#          Country = LOCATION, 
+#          countryCode = LOCATION, 
 #          Value = obsValue)
 # leadingIndicatorsOECD_1960_2020 <- leadingIndicatorsOECD
 # leadingIndicatorsOECD_1960_2020
@@ -49,11 +44,11 @@ leadingIndicatorsOECD <- get_dataset("MEI_CLI",
                                      start_time = selected_initial_year_OECD, 
                                      end_time = selected_end_year_OECD)
 leadingIndicatorsOECD <- leadingIndicatorsOECD %>% 
-  mutate(obsDate = paste(Time, "-15", sep = "")) %>% 
-  select(Date = obsDate,
+  mutate(obsDate = paste(obsTime, "-15", sep = "")) %>% 
+  select(date = obsDate,
          Indicator = SUBJECT, 
-         Country = LOCATION, 
-         Value = ObsValue)
+         countryCode = LOCATION, 
+         Value = obsValue)
 
 # Now we join current (fresh) and historical data:
 leadingIndicatorsOECD <- rbind(leadingIndicatorsOECD, leadingIndicatorsOECD_1960_2020)
@@ -68,5 +63,10 @@ leadingIndicatorsOECD <- leadingIndicatorsOECD %>%
 
 
 # Save to RDS
+# Collect countries (not online updated. See: https://fgeerolf.com/data/oecd/MEI_CLI.html)
+countries_OECD <- readRDS("data/geo_OECD.rds")
+head(countries_OECD)
 saveRDS(countries_OECD, "data/geo_OECD.rds") # Countries master table
+
 saveRDS(leadingIndicatorsOECD, "data/data_OECD_ts.rds") # Values indicators
+

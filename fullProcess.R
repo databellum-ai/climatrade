@@ -1,5 +1,7 @@
-# ! PTE: estandarizar los esquemas y nomenclatura de los .RDS de datos de origen + Eliminar los .RDS "geo" y calcular a partir de los datos
 # ! PTE: SENTIMENTS... ampliar rango de fecha de la API o usar GDELT para sentiments
+# ! PTE: eliminar los .RDS "geo" y generar DRAFT-CATALOG.xlsx a partir de los datos (en "extract_standardizeGeography.R")
+# PTE: decidir dónde se define la lista de entidades a cargar ("merge") (ahora en "mergeExtractedData.R")
+
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -11,6 +13,7 @@
 # ===============
 # Initialize environment. Load all packages required
 source("initialization/initialize.R") 
+
 # ===============
 # Establish what data we need to extract
 # This is an extensive "raw" that will be narrowed in further phases (filtered to seeds, etc.)
@@ -26,6 +29,7 @@ source("initialization/obtainScopeExtraction.R")
 # ===============
 # KEYS
 source("keys_APIs.R")
+
 # ===============
 # Data backup before new extraction
 # We use a new directory named by date and time to store current .RDS files, etc. (all content)
@@ -37,6 +41,7 @@ dir.create(dir_to)
 file.copy(list.files(dir_from, full.names = TRUE), 
           dir_to, 
           recursive = TRUE)
+
 # ===============
 # Data extraction from each source
 source("extraction/extract_searchsGTrends.R")# Extract searches from Google Trends
@@ -47,16 +52,16 @@ source("extraction/extract_moonSunData.R")# Extract Moon and Sun related data (p
 source("extraction/extract_sentimentsTwitter.R")# Extract Twitter posts sentiment data
 source("extraction/extract_rankingFIFA.R")# Extract from FIFA Ranking
 source("extraction/extract_musicSPOTIFY.R") # Extract music trends from SPOTIFY
+
 # ===============
 # Standardize geography
 # Based on all extracted data (.RDS files), we generate editable geography codes proposal and read its revised (manually edited) version
 source("extraction/extract_standardizeGeography.R") # Prepare a standard geography proposal ("userEdition/standardGeography_DRAFT.xlsx") coding to mix data from disparate sources
 # Now, an authorized administrator edits the draft and saves as "userEdition/standardGeography.xlsx"
+
 # ===============
 # Merge all extracted data into a single raw file, still to refine
 source("extraction/mergeExtractedData.R") 
-
-
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -69,6 +74,7 @@ source("extraction/mergeExtractedData.R")
 # Establish what data we need to extract according to given seed
 # Determine what stocks, feautres, concepts and geography locations we want to extract in next phase.
 source("transformation/obtainSeedSpecs.R")
+
 # ===============
 # Data in .RDS files is preprocessed for use (consolidation, geography dimensioning, imputation, normalization)
 source("transformation/buildDataset_seedBased.R") 
