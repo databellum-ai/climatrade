@@ -1,5 +1,3 @@
-
-
 # =============================================
 # EXTRACT TWEETS AND ESTIMATE SENTIMENT
 # =============================================
@@ -16,8 +14,8 @@ library(syuzhet)
 print(paste("Extraction started at",Sys.time()))
 
 # ============ Load sentiment parameters seed:
-head(allFeatures_df)
-sentimentTerms <- allFeatures_df %>% filter(source %in% c("twitterSentiment"))
+head(seedFeatures_df)
+sentimentTerms <- seedFeatures_df %>% filter(source %in% c("twitterSentiment"))
 tmpItems <- as.list(sentimentTerms$termsDetailed)
 names(tmpItems) <- sentimentTerms$variable
 sentimentTerms <- tmpItems

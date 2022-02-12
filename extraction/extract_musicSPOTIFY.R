@@ -43,7 +43,7 @@ print("Dates to process:")
 print(unProcessedDates)
 
 # Determine what countries we'll process:
-allPossibleCountries <- readRDS("data/geo_music.rds")
+allPossibleCountries <- std_geo %>% filter(source=="music") %>% select(countryCode, country = countryName)
 print("Countries to process:")
 print(allPossibleCountries$countryCode)
 

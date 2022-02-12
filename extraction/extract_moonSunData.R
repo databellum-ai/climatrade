@@ -9,9 +9,9 @@ library(suncalc)
 
 
 # ============ Load cities and addresses:
-head(allFeatures_df)
-cities <- allFeatures_df$variable[allFeatures_df$type == "city"]
-addresses <- allFeatures_df$termsDetailed[allFeatures_df$type == "city"]
+head(seedFeatures_df)
+cities <- seedFeatures_df$variable[seedFeatures_df$type == "city"]
+addresses <- seedFeatures_df$termsDetailed[seedFeatures_df$type == "city"]
 
 # Obtain coordinates of relevant cities
 relevantCitiesCoordinates <- data.frame(name = cities, addr = addresses) %>% 

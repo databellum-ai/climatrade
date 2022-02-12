@@ -7,8 +7,8 @@ library(tidyverse)
 
 #============ Prices parameters to extract (Yahoo! Finance):
 print("Loading seed")
-head(allFeatures_df)
-chosenTickers <- allFeatures_df %>% filter(source %in% c("stocks")) %>% select(variable)
+head(seedFeatures_df)
+chosenTickers <- seedFeatures_df %>% filter(source %in% c("stocks")) %>% select(variable)
 chosenTickers <- chosenTickers$variable
 chosenTickers
 

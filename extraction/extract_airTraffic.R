@@ -10,7 +10,7 @@ library(openSkies)
 library(lubridate)
 
 startDate <- "2016-01-01"
-startDate <- "2022-02-07"
+startDate <- "2022-01-01"
 yesterdayRefDate <- Sys.Date()-1
 
 # ================================

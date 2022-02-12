@@ -1,7 +1,4 @@
-# ! PTE: SENTIMENTS... ampliar rango de fecha de la API o usar GDELT para sentiments
-# PTE: reducir scope de fechas al cargar la seed y crear el dataset (1992? 2002?)
-# PTE: decidir dónde se define la lista de entidades a cargar ("merge") (ahora en "mergeExtractedData.R")
-
+# ! PTE: SENTIMENTS... ampliar rango de fecha de la API de Twitter o usar GDELT para sentiments
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -10,6 +7,10 @@
 # -Data scope to retrieve 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
+
+library(tidyverse)
+library(openxlsx)
+
 # ===============
 # CLEAN ENVIRONMENT
 # ---------------
@@ -54,116 +55,21 @@ absoluteInitialDate <- "1960-01-01"
 # Function to load available active sources to be used during extraction and transformation phases
 sourcesAvailable <- function() {
   extractedEntities <- data.frame()
-  extractedEntities <- rbind(extractedEntities, 
-                             c("airTraffic", "data/data_airTraffic_ts.rds", "extraction/extract_airTraffic.R", "Air traffic data"))
-  extractedEntities <- rbind(extractedEntities, 
-                             c("FIFA", "data/data_FIFA_ts.rds", "extraction/extract_rankingFIFA.R", "FIFA Ranking"))
-  extractedEntities <- rbind(extractedEntities, 
-                             c("moonSun", "data/data_moonSun_ts.rds", "extraction/extract_moonSunData.R", "Moon and Sun related data (phase, night hours)"))
-  extractedEntities <- rbind(extractedEntities, 
-                             c("music", "data/data_music_ts.rds", "extraction/extract_musicSPOTIFY.R", "Music trends from SPOTIFY"))
-  extractedEntities <- rbind(extractedEntities, 
-                             c("OECD", "data/data_OECD_ts.rds", "extraction/extract_indicatorsOECD.R", "Leading indicators from OECD"))
-  extractedEntities <- rbind(extractedEntities, 
-                             c("searchesGoogle", "data/data_searchesGoogle_ts.rds", "extraction/extract_searchsGTrends.R", "Searches from Google Trends"))
-  extractedEntities <- rbind(extractedEntities, 
-                             c("twitterSentiment", "data/data_twitterSentiment_ts.rds", "extraction/extract_sentimentsTwitter.R", "Twitter posts sentiment data"))
-  extractedEntities <- rbind(extractedEntities, 
-                             c("stocks", "data/data_stocks_ts.rds", "extraction/extract_stocksPrices.R", "Stock prices from Yahoo Finance"))
+  extractedEntities <- rbind(extractedEntities, c("airTraffic", "data/data_airTraffic_ts.rds", "extraction/extract_airTraffic.R", "Air traffic data"))
+  extractedEntities <- rbind(extractedEntities, c("moonSun", "data/data_moonSun_ts.rds", "extraction/extract_moonSunData.R", "Moon and Sun related data (phase, night hours)"))
+  extractedEntities <- rbind(extractedEntities, c("OECD", "data/data_OECD_ts.rds", "extraction/extract_indicatorsOECD.R", "Leading indicators from OECD"))
+  extractedEntities <- rbind(extractedEntities, c("stocks", "data/data_stocks_ts.rds", "extraction/extract_stocksPrices.R", "Stock prices from Yahoo Finance"))
+  extractedEntities <- rbind(extractedEntities, c("searchesGoogle", "data/data_searchesGoogle_ts.rds", "extraction/extract_searchsGTrends.R", "Searches from Google Trends"))
+  extractedEntities <- rbind(extractedEntities, c("twitterSentiment", "data/data_twitterSentiment_ts.rds", "extraction/extract_sentimentsTwitter.R", "Twitter posts sentiment data"))
+  extractedEntities <- rbind(extractedEntities, c("FIFA", "data/data_FIFA_ts.rds", "extraction/extract_rankingFIFA.R", "FIFA Ranking"))  
+  extractedEntities <- rbind(extractedEntities, c("music", "data/data_music_ts.rds", "extraction/extract_musicSPOTIFY.R", "Music trends from SPOTIFY"))  
   names(extractedEntities) <- c("Preffix", "DataFileName", "SourceCode", "Description")
   extractedEntities
 }
-# source("initialization/initialize.R") 
-
-
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# OBTAIN SCOPE OF EXTRACTION
-# Establish what data we need to extract
-# This is an extensive "raw" that will be narrowed in further phases (filtered to seeds, etc.)
-# INPUT: .XLSX user edited defining the variables to extract
-# OUTPUT: .RDS containing a dataframe with the structured scope (hypothesis)
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-library(tidyverse)
-library(openxlsx)
-
-scope <- read.xlsx("userEdition/ScopeExtraction.xlsx")
-names(scope)
-goalFeatures <- scope$FeatureCode
-searchTerms <- c(specificSearchTerms, genericSearchTerms)
-specificSentimentTerms <- scope$SpecificSentimentTerms[!(is.na(scope$SpecificSentimentTerms))]
-genericSentimentTerms <- strsplit(scope$GenericSentimentTerms[1], "\n")[[1]]
-sentimentTerms <- c(specificSentimentTerms, genericSentimentTerms)
-cities <- scope %>% filter(!is.na(Cities)) %>% pull(Cities)
-addresses <- scope %>% filter(!is.na(Addresses)) %>% pull(Addresses)
-
-allFeatures_df <- 
-  rbind(data.frame(source="stocks", variable=goalFeatures, type="outcome"),
-        data.frame(source="searchesGoogle", variable=searchTerms, type="prescriptor"),
-        data.frame(source="twitterSentiment", variable=sentimentTerms, type="prescriptor")) %>% 
-  mutate(
-    termsDetailed = str_extract(variable,  "(?<=\\().+?(?=\\))"), 
-    termsDetailed = replace(termsDetailed, is.na(termsDetailed), ""), 
-    variable = str_remove(variable, paste0("\\(",termsDetailed,"\\)"))) %>% 
-  select(source, variable, termsDetailed, type) %>% 
-  rbind(data.frame(source="cities", variable=cities, termsDetailed=addresses, type="city"))
-allFeatures_df
-# source("initialization/obtainScopeExtraction.R")
-
-
-
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-#       EXTRACTION
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# RAW DATA EXTRACTION
-# INPUT: several internet sources, APIs, etc.
-# OUTPUT: .RDS files from each source
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ===============
-# KEYS
-# ---------------
-source("keys_APIs.R")
-
-# ===============
-# DATA BACKUP
-# ---------------
-# We use a new directory named by date and time to store current .RDS files, etc. (all content)
-library(stringr)
-
-dir_from <- "data"
-dir_to <- str_remove_all(paste0("dataExtracted_", as.character(Sys.time())), "[-: ]")
-dir_to <- file.path("backup", dir_to)
-dir.create(dir_to)
-file.copy(list.files(dir_from, full.names = TRUE), 
-          dir_to, 
-          recursive = TRUE)
-
-# ===============
-# DATA EXTRACTION
-# ---------------
-codeToRunExtraction <- sourcesAvailable()
-head(codeToRunExtraction)
-for (i in 1:nrow(codeToRunExtraction)) {
-  print(paste0("Running extraction: ", codeToRunExtraction$Description[i], " (", codeToRunExtraction$SourceCode[i], ")"))
-  source(codeToRunExtraction$SourceCode[i])
-}
-
-
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-# STANDARDIZE THE GEOGRAPHIC LOCATIONS FROM EACH EXTRACTED DATASET
+# CREATE CONVERSION-TABLE DRAFT TO STANDARDIZE GEOGRAPHIC LOCATIONS FROM EACH EXTRACTED DATASET
 # INPUT: Raw extracted data files (.RDS)
 # OUTPUT: Catalog (.XLSX) with a draft of available geography to be manually edited
 # -----------------------------------------------------------------
@@ -175,10 +81,6 @@ for (i in 1:nrow(codeToRunExtraction)) {
 #  Step 3: list contained in the new file will solve the correspondence between country codes in each original dataset and standard codes
 # NOTE: we use an extended meaning of country that combines countrys, nations or even groups of countries. Eg: for FIFA data we get England or Wales, for OECD data we get countries or groups like NAFTA or G7, even for FIFA data, we have a different column for group (UEFA, CONCACAF)
 # NOTE: regions/groups of countries are ignored now. In other pieces of code, regions could be used as aggregators, wether for regions already contained in the initial file (eg FIFA), or by using other external table to aggregate single records in current list
-
-library(tidyverse)
-library(openxlsx)
-
 # Function to convert locations align field names, add geo field applies
 obtainGeodData <- function(df_to_treat, preffix) {
   df_to_treat <- df_to_treat %>% 
@@ -202,7 +104,6 @@ for (i in 1:nrow(extractedEntities)) {
   geoDataset <- rbind(geoDataset, tmpGeoDataset)
 }
 head(geoDataset)
-
 # ===============
 # DETAIL OF NAMES AND GEOGRAPHIC REGIONS (EXCEPTION)
 # ---------------
@@ -218,8 +119,95 @@ geoDataset <- geoDataset %>%
   arrange(countryCode)
 # save a DRAFT (standardGeography_DRAFT.xlsx) so an administrator/user can use as reference to generate final file (standardGeography.xlsx)
 write.xlsx(geoDataset, "userEdition/standardGeography_DRAFT.xlsx", overwrite = TRUE)
-# source("extraction/extract_standardizeGeography.R") 
 
+
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# OBTAIN SEED SPECIFICATIONS
+# INPUT: .XLSX user edited defining the seed (hypothesis)
+# OUTPUT: dataframe with the structured seed (hypethesis)
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# Establish what specific stocks, features, concepts and geography locations we want to analize for a given seed
+# Determine what stocks, features, concepts and geography locations we want to analize.
+# Code convert table of "seed" tables (hypothesis) from .XLSX to a structured dataframe
+# Since this this dataframe identifies exactly what features and standard geolocations will be used as "seed", it will be later used during Extraction and Transformation phases
+seed <- read.xlsx("userEdition/seed1.xlsx")
+names(seed)
+goalFeatures <- seed$FeatureCode
+goalFeatureNames <- seed$FeatureName
+moodFeatures <- as.data.frame(do.call(rbind, strsplit(strsplit(seed$PlanetMoodFeatures[1], "\n")[[1]], "\\."))) %>% rename(source = V1, variable = V2)
+specificSearchTerms <- seed$SpecificSearchTerms[!(is.na(seed$SpecificSearchTerms))]
+genericSearchTerms <- strsplit(seed$GenericSearchTerms[1], "\n")[[1]]
+searchTerms <- c(specificSearchTerms, genericSearchTerms)
+specificSentimentTerms <- seed$SpecificSentimentTerms[!(is.na(seed$SpecificSentimentTerms))]
+genericSentimentTerms <- strsplit(seed$GenericSentimentTerms[1], "\n")[[1]]
+sentimentTerms <- c(specificSentimentTerms, genericSentimentTerms)
+specificStd_Geo <- seed$SpecificStd_Geo[!(is.na(seed$SpecificStd_Geo))]
+genericStd_Geo <- strsplit(seed$GenericStd_Geo[1], "\n")[[1]]
+geoLocations <- c(specificStd_Geo, genericStd_Geo)
+cities <- seed %>% filter(!is.na(Cities)) %>% pull(Cities)
+addresses <- seed %>% filter(!is.na(Addresses)) %>% pull(Addresses)
+seedFeatures_df <- 
+  rbind(
+    data.frame(source="stocks", variable=goalFeatures, type="outcome"),
+    data.frame(moodFeatures, type="prescriptor"),
+    data.frame(source="searchesGoogle", variable=searchTerms, type="prescriptor"),
+    data.frame(source="twitterSentiment", variable=sentimentTerms, type="prescriptor"), 
+    data.frame(source="locations", variable=geoLocations, type="dimension")) %>%
+  mutate(
+    termsDetailed = str_extract(variable,  "(?<=\\().+?(?=\\))"), 
+    termsDetailed = replace(termsDetailed, is.na(termsDetailed), ""), 
+    variable = str_remove(variable, paste0("\\(",termsDetailed,"\\)"))) %>% 
+  select(source, variable, termsDetailed, type) %>% 
+  rbind(data.frame(source="cities", variable=cities, termsDetailed=addresses, type="city"))
+seedFeatures_df
+
+
+
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+#       EXTRACTION
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+
+library(tidyverse)
+library(openxlsx)
+
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# RAW DATA EXTRACTION
+# INPUT: several internet sources, APIs, etc.
+# OUTPUT: .RDS files from each source
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+# ===============
+# KEYS
+# ---------------
+source("keys_APIs.R")
+# ===============
+# DATA BACKUP
+# ---------------
+# We use a new directory named by date and time to store current .RDS files, etc. (all content)
+library(stringr)
+dir_from <- "data"
+dir_to <- str_remove_all(paste0("dataExtracted_", as.character(Sys.time())), "[-: ]")
+dir_to <- file.path("backup", dir_to)
+dir.create(dir_to)
+file.copy(list.files(dir_from, full.names = TRUE), dir_to, recursive = TRUE)
+# ===============
+# RUN DATA EXTRACTION (APIS, ETC.)
+# ---------------
+codeToRunExtraction <- sourcesAvailable()
+codeToRunExtraction
+for (i in 1:nrow(codeToRunExtraction)) {
+  print(paste0("Running extraction: ", codeToRunExtraction$Description[i], " (", codeToRunExtraction$SourceCode[i], ")"))
+  source(codeToRunExtraction$SourceCode[i])
+}
 
 
 # ---------------------------------------------------------------------
@@ -230,18 +218,14 @@ write.xlsx(geoDataset, "userEdition/standardGeography_DRAFT.xlsx", overwrite = T
 # OUTPUT: .RDS merged file (still raw, no seed applied)
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
-library(tidyverse)
-library(openxlsx)
 library(lubridate)  # To create absolute list of dates
-
 # ===============
-# LOAD  CONVERSION-TABLE FOR STANDARD GEOGRAPHY
-# (previously edited/validated by user)
+# LOAD  CONVERSION-TABLE TO STANDARD GEOGRAPHY
 # ---------------
+# (previously edited/validated by user)
 std_geo <- read.xlsx("userEdition/standardGeography.xlsx")
 reduced_std_geo <- std_geo %>% select(source, countryCode, stdCountryCode)
 head(reduced_std_geo)
-
 # ------------------------------------------------------
 # FUNCTION TO ADD PREFFIX AND CONVERT TO STANDARD LOCATION
 # ------------------------------------------------------
@@ -258,7 +242,6 @@ uniformExtractedData <- function(df_to_treat, preffix) {
     select(-c("countryCode", "source"))
   df_to_treat
 }
-
 # ===============
 # MERGE ALL AVAILABLE RAW DATA
 # ---------------
@@ -271,14 +254,11 @@ for (i in 1:nrow(extractedEntities)) {
 }
 # NA values in countryCode indicate "GLOBAL" scope for those features
 fullDataset_raw <- fullDataset_raw %>% mutate(stdCountryCode = ifelse(is.na(stdCountryCode),"GLOBAL",stdCountryCode))
-
-# ------------------------------------------------------
-# Save consolidated raw dataset, still to refine
-# ------------------------------------------------------
+# ===============
+# SAVE CONSOLIDATED RAW DATASET, STILL TO REFINE
+# ---------------
 saveRDS(fullDataset_raw,"data/dataset_raw.rds")
 print("All data merged and stored")
-# source("extraction/mergeExtractedData.R") 
-
 
 
 
@@ -293,53 +273,8 @@ print("All data merged and stored")
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 
-
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# OBTAIN SEED SPECIFICATIONS
-# INPUT: .XLSX user edited defining the seed (hypothesis)
-# OUTPUT: dataframe with the structured seed (hypethesis)
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# Establish what specific stocks, features, concepts and geography locations we want to analize for a given seed
-# Determine what stocks, features, concepts and geography locations we want to analize.
-# Code convert table of "seed" tables (hypothesis) from .XLSX to a structured dataframe
-# Since this this dataframe identifies exactly what features and standard geolocations will be used as "seed", it will be later used during Extraction and Transformation phases
-
 library(tidyverse)
 library(openxlsx)
-
-seed <- read.xlsx("userEdition/seed1.xlsx")
-names(seed)
-goalFeatures <- seed$FeatureCode
-goalFeatureNames <- seed$FeatureName
-moodFeatures <- as.data.frame(do.call(rbind, strsplit(strsplit(seed$PlanetMoodFeatures[1], "\n")[[1]], "\\."))) %>% rename(source = V1, variable = V2)
-specificSearchTerms <- seed$SpecificSearchTerms[!(is.na(seed$SpecificSearchTerms))]
-genericSearchTerms <- strsplit(seed$GenericSearchTerms[1], "\n")[[1]]
-searchTerms <- c(specificSearchTerms, genericSearchTerms)
-specificSentimentTerms <- seed$SpecificSentimentTerms[!(is.na(seed$SpecificSentimentTerms))]
-genericSentimentTerms <- strsplit(seed$GenericSentimentTerms[1], "\n")[[1]]
-sentimentTerms <- c(specificSentimentTerms, genericSentimentTerms)
-specificStd_Geo <- seed$SpecificStd_Geo[!(is.na(seed$SpecificStd_Geo))]
-genericStd_Geo <- strsplit(seed$GenericStd_Geo[1], "\n")[[1]]
-geoLocations <- c(specificStd_Geo, genericStd_Geo)
-seedFeatures_df <- 
-  rbind(
-    data.frame(source="stocks", variable=goalFeatures, type="outcome"),
-    data.frame(moodFeatures, type="prescriptor"),
-    data.frame(source="searchesGoogle", variable=searchTerms, type="prescriptor"),
-    data.frame(source="twitterSentiment", variable=sentimentTerms, type="prescriptor"), 
-    data.frame(source="locations", variable=geoLocations, type="dimension")) %>%
-  mutate(
-    termsDetailed = str_extract(variable,  "(?<=\\().+?(?=\\))"), 
-    termsDetailed = replace(termsDetailed, is.na(termsDetailed), ""), 
-    variable = str_remove(variable, paste0("\\(",termsDetailed,"\\)")
-    )) %>% 
-  select(source, variable, termsDetailed, type)
-seedFeatures_df
-# saveRDS(allFeatures_df,"data/seedSpecs.rds")
-# source("transformation/obtainSeedSpecs.R")
-
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -349,14 +284,10 @@ seedFeatures_df
 # OUTPUT: dataset/s in .RDS after customization to seed, outliers removal, imputation and normalization
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
-
-library(tidyverse)
-library(openxlsx)
 library(lubridate)  # To create absolute list of dates
 library(data.table)  # For dcast() to spread multiple columns
 library(reshape2)  # For dcast() to spread multiple columns
 library(imputeTS)  # To impute missing values with imputeTS()
-
 # ===============
 # REMOVE FEATURES NOT APPLYING ACCORDING TO SEED
 # ---------------
@@ -378,7 +309,6 @@ fullDataset_raw <- fullDataset_raw %>% filter(stdCountryCode %in% c("GLOBAL", ge
 seedVbles <- seedVbles[seedVbles %in% names(fullDataset_raw)]
 # Keep remaining columns not forgetting to include date and geo dimensions
 seedDataset <- fullDataset_raw %>% select(date, stdCountryCode, seedVbles)
-
 # ===============
 # SPREAD FEATURE AND _GEO
 # ---------------
@@ -399,13 +329,11 @@ seedDataset <- seedDataset %>%
   right_join(allAbsoluteDates, by = "date")
 seedDataset <- seedDataset %>% arrange(desc(date))
 head(seedDataset)
-
 # ===============
 # IMPUTATION
 # ---------------
 # Load dataset to prepare changes
 seedDataset2 <- seedDataset
-
 # Function to detect start and end of time serie values and apply interpolation to fill missing values (NAs)
 # Missing Values Very recent (nor yet extracted) or very old (before historic availability) will remain NA 
 # On imputation function: https://cran.r-project.org/web/packages/imputeTS/imputeTS.pdf
@@ -416,7 +344,6 @@ imputeFeatureWithinExistingInterval <- function(tsValues) {
   tsValues[start:end] <- imputedWithinExistingInterval
   tsValues
 }
-
 # Function to remove outliers based in 1.5 times distance between percentiles 1 and 99 (pretty conservative)
 # For these outliers, value is moved to NA, and it will be in next step imputated (linearly)
 removeOutliers <- function(tsValues) {
@@ -427,7 +354,6 @@ removeOutliers <- function(tsValues) {
   tsValues <- ifelse(!(between(tsValues,low,up)),NA,tsValues)
   tsValues
 }
-
 # Remove columns with <= 2 valid values to avoid imputation issues
 empty_columns <- sapply(seedDataset2, function(x) sum(!is.na(x)) <= 2)
 seedDataset2 <- seedDataset2[, !empty_columns]
@@ -438,13 +364,11 @@ tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=removeOutliers))
 # Perform massive imputation to numeric time series (features)
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval))
 seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
-
 # ===============
 # NORMALIZATION TO A RANGE
 # ---------------
 # Load dataset to prepare changes
 seedDataset3 <- seedDataset2
-
 # Function to nomalize to a -1000 to 1000 range (using only one of the interval extremes)
 normalizeTo1000 <- function(tsValues) {
   start <- which.min(is.na(tsValues))
@@ -455,22 +379,17 @@ normalizeTo1000 <- function(tsValues) {
   tsValues[start:end] <- normalizedWithinExistingInterval * sign(tsValues[start:end])
   tsValues
 }
-
 # Temporarily remove "date" column to call function that makes massive imputation
 tmp_df_noDate <- seedDataset3[,!(colnames(seedDataset3) == "date")]
 # Perform data normalization to range 1:100
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=normalizeTo1000))
 seedDataset3 <- cbind(date = seedDataset3$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
-
-
-# ------------------------------------------------------
-# Save transformed datasets
-# ------------------------------------------------------
+# ===============
+# SAVE TRANSFORMED DATASETS
+# ---------------
 saveRDS(seedDataset,"data/dataset_seed1_p1.rds")  # Dataset with original values customized to the existing seed and spread to final columns format
 saveRDS(seedDataset2,"data/dataset_seed1_p2.rds")  # Dataset including imputation of missing values and removing empty columns
 saveRDS(seedDataset3,"data/dataset_seed1_p3.rds")  # Dataset adding conversion to 1:1000 range
-
-
 # view(seedDataset[1:2000,1:45])
 # view(seedDataset2[1:2000,1:45])
 # view(seedDataset3[1:2000,1:45])
@@ -478,59 +397,46 @@ saveRDS(seedDataset3,"data/dataset_seed1_p3.rds")  # Dataset adding conversion t
 # write.xlsx(seedDataset2, "data/dataset_seed1_p2.xlsx")
 # write.xlsx(seedDataset3, "data/dataset_seed1_p3.xlsx")
 
-# source("transformation/buildDataset_seedBased.R") 
-
-
-
 
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
-#       EDA
+#       EXPLORATORY DATA ANALYSIS
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
-
-# ===============
-# EXPLORATORY DATA ANALYSIS
-# ---------------
 
 # PTE: FIFA es un ranking: 1) su evolución no es significativa + 2) estaría invertido (mejor es 1 y sólo hay ~200 países)
 # PTE: MUSICA/OECD/FIFA: ¿debe compararse sólo consigo mismos o también respecto al GLOBAL/MEDIANA?
 # PTE: Reducir scope temporal: "2002-01-01"?
 # PTE: decidir cómo incorporaré features categóricas (p.e. moonSum.weekday) que no están en la seed
 
+library(tidyverse)
+library(openxlsx)
+
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 # EDA
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
-
-library(tidyverse)
-library(openxlsx)
-
-# ------------------------------------------------------
-# Load transformed datasets
-# ------------------------------------------------------
+# ===============
+# LOAD TRANSFORMED DATASETS
+# ---------------
 seedDataset <- readRDS("data/dataset_seed1_p1.rds")  # Dataset with original values customized to the existing seed and spread to final columns format
 seedDataset2 <- readRDS("data/dataset_seed1_p2.rds")  # Dataset including imputation of missing values and removing empty columns
 seedDataset3 <- readRDS("data/dataset_seed1_p3.rds")  # Dataset adding conversion to 1:1000 range
-
-
-
-
+# ===============
+# GRAPHICAL ANALYSIS
+# ---------------
 # Google searches chart
 all_searches %>% group_by(KAM) %>%
   ggplot(aes(x = date, y = nSearches, color = date)) +
   geom_point(size = 1) +
   facet_wrap(~KAM) +
   ggthemes::theme_economist() + labs(title = "Interest over Time", subtitle = "Google Trends Report", caption = "By databellum®")
-
-
-
 # Stocks price chart
 stocksData %>%
   ggplot(aes(x = date, y = value, color = symbol)) +
@@ -555,13 +461,10 @@ stocksVolume %>%
   scale_x_date(date_breaks = "month",
                date_labels = "%b\n%y") + 
   ggthemes::theme_economist()
-
-
 # OECD chart
 leadingIndicatorsOECD %>%
   ggplot(aes(as_date(Date), OECD_CLI, color=Country)) + geom_line()
 
-# source("EDA/EDA.R")
 
 
 

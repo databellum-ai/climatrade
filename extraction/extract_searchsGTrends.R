@@ -9,8 +9,8 @@ library(gtrendsR)
 library(ggthemes)
 
 # ============ Load search parameters seed (Google Trends):
-head(allFeatures_df)
-searchTerms <- allFeatures_df %>% filter(source %in% c("searchesGoogle"))
+head(seedFeatures_df)
+searchTerms <- seedFeatures_df %>% filter(source %in% c("searchesGoogle"))
 tmpItems <- as.list(searchTerms$termsDetailed)
 names(tmpItems) <- searchTerms$variable
 searchTerms <- tmpItems
