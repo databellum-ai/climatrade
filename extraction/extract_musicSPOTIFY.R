@@ -219,8 +219,8 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   saveRDS(as_tibble(allTracksFeatures),"data/data_music_ts.rds")
   # write.csv(allTracksFeatures,"data/data_music_ts.csv")
   # # Save also countries and codes for further consolidation with other data
-  geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
-  geo_music
-  saveRDS(geo_music,"data/geo_music.rds")
+  # geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
+  # geo_music
+  # saveRDS(geo_music,"data/geo_music.rds")
 }
 

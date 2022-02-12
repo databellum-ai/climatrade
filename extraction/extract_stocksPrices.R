@@ -7,7 +7,7 @@ library(tidyverse)
 
 #============ Prices parameters to extract (Yahoo! Finance):
 print("Loading seed")
-allFeatures_df <- readRDS("data/scopeExtraction.rds")
+head(allFeatures_df)
 chosenTickers <- allFeatures_df %>% filter(source %in% c("stocks")) %>% select(variable)
 chosenTickers <- chosenTickers$variable
 chosenTickers

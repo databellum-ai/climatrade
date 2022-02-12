@@ -9,7 +9,7 @@ library(gtrendsR)
 library(ggthemes)
 
 # ============ Load search parameters seed (Google Trends):
-allFeatures_df <- readRDS("data/scopeExtraction.rds")
+head(allFeatures_df)
 searchTerms <- allFeatures_df %>% filter(source %in% c("searchesGoogle"))
 tmpItems <- as.list(searchTerms$termsDetailed)
 names(tmpItems) <- searchTerms$variable

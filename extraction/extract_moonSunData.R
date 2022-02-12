@@ -9,7 +9,7 @@ library(suncalc)
 
 
 # ============ Load cities and addresses:
-allFeatures_df <- readRDS("data/scopeExtraction.rds")
+head(allFeatures_df)
 cities <- allFeatures_df$variable[allFeatures_df$type == "city"]
 addresses <- allFeatures_df$termsDetailed[allFeatures_df$type == "city"]
 
@@ -86,7 +86,7 @@ nrow(moon_sunData)
 # Save dataset
 saveRDS(moon_sunData,"data/data_moonSun_ts.rds")
 # Save also countries and codes for further consolidation with other data
-geo_moon_sun <- moon_sunData %>% group_by(countryCode) %>% summarise() %>% arrange(countryCode)
-geo_moon_sun
-saveRDS(geo_moon_sun,"data/geo_moonSun.rds")
+# geo_moon_sun <- moon_sunData %>% group_by(countryCode) %>% summarise() %>% arrange(countryCode)
+# geo_moon_sun
+# saveRDS(geo_moon_sun,"data/geo_moonSun.rds")
 
