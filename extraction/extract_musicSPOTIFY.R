@@ -41,7 +41,8 @@ if (length(unProcessedDates) <= lotSize) {
 }
 print("Dates to process:")
 print(unProcessedDates)
-
+# LOAD  CONVERSION-TABLE TO STANDARD GEOGRAPHY (previously edited/validated by user)
+std_geo <- read.xlsx("userEdition/standardGeography.xlsx")
 # Determine what countries we'll process:
 allPossibleCountries <- std_geo %>% filter(source=="music") %>% select(countryCode, country = countryName)
 print("Countries to process:")
