@@ -1,5 +1,5 @@
 # ! PTE: SENTIMENTS... ampliar rango de fecha de la API o usar GDELT para sentiments
-# ! PTE: eliminar los .RDS "geo" y generar DRAFT-CATALOG.xlsx a partir de los datos (en "extract_standardizeGeography.R")
+# PTE: reducir scope de fechas al cargar la seed y crear el dataset (1992? 2002?)
 # PTE: decidir dónde se define la lista de entidades a cargar ("merge") (ahora en "mergeExtractedData.R")
 
 
@@ -12,11 +12,13 @@
 # ---------------------------------------------------------------------
 # ===============
 # Initialize environment. Load all packages required
+
 source("initialization/initialize.R") 
 
 # ===============
 # Establish what data we need to extract
 # This is an extensive "raw" that will be narrowed in further phases (filtered to seeds, etc.)
+
 source("initialization/obtainScopeExtraction.R")
 
 # ---------------------------------------------------------------------
@@ -28,6 +30,7 @@ source("initialization/obtainScopeExtraction.R")
 # ---------------------------------------------------------------------
 # ===============
 # KEYS
+
 source("keys_APIs.R")
 
 # ===============
@@ -56,7 +59,9 @@ source("extraction/extract_musicSPOTIFY.R") # Extract music trends from SPOTIFY
 # ===============
 # Standardize geography
 # Based on all extracted data (.RDS files), we generate editable geography codes proposal and read its revised (manually edited) version
+
 source("extraction/extract_standardizeGeography.R") # Prepare a standard geography proposal ("userEdition/standardGeography_DRAFT.xlsx") coding to mix data from disparate sources
+
 # Now, an authorized administrator edits the draft and saves as "userEdition/standardGeography.xlsx"
 
 # ===============

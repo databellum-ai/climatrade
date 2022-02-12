@@ -36,3 +36,20 @@ if(!require(imputeTS)) install.packages("imputeTS", repos = "http://cran.us.r-pr
   # + Install chromedriver with function chrome() of package "wdman":
   # cDrv <- chrome()
 
+
+# ===============
+# SOURCES AVAILABLE
+# ---------------
+extractedEntities <- data.frame()
+extractedEntities <- rbind(extractedEntities, c("airTraffic", "data/data_airTraffic_ts.rds"))
+extractedEntities <- rbind(extractedEntities, c("FIFA", "data/data_FIFA_ts.rds"))
+extractedEntities <- rbind(extractedEntities, c("moonSun", "data/data_moonSun_ts.rds"))
+extractedEntities <- rbind(extractedEntities, c("music", "data/data_music_ts.rds"))
+extractedEntities <- rbind(extractedEntities, c("OECD", "data/data_OECD_ts.rds"))
+extractedEntities <- rbind(extractedEntities, c("searchesGoogle", "data/data_searchesGoogle_ts.rds"))
+extractedEntities <- rbind(extractedEntities, c("twitterSentiment", "data/data_twitterSentiment_ts.rds"))
+extractedEntities <- rbind(extractedEntities, c("stocks", "data/data_stocks_ts.rds"))
+names(extractedEntities) <- c("Preffix", "DataFileName")
+extractedEntities
+
+

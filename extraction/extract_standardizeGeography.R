@@ -18,56 +18,40 @@
 library(tidyverse)
 library(openxlsx)
 
-geo_FIFA <- readRDS("data/geo_FIFA.rds")
-geo_moonSun <- readRDS("data/geo_moonSun.rds")
-geo_music <- readRDS("data/geo_music.rds")
-geo_OECD <- readRDS("data/geo_OECD.rds")
 
-head(geo_FIFA)
-head(geo_moonSun)
-head(geo_music)
-head(geo_OECD)
+# ------------------------------------------------------
+# Convert locations align field names, add geo field applies
+# ------------------------------------------------------
 
-geo_FIFA <- geo_FIFA %>% 
-  mutate(source="FIFA", CountryCode = toupper(CountryCode), countryName = CountryName, regionCode = Region) %>% 
-  rename(countryCode = CountryCode) %>% 
-  select(source, countryCode, countryName, regionCode)
-geo_moonSun <- geo_moonSun %>% 
-  mutate(source="moonSun", countryCode=toupper(countryCode)) %>% select(source, countryCode)
-geo_music <- geo_music %>% 
-  mutate(source="music", countryCode=toupper(countryCode), countryName = country) %>% select(source, countryCode, countryName)
-geo_OECD <- geo_OECD %>% 
-  mutate(source="OECD", countryCode = toupper(LocationId), countryName = LocationName) %>% select(source, countryCode, countryName)
+# Function to treat received datasets from extraction
+# Convert locations align field names, add geo field applies
+obtainGeodData <- function(df_to_treat, preffix) {
+  df_to_treat <- df_to_treat %>% 
+    filter(!is.na(countryCode)) %>% 
+    group_by(countryCode) %>% 
+    summarise(first(date)) %>% 
+    mutate(source = preffix, stdCountryCode = "?") %>% 
+    select(source, countryCode, stdCountryCode)
+  df_to_treat
+}
 
-# we bind all lists of codes
-all_geo <- data.frame()
-all_geo <- all_geo %>% 
-  bind_rows(geo_FIFA) %>% 
-  bind_rows(geo_moonSun) %>% 
-  bind_rows(geo_music) %>% 
-  bind_rows(geo_OECD) %>% 
-  arrange(countryCode, source)
-head(all_geo)
+# ------------------------------------------------------
+# Load extracted data, treat to homogenize and merge all
+# ------------------------------------------------------
+# Create empty dataframe to merge all extracted data
+geoDataset <- data.frame(source=character(), countryCode=character(), stdCountryCode=character())
 
-# we use as draft values the most complete list (FIFA football) 
-tmp_std <- all_geo %>% 
-  filter(source=="FIFA") %>% 
-  mutate(stdCountryCode = countryCode, stdCountryName = countryName) %>% 
-  group_by(countryCode) %>% summarise(stdCountryCode = first(stdCountryCode), stdCountryName = first(stdCountryName)) %>% 
-  select(countryCode, stdCountryCode,stdCountryName)
-nrow(tmp_std)
-head(tmp_std)
+# Process each entity available
+for (i in 1:nrow(extractedEntities)) {
+  print (paste("Analyzing: ",extractedEntities$Preffix[i],"::",extractedEntities$DataFileName[i]))
+  tmpGeoDataset <- obtainGeodData(readRDS(extractedEntities$DataFileName[i]), extractedEntities$Preffix[i])
+  geoDataset <- rbind(geoDataset, tmpGeoDataset)
+}
 
-# we add new draft standard columns (stdCountryCode, stdCountryName) as a proposal for further manual edition
-std_geo <- all_geo %>% left_join(tmp_std, by = "countryCode")
-nrow(std_geo)
-head(std_geo)
+head(geoDataset)
 
 # save a DRAFT (standardGeography_DRAFT.xlsx) so an administrator/user can use as reference to generate final file (standardGeography.xlsx)
-write.xlsx(std_geo, "userEdition/standardGeography_DRAFT.xlsx", overwrite = TRUE)
-
-
-
+write.xlsx(geoDataset, "userEdition/standardGeography_DRAFT.xlsx", overwrite = TRUE)
 
 
 
