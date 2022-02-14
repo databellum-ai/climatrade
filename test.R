@@ -1,6 +1,22 @@
-# https://www.r-bloggers.com/2020/03/google-big-query-with-r/
+
+
+# -----------------------------------
+# -----------------------------------
+#  BIG QUERY...
+
+# GENERAL BIGQUERY:
 # https://www.youtube.com/watch?v=UHc3Gsvz2Ss
+
+
+# BIGQUERY
+library(bigrquery)
+# https://www.r-bloggers.com/2020/03/google-big-query-with-r/
 # https://bigrquery.r-dbi.org/
+
+
+
+
+
 
 # -----------------------------------
 # -----------------------------------
@@ -39,10 +55,6 @@ df5 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
                 local_folder = "~/gdeltdata")
 
 
-
-# -----------------------------------
-# -----------------------------------
-#  BIG QUERY...
 
 
 # -----------------------------------
