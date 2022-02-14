@@ -3,19 +3,36 @@
 # -----------------------------------
 # -----------------------------------
 #  BIG QUERY...
-
+#
 # GENERAL BIGQUERY:
+
+# -----------------------------------
+# -----------------------------------
+
+# BIGQUERY DESDE CONSOLA:
+
 # https://www.youtube.com/watch?v=UHc3Gsvz2Ss
 
 
-# BIGQUERY
-library(bigrquery)
+# -----------------------------------
+# -----------------------------------
+# BIGQUERY CON R:
+#
 # https://www.r-bloggers.com/2020/03/google-big-query-with-r/
 # https://bigrquery.r-dbi.org/
+# https://www.infoworld.com/article/3622926/how-to-use-r-with-bigquery.html
+library(bigrquery)
+library(dplyr)
+con <- dbConnect(
+  bigrquery::bigquery(),
+  project = "bigquery-public-data",
+  dataset = "baseball",
+  billing = "applied-flag-330811"
+)
 
-
-
-
+dbListTables(con)
+# Is it OK to cache OAuth access credentials in the folder C:/Users/bab635/AppData/Local/gargle/gargle/Cache between R sessions?
+skeds <- tbl(con, "schedules")
 
 
 # -----------------------------------
