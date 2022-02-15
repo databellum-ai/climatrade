@@ -22,11 +22,19 @@
 # https://bigrquery.r-dbi.org/
 # https://www.infoworld.com/article/3622926/how-to-use-r-with-bigquery.html
 library(bigrquery)
+billing <- "applied-flag-330811" # replace this with your project ID 
+sql <- "SELECT COUNT(*) FROM `gdelt-bq.full.events`"
+
+tb <- bq_project_query(billing, sql)
+bq_table_download(tb, n_max = 10)
+
+
+
 library(dplyr)
 con <- dbConnect(
   bigrquery::bigquery(),
-  project = "bigquery-public-data",
-  dataset = "baseball",
+  project = "applied-flag-330811",
+  dataset = "gdelt-bq.full",
   billing = "applied-flag-330811"
 )
 
@@ -34,6 +42,7 @@ dbListTables(con)
 # Is it OK to cache OAuth access credentials in the folder C:/Users/bab635/AppData/Local/gargle/gargle/Cache between R sessions?
 skeds <- tbl(con, "schedules")
 
+# SELECT COUNT(*) FROM `gdelt-bq.full.events`
 
 # -----------------------------------
 # -----------------------------------
