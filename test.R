@@ -1,3 +1,4 @@
+# https://www.analyticssteps.com/blogs/data-scraping-r-programming-part-1
 baseURL <- "http://data.gdelt.com/events/"
 currentURL <- paste(baseURL, "20220215","EXPORT.csv.zip", sep="")
 download.file(currentURL, "tmpFile.zip")
