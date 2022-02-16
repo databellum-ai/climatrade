@@ -1,9 +1,12 @@
-baseURL <- "http://data.gdelt.com/events"
-currentURL <- paste(baseURL, stationsIds[i_station],".csv.gz", sep="")
-print(paste("Station: ",stationsIds[i_station]," (",stationsNames[i_station],")",sep=""))
-tmpStationData <- read_csv(
-  file = currentURL,
-  col_names=FALSE)
+baseURL <- "http://data.gdelt.com/events/"
+currentURL <- paste(baseURL, "20220215","EXPORT.csv.zip", sep="")
+download.file(currentURL, "tmpFile.zip")
+unzip("tmpFile.zip")
+print(paste("Station:",currentURL))
+tmpData <- read_csv( file = currentURL, col_names=FALSE)
+
+
+read.table(currentURL)
 
 # ---------------------------------------------
 # STEP 2: get historical data from NOAA FTP files
