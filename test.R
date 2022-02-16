@@ -1,3 +1,35 @@
+baseURL <- "http://data.gdelt.com/events"
+currentURL <- paste(baseURL, stationsIds[i_station],".csv.gz", sep="")
+print(paste("Station: ",stationsIds[i_station]," (",stationsNames[i_station],")",sep=""))
+tmpStationData <- read_csv(
+  file = currentURL,
+  col_names=FALSE)
+
+# ---------------------------------------------
+# STEP 2: get historical data from NOAA FTP files
+# ---------------------------------------------
+# baseURL <- 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/'
+# historicStationsData <- data.frame()
+# # Reading historical (.csv.gz) values
+# for (i_station in 1:length(stationsIds)) {
+#   currentURL <- paste(baseURL, stationsIds[i_station],".csv.gz", sep="")
+#   print(paste("Station: ",stationsIds[i_station]," (",stationsNames[i_station],")",sep=""))
+#   tmpStationData <- read_csv(
+#     file = currentURL, 
+#     col_names=FALSE)
+#   tmpStationData <- tmpStationData %>% 
+#     mutate(date = ymd(X2), 
+#            station = paste('GHCND:',stationsIds[i_station],sep=""), 
+#            stationPlace = stationsNames[i_station]) %>% 
+#     filter(year(date) >= year_from_NOAA) %>% 
+#     filter(X3 %in% measureTypes) %>% 
+#     select(date, station, stationPlace, indicator = X3, value = X4)
+#   historicStationsData <- rbind(historicStationsData, tmpStationData)
+# }
+# head(historicStationsData)
+
+
+
 
 
 # -----------------------------------
