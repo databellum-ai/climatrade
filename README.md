@@ -25,6 +25,7 @@
 #
 # FUTURE DEVELOPMENTS:
 # --------------------
+# -"Multiseed" capability
 # -Scheduled extraction (https://www.sqlservercentral.com/articles/how-to-download-stocks-on-schedule-using-r)
 # -Weather: use existing code in directory extraction_other/ to extract data by city
 # -Air traffic: use existing code in directory extraction_other/ to extract also data by city
@@ -36,6 +37,4 @@
 # -Twitter posts volume (currently using Google searchs for it)
 # -Analysis ("tag cloud", etc.) of related term-searches to list given
 # -News combined/coexisting terms (in same article) volume and sentiment
-# -Use points instead of ranking in the FIFA classification
-# PTE: multiseed
-# PTE: decidir si utilizo "popular", "recent" o "mixed" al leer de Twitter
+

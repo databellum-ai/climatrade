@@ -1,3 +1,5 @@
+library(tidyverse)
+
 # https://www.analyticssteps.com/blogs/data-scraping-r-programming-part-1
 baseURL <- "http://data.gdelt.com/events/"
 currentURL <- paste(baseURL, "20220215","EXPORT.csv.zip", sep="")
@@ -59,11 +61,11 @@ read.table(currentURL)
 # https://www.infoworld.com/article/3622926/how-to-use-r-with-bigquery.html
 library(bigrquery)
 billing <- "applied-flag-330811" # replace this with your project ID 
-sql <- "SELECT COUNT(*) FROM `gdelt-bq.full.events`"
+sql <- "SELECT Actor1Name, COUNT(*) FROM `gdelt-bq.full.events` GROUP BY `Actor1Name`"
 
 tb <- bq_project_query(billing, sql)
-bq_table_download(tb, n_max = 10)
-
+bq_table_download(tb, n_max = 10000)
+class(tb)
 
 
 library(dplyr)
