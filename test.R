@@ -1,4 +1,44 @@
+# -----------------------------------
+# -----------------------------------
+# GDELTTOOLS...
+
+# https://cran.r-project.org/web/packages/GDELTtools/GDELTtools.pdf
+
+# install.packages("GDELTtools")
+
 library(tidyverse)
+library(GDELTtools)
+df10 <- GetGDELT(start_date="2022-01-31", end_date="2022-02-14")
+class(df10)
+head(df10)
+names(df10)
+nrow(df10)
+unique(df10$Actor1CountryCode)
+view(df10[1:1000,1:50])
+view(df10[1:1000,51:58])
+head(df10)
+
+## Not run:
+df1 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03")
+df2 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
+                row_filter=ActionGeo_CountryCode=="US")
+df3 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
+                row_filter=Actor2Geo_CountryCode=="RS" & NumArticles==2 & is.na(Actor1CountryCode),
+                1:5)
+df4 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
+                row_filter=Actor2Code=="COP" | Actor2Code=="MED",
+                contains("date"), starts_with("actor"))
+# Specify a local folder to store the downloaded files
+df5 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
+                row_filter=ActionGeo_CountryCode=="US",
+                local_folder = "~/gdeltdata")
+
+
+# ==========================================================================
+# ==========================================================================
+
+
+
 
 # https://www.analyticssteps.com/blogs/data-scraping-r-programming-part-1
 baseURL <- "http://data.gdelt.com/events/"
@@ -82,41 +122,6 @@ skeds <- tbl(con, "schedules")
 
 # SELECT COUNT(*) FROM `gdelt-bq.full.events`
 
-# -----------------------------------
-# -----------------------------------
-# GDELTTOOLS...
-
-# https://cran.r-project.org/web/packages/GDELTtools/GDELTtools.pdf
-
-# install.packages("GDELTtools")
-
-library(GDELTtools)
-df10 <- GetGDELT(start_date="2022-01-31", end_date="2022-02-02")
-class(df10)
-head(df10)
-names(df10)
-nrow(df10)
-unique(df10$Actor1CountryCode)
-
-
-view(df1[1,1:50])
-view(df1[1,51:58])
-
-
-## Not run:
-df1 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03")
-df2 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
-                row_filter=ActionGeo_CountryCode=="US")
-df3 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
-                row_filter=Actor2Geo_CountryCode=="RS" & NumArticles==2 & is.na(Actor1CountryCode),
-                1:5)
-df4 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
-                row_filter=Actor2Code=="COP" | Actor2Code=="MED",
-                contains("date"), starts_with("actor"))
-# Specify a local folder to store the downloaded files
-df5 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
-                row_filter=ActionGeo_CountryCode=="US",
-                local_folder = "~/gdeltdata")
 
 
 

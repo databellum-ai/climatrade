@@ -9,8 +9,8 @@ library(tidyverse)
 library(openSkies)
 library(lubridate)
 
-startDate <- "2016-01-01"
-startDate <- "2022-01-01"
+# startDate <- "2016-01-01"
+startDate <- "2021-12-31"
 yesterdayRefDate <- Sys.Date()-1
 
 # ================================
