@@ -7,6 +7,7 @@
 # install.packages("GDELTtools")
 
 library(tidyverse)
+library(openxlsx)
 library(GDELTtools)
 df10 <- GetGDELT(start_date="2022-01-31", end_date="2022-02-14")
 class(df10)
@@ -14,11 +15,9 @@ head(df10)
 names(df10)
 nrow(df10)
 unique(df10$Actor1CountryCode)
-view(df10[1:1000,1:50])
-view(df10[1:1000,51:58])
 head(df10)
+write.xlsx(df10[1:10000,], "data/test_gdelt.xlsx")
 
-## Not run:
 df1 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03")
 df2 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
                 row_filter=ActionGeo_CountryCode=="US")
