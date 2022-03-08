@@ -6,10 +6,11 @@
 
 # install.packages("GDELTtools")
 
+
 library(tidyverse)
 library(openxlsx)
 library(GDELTtools)
-df10 <- GetGDELT(start_date="2022-01-31", end_date="2022-02-14")
+df10 <- GetGDELT(start_date="2022-03-05", end_date="2022-03-07")
 class(df10)
 head(df10)
 names(df10)
@@ -36,9 +37,6 @@ df5 <- GetGDELT(start_date="2022-01-01", end_date="2022-01-03",
 # ==========================================================================
 # ==========================================================================
 
-
-
-
 # https://www.analyticssteps.com/blogs/data-scraping-r-programming-part-1
 baseURL <- "http://data.gdelt.com/events/"
 currentURL <- paste(baseURL, "20220215","EXPORT.csv.zip", sep="")
@@ -46,42 +44,8 @@ download.file(currentURL, "tmpFile.zip")
 unzip("tmpFile.zip")
 print(paste("Station:",currentURL))
 tmpData <- read_csv( file = currentURL, col_names=FALSE)
-
-
 read.table(currentURL)
 
-# ---------------------------------------------
-# STEP 2: get historical data from NOAA FTP files
-# ---------------------------------------------
-# baseURL <- 'https://www1.ncdc.noaa.gov/pub/data/ghcn/daily/by_station/'
-# historicStationsData <- data.frame()
-# # Reading historical (.csv.gz) values
-# for (i_station in 1:length(stationsIds)) {
-#   currentURL <- paste(baseURL, stationsIds[i_station],".csv.gz", sep="")
-#   print(paste("Station: ",stationsIds[i_station]," (",stationsNames[i_station],")",sep=""))
-#   tmpStationData <- read_csv(
-#     file = currentURL, 
-#     col_names=FALSE)
-#   tmpStationData <- tmpStationData %>% 
-#     mutate(date = ymd(X2), 
-#            station = paste('GHCND:',stationsIds[i_station],sep=""), 
-#            stationPlace = stationsNames[i_station]) %>% 
-#     filter(year(date) >= year_from_NOAA) %>% 
-#     filter(X3 %in% measureTypes) %>% 
-#     select(date, station, stationPlace, indicator = X3, value = X4)
-#   historicStationsData <- rbind(historicStationsData, tmpStationData)
-# }
-# head(historicStationsData)
-
-
-
-
-
-# -----------------------------------
-# -----------------------------------
-#  BIG QUERY...
-#
-# GENERAL BIGQUERY:
 
 # -----------------------------------
 # -----------------------------------
@@ -98,6 +62,8 @@ read.table(currentURL)
 # https://www.r-bloggers.com/2020/03/google-big-query-with-r/
 # https://bigrquery.r-dbi.org/
 # https://www.infoworld.com/article/3622926/how-to-use-r-with-bigquery.html
+
+# install.packages("bigrquery")
 library(bigrquery)
 billing <- "applied-flag-330811" # replace this with your project ID 
 sql <- "SELECT Actor1Name, COUNT(*) FROM `gdelt-bq.full.events` GROUP BY `Actor1Name`"
