@@ -136,20 +136,28 @@ write.xlsx(geoDataset, "userEdition/standardGeography_DRAFT.xlsx", overwrite = T
 # Since this this dataframe identifies exactly what features and standard geolocations will be used as "seed", it will be later used during Extraction and Transformation phases
 seed <- read.xlsx("userEdition/seed1.xlsx")
 names(seed)
+
 goalFeatures <- seed$FeatureCode
 goalFeatureNames <- seed$FeatureName
+
 moodFeatures <- as.data.frame(do.call(rbind, strsplit(strsplit(seed$PlanetMoodFeatures[1], "\n")[[1]], "\\."))) %>% rename(source = V1, variable = V2)
+
 specificSearchTerms <- seed$SpecificSearchTerms[!(is.na(seed$SpecificSearchTerms))]
 genericSearchTerms <- strsplit(seed$GenericSearchTerms[1], "\n")[[1]]
 searchTerms <- c(specificSearchTerms, genericSearchTerms)
+
 specificSentimentTerms <- seed$SpecificSentimentTerms[!(is.na(seed$SpecificSentimentTerms))]
 genericSentimentTerms <- strsplit(seed$GenericSentimentTerms[1], "\n")[[1]]
 sentimentTerms <- c(specificSentimentTerms, genericSentimentTerms)
+
 specificStd_Geo <- seed$SpecificStd_Geo[!(is.na(seed$SpecificStd_Geo))]
 genericStd_Geo <- strsplit(seed$GenericStd_Geo[1], "\n")[[1]]
 geoLocations <- c(specificStd_Geo, genericStd_Geo)
+
+# Cities/addresses used only by extract_moonSunData.R and extract_weatherNOAA.R (not active currently)
 cities <- seed %>% filter(!is.na(Cities)) %>% pull(Cities)
 addresses <- seed %>% filter(!is.na(Addresses)) %>% pull(Addresses)
+
 seedFeatures_df <- 
   rbind(
     data.frame(source="stocks", variable=goalFeatures, type="outcome"),
@@ -433,12 +441,21 @@ seedDataset3 <- readRDS("data/dataset_seed1_p3.rds")  # Dataset adding conversio
 # ===============
 # GRAPHICAL ANALYSIS
 # ---------------
+library(ggplot2)
+
 # Google searches chart
 all_searches %>% group_by(KAM) %>%
   ggplot(aes(x = date, y = nSearches, color = date)) +
   geom_point(size = 1) +
   facet_wrap(~KAM) +
   ggthemes::theme_economist() + labs(title = "Interest over Time", subtitle = "Google Trends Report", caption = "By databellum®")
+all_searches %>% group_by(KAM) %>%
+  ggplot(aes(x = date, y = nSearches, color = KAM)) +
+  geom_line(size = 1) +
+  ggthemes::theme_economist() + labs(title = "Interest over Time", subtitle = "Google Trends Report", caption = "By databellum®")
+
+
+
 # Stocks price chart
 stocksData %>%
   ggplot(aes(x = date, y = value, color = symbol)) +
@@ -451,6 +468,28 @@ stocksData %>%
   scale_x_date(date_breaks = "month",
                date_labels = "%b\n%y") + 
   ggthemes::theme_economist()
+
+
+
+
+
+
+test_data <- seedDataset3 %>% select(date, `stocks.USDGBP=X_GLOBAL`, `stocks.^N225_GLOBAL`, `OECD.CLI_OECD`)
+
+test_data_gathered <- test_data %>% gather(key = "variable", value = "value", -date)
+ggplot(test_data_gathered, 
+       aes(x = date, y = value)) + 
+  geom_line(size = 0.50, aes(color = variable))
+
+# https://epirhandbook.com/en/ggplot-basics.html
+ggplot(data = test_data, 
+       mapping = aes(x = `stocks.USDGBP=X_GLOBAL`, y = `stocks.^N225_GLOBAL`, color = `date`, size = `OECD.CLI_OECD`)) + 
+  geom_point(alpha = 0.5, shape = "diamond")
+
+
+
+
+
 
 
 
