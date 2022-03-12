@@ -2,6 +2,7 @@
 ## Probar Extraction y Transformation (AÑADIENDO index, GDELT + QUITANDO moonSum, FIFA, twitter)
 # Terminar index (IAI): leer directamente el .csv + obtener datos históricos
 # Extract GDELT, IAI
+# Probar extracción limpiando variables y repetidamente
 
 
 
