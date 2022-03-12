@@ -22,14 +22,8 @@ stocksData <- tq_get(chosenTickers,
                  to = endDateTicker,
                  get = "stock.prices")
 
-# we distinguish close price
-stocksClosePrice <- stocksData %>% select(date, symbol, value = close) %>% arrange(desc(date))
-# we distinguish volume values and add a suffix to asset name
-stocksVolume <- stocksData %>% mutate(symbol=paste0(symbol,"_vol")) %>% select(date,symbol, value=volume) %>% arrange(desc(date))
-# joining close prices and volumes (with suffix ".vol" in the asset name)
-
-# stocksData <- rbind(stocksClosePrice, stocksVolume)
-stocksData <- stocksClosePrice
+# we extract close price
+stocksData <- stocksData %>% select(date, symbol, value = close) %>% group_by(date, symbol) %>% summarise(value = mean(value)) %>% arrange(desc(date))
 
 stocksData_ts <- stocksData %>% 
   spread(key=symbol, value = value) %>% mutate(countryCode = NA) %>% 

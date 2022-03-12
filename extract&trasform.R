@@ -1,5 +1,6 @@
-# Adaptar SEED1.xlsx
-# Archive FIFA, MoonSun, Twitter 
+## Pasar datos GDELT a diarios y filtar similar al proyecto de la OUC
+## Probar Extraction y Transformation (AÑADIENDO index, GDELT + QUITANDO moonSum, FIFA, twitter)
+# Terminar index (IAI): leer directamente el .csv + obtener datos históricos
 # Extract GDELT, IAI
 
 
@@ -29,7 +30,7 @@ source("initialize.R")
 seed <- read.xlsx("userEdition/seed1.xlsx")
 names(seed)
 goalFeatures <- seed$FeatureCode[!is.na(seed$FeatureCode)]
-goalFeatureNames <- seed$FeatureCode[!is.na(seed$FeatureName)]
+goalFeatureNames <- seed$FeatureName[!is.na(seed$FeatureName)]
 moodFeatures <- as.data.frame(do.call(rbind, strsplit(seed$PlanetMoodFeatures, "\\."))) %>% rename(source = V1, variable = V2)
 moodFeatures <- moodFeatures[!(is.na(seed$PlanetMoodFeatures)),]
 SearchTerms <- seed$SearchTerms[!(is.na(seed$SearchTerms))]

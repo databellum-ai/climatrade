@@ -12,7 +12,8 @@ library(spotifyr)# For certain functions and applications, you’ll need to log 
 
 numTopTracks <- 3 # how many tracks we extract per day/week
 lotSize <- 90  # dates processed in a run. If not enough, just repeat run
-versionChrome <- "97.0.4692.71" # RSelenium requires current version of Chrome browser to launch it
+# versionChrome <- "97.0.4692.71" # RSelenium requires current version of Chrome browser to launch it
+versionChrome <- "99.0.4844.51" # RSelenium requires current version of Chrome browser to launch it
 
 # ================================
 # STEP 1: Determine countries and dates we need to collect
@@ -53,7 +54,7 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   # ================================
   # STEP 2: Scrape Spotify web site and obtain list of top tracks per date/country, collecting also number of streams
   # ================================
-  
+
   # Start RSelenium server
   driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = versionChrome)  
   remote_driver <- driver[["client"]]

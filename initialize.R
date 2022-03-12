@@ -33,6 +33,7 @@ if(!require(syuzhet)) install.packages("syuzhet", repos = "http://cran.us.r-proj
 if(!require(openxlsx)) install.packages("openxlsx", repos = "http://cran.us.r-project.org") # import/export Excel
 if(!require(tidyquant)) install.packages("tidyquant", repos = "http://cran.us.r-project.org") # To get stock data
 if(!require(imputeTS)) install.packages("imputeTS", repos = "http://cran.us.r-project.org") # To impute values in time series
+if(!require(bigrquery)) install.packages("bigrquery", repos = "http://cran.us.r-project.org") # To extract from GDELT using BigQuery
 # INSTALL SCRAPE PACKAGES:
 # + Ensure java installed
 if(!require(rvest)) install.packages("rvest", repos = "http://cran.us.r-project.org")  # to scrape static pages
