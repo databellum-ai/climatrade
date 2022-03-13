@@ -61,7 +61,7 @@ sourcesAvailable <- function() {
   extractedEntities <- rbind(extractedEntities, c("OECD", "data/data_OECD_ts.rds", "extraction/extract_indicatorsOECD.R", "Leading indicators from OECD"))
   extractedEntities <- rbind(extractedEntities, c("stocks", "data/data_stocks_ts.rds", "extraction/extract_stocksPrices.R", "Stock prices from Yahoo Finance"))
   extractedEntities <- rbind(extractedEntities, c("searchesGoogle", "data/data_searchesGoogle_ts.rds", "extraction/extract_searchsGTrends.R", "Searches from Google Trends"))
-  extractedEntities <- rbind(extractedEntities, c("GDELT", "data/data_GDELT_ts.rds", "extraction/extract_GDELT.R", "Worls events tone and impact"))
+  # extractedEntities <- rbind(extractedEntities, c("GDELT", "data/data_GDELT_ts.rds", "extraction/extract_GDELT.R", "Worls events tone and impact"))
   extractedEntities <- rbind(extractedEntities, c("index", "data/data_index_ts.rds", "extraction/extract_index.R", "Indexes from disparate origins"))
   extractedEntities <- rbind(extractedEntities, c("music", "data/data_music_ts.rds", "extraction/extract_musicSPOTIFY.R", "Music trends from SPOTIFY"))  
   names(extractedEntities) <- c("Preffix", "DataFileName", "SourceCode", "Description")

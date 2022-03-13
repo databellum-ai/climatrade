@@ -1,9 +1,6 @@
-## Pasar datos GDELT a diarios y filtar similar al proyecto de la OUC
-## Probar Extraction y Transformation (AÑADIENDO index, GDELT + QUITANDO moonSum, FIFA, twitter)
+## Terminar GDELT 
+## Probar proceso comleto Extraction y Transformation (AÑADIENDO index, GDELT + QUITANDO moonSum, FIFA, twitter)
 # Terminar index (IAI): leer directamente el .csv + obtener datos históricos
-# Extract GDELT, IAI
-# Probar extracción limpiando variables y repetidamente
-
 
 
 source("initialize.R")
