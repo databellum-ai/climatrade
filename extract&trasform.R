@@ -1,5 +1,4 @@
-## Terminar GDELT 
-## Probar proceso comleto Extraction y Transformation (AÑADIENDO index, GDELT + QUITANDO moonSum, FIFA, twitter)
+## Probar proceso completo Extraction y Transformation (AÑADIENDO index, GDELT + QUITANDO moonSum, FIFA, twitter)
 # Terminar index (IAI): leer directamente el .csv + obtener datos históricos
 
 

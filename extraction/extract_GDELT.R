@@ -1,7 +1,3 @@
-# DECIDIR valores parámetros: EventRootCode, QuadClass
-# PONDERACIÓN (sum?/avg?... GoldsteinScale, mentions, sources, articles 
-
-
 # ================================
 # Extract GDELT data
 # ================================
@@ -13,6 +9,7 @@
 library(tidyverse)
 library(openxlsx)
 library(bigrquery)
+library(lubridate)
 
 print("Extracting GDELT events")
 
@@ -21,37 +18,30 @@ initialDateGDELT_sqlInt <- "19790101"
 currenDate <- Sys.time()
 currentDate_sqlInt <- as.character(10000*year(currenDate) + 100*month(currenDate) + day(currenDate))
 dateFilter <- paste0("SQLDATE BETWEEN ",initialDateGDELT_sqlInt," AND ", currentDate_sqlInt)
-eventRootCodeFilter <- "'14','15','16','17','18','19','20'"
-quadClassFilter <- "3, 4"
 
 billing <- "applied-flag-330811"
 bq_user()# active user: databellum.ai@gmail.com
 
 sql <- paste0("SELECT
-  COUNT(*) totalEvents,
-  SQLDATE date,
-  SUM(AvgTone) toneSum,
-  AVG(AvgTone) toneAvg,
-  SUM(GoldsteinScale) GoldsteinScaleSum,
-  AVG(GoldsteinScale) GoldsteinScaleAvg,
-  AVG(NumMentions) mentionsAvg,
-  AVG(NumSources) sourcesAvg,
-  AVG(NumArticles) articlesAvg, 
-  SUM(NumMentions) mentionsSum, 
-  SUM(NumSources) sourcesSum, 
-  SUM(NumArticles) articlesSum
+SQLDATE date, 
+EventRootCode, 
+COUNT(*) Events,
+SUM(NumArticles) Articles,
+(SUM(AvgTone * NumArticles) / SUM(NumArticles)) Tone, 
+(SUM(GoldsteinScale * NumArticles) / SUM(NumArticles)) Goldstein
 FROM `gdelt-bq.full.events`
-WHERE (", dateFilter, ")
-  AND EventRootCode IN (", eventRootCodeFilter, ")
-  AND (QuadClass IN (", quadClassFilter,"))
-  AND (IsRootEvent = 1)
-GROUP BY SQLDATE")
-GDELTevents <- bq_table_download(bq_project_query(billing, sql), n_max = 10000)
-class(GDELTevents)
+WHERE (", dateFilter, ") AND (IsRootEvent = 1) 
+GROUP BY SQLDATE, EventRootCode
+ORDER BY date DESC, EventRootCode")
+
+# call bigquery
+GDELTevents <- bq_table_download(bq_project_query(billing, sql), n_max = 1000000)
 head(GDELTevents)
 
+# group by date and extract only Tone and Goldstein scale
+GDELTevents <- GDELTevents %>% mutate(date = ymd(date)) %>% group_by(date) %>% summarise(Tone = mean(Tone), Goldstein = mean(Goldstein)) %>% mutate(countryCode = NA)
+
 # # Save to RDS
-GDELTevents <- GDELTevents %>% mutate(countryCode = NA)
 saveRDS(GDELTevents, "data/data_GDELT_ts.rds")
 
 print("GDELT events extraction process FINISHED")
