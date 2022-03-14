@@ -27,8 +27,8 @@ SQLDATE date,
 EventRootCode, 
 COUNT(*) Events,
 SUM(NumArticles) Articles,
-(SUM(AvgTone * NumArticles) / SUM(NumArticles)) Tone, 
-(SUM(GoldsteinScale * NumArticles) / SUM(NumArticles)) Goldstein
+(SUM(AvgTone * NumArticles) / SUM(NumArticles)) tone, 
+(SUM(GoldsteinScale * NumArticles) / SUM(NumArticles)) goldstein
 FROM `gdelt-bq.full.events`
 WHERE (", dateFilter, ") AND (IsRootEvent = 1) 
 GROUP BY SQLDATE, EventRootCode
@@ -39,7 +39,7 @@ GDELTevents <- bq_table_download(bq_project_query(billing, sql), n_max = 1000000
 head(GDELTevents)
 
 # group by date and extract only Tone and Goldstein scale
-GDELTevents <- GDELTevents %>% mutate(date = ymd(date)) %>% group_by(date) %>% summarise(Tone = mean(Tone), Goldstein = mean(Goldstein)) %>% mutate(countryCode = NA)
+GDELTevents <- GDELTevents %>% mutate(date = ymd(date)) %>% group_by(date) %>% summarise(tone = mean(tone), goldstein = mean(goldstein)) %>% mutate(countryCode = NA)
 
 # # Save to RDS
 saveRDS(GDELTevents, "data/data_GDELT_ts.rds")

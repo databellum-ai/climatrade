@@ -9,10 +9,6 @@ source("initialize.R")
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 
-# PTE: MUSICA/OECD: ¿debe compararse sólo consigo mismos o también respecto al GLOBAL/MEDIANA?
-# PTE: Reducir scope temporal: "2002-01-01"?
-# PTE: decidir cómo incorporaré features categóricas (p.e. weekday) que no están en la seed
-
 library(tidyverse)
 library(openxlsx)
 
@@ -63,16 +59,16 @@ stocksData %>%
 
 
 
-test_data <- seedDataset3 %>% select(date, `stocks.USDGBP=X_GLOBAL`, `stocks.^N225_GLOBAL`, `OECD.CLI_OECD`)
+test_data <- seedDataset3 %>% select(date, `stocks.^VIX_GLOBAL`, `stocks.^VVIX_GLOBAL`, `OECD.CLI_OECD`, `index.IAI_GLOBAL`)
 
 test_data_gathered <- test_data %>% gather(key = "variable", value = "value", -date)
 ggplot(test_data_gathered, 
        aes(x = date, y = value)) + 
-  geom_line(size = 0.50, aes(color = variable))
+  geom_point(size = 0.50, aes(color = variable))
 
 # https://epirhandbook.com/en/ggplot-basics.html
 ggplot(data = test_data, 
-       mapping = aes(x = `stocks.USDGBP=X_GLOBAL`, y = `stocks.^N225_GLOBAL`, color = `date`, size = `OECD.CLI_OECD`)) + 
+       mapping = aes(x = `stocks.^VIX_GLOBAL`, y = `stocks.^VVIX_GLOBAL`, color = `index.IAI_GLOBAL`, size = `date`)) + 
   geom_point(alpha = 0.5, shape = "diamond")
 
 
