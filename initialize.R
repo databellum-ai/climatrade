@@ -1,10 +1,10 @@
 # PTES:
-## TRANSFORM: Revisar datos, imputation y normalization en los .XLSX
-# EXTRACT: Terminar index (IAI): leer directamente el .csv + obtener datos históricos
-# EDA: MUSICA/OECD: ¿debe compararse sólo consigo mismos o también respecto al GLOBAL/MEDIANA?
+## TRANSFORM: Revisar datos, imputation y normalization en los .XLSX (signo de IAI y GDELT tras normalización)
+## EXTRACT: probar repetidamente proceso integral de EXtract ("automatizarlo")
+## EXTRACT: Terminar index (IAI): obtener datos históricos + leer directamente el .csv
 # EDA: Reducir scope temporal: "2002-01-01"?
 # EDA: decidir cómo incorporaré features categóricas (p.e. weekday) que no están en la seed
-
+# EDA: OECD: ¿debe compararse sólo consigo mismos o también respecto al GLOBAL/MEDIANA?
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
