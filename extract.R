@@ -83,7 +83,9 @@ file.copy(list.files(dir_from, full.names = TRUE), dir_to, recursive = TRUE)
 extractedEntities <- sourcesAvailable()
 extractedEntities
 for (i in 1:nrow(extractedEntities)) {
-  print(paste0("Running extraction: ", extractedEntities$Description[i], " (", extractedEntities$SourceCode[i], ")"))
+  print("=======================================================================")
+  print("=======================================================================")
+  print(paste0("=======>> RUNNING EXTRACTION: ", extractedEntities$Description[i], " (", extractedEntities$SourceCode[i], ")"))
   source(extractedEntities$SourceCode[i])
 }
 

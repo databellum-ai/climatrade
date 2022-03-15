@@ -7,7 +7,7 @@ print("Extracting IAI index")
 
 historicalIAI <- readRDS("data/data_index_ts.rds")
 
-recentIAI <- read.csv("data/data-aFQir.csv")
+recentIAI <- read.csv("data/data-IAI-fresh.csv")
 names(recentIAI) <- c("date", "IAI")
 recentIAI <- recentIAI %>% mutate(date = as.Date(date, "%m/%d/%Y"), countryCode = NA) %>% select(date, IAI, countryCode)
 IAIindex <- rbind(historicalIAI, recentIAI) %>% group_by(date,IAI,countryCode) %>% summarise(date = last(date), IAI = mean(IAI), countryCode = NA) %>% select(date, IAI, countryCode)

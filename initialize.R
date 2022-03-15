@@ -1,11 +1,3 @@
-# PTES:
-## TRANSFORM: Revisar datos, imputation y normalization en los .XLSX (signo de IAI y GDELT tras normalización)
-## EXTRACT: probar repetidamente proceso integral de EXtract ("automatizarlo")
-## EXTRACT: Terminar index (IAI): obtener datos históricos + leer directamente el .csv
-# EDA: Reducir scope temporal: "2002-01-01"?
-# EDA: decidir cómo incorporaré features categóricas (p.e. weekday) que no están en la seed
-# EDA: OECD: ¿debe compararse sólo consigo mismos o también respecto al GLOBAL/MEDIANA?
-
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
@@ -69,7 +61,7 @@ sourcesAvailable <- function() {
   extractedEntities <- rbind(extractedEntities, c("OECD", "data/data_OECD_ts.rds", "extraction/extract_indicatorsOECD.R", "Leading indicators from OECD"))
   extractedEntities <- rbind(extractedEntities, c("stocks", "data/data_stocks_ts.rds", "extraction/extract_stocksPrices.R", "Stock prices from Yahoo Finance"))
   extractedEntities <- rbind(extractedEntities, c("searchesGoogle", "data/data_searchesGoogle_ts.rds", "extraction/extract_searchsGTrends.R", "Searches from Google Trends"))
-  extractedEntities <- rbind(extractedEntities, c("GDELT", "data/data_GDELT_ts.rds", "extraction/extract_GDELT.R", "Worls events tone and impact"))
+  extractedEntities <- rbind(extractedEntities, c("GDELT", "data/data_GDELT_ts.rds", "extraction/extract_GDELT.R", "World events tone and impact"))
   extractedEntities <- rbind(extractedEntities, c("index", "data/data_index_ts.rds", "extraction/extract_index.R", "Indexes from disparate origins"))
   extractedEntities <- rbind(extractedEntities, c("music", "data/data_music_ts.rds", "extraction/extract_musicSPOTIFY.R", "Music trends from SPOTIFY"))  
   names(extractedEntities) <- c("Preffix", "DataFileName", "SourceCode", "Description")
