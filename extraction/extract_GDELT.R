@@ -11,6 +11,17 @@ library(openxlsx)
 library(bigrquery)
 library(lubridate)
 
+
+
+# https://cran.r-project.org/web/packages/bigrquery/bigrquery.pdf
+# bq_user()
+# bq_token() 
+# bq_deauth()
+# bq_auth_configure(path = "client_secret_756662440975-4oh9tqi109v6kuncm1edsabotmous5r4.apps.googleusercontent.com.json")
+
+
+
+
 print("Extracting GDELT events")
 
 # Prepare filter for SQL query
