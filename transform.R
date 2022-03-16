@@ -111,7 +111,7 @@ normalizeTo1000 <- function(tsValues) {
   tsValues[start:end] <- normalizedWithinExistingInterval * sign(tsValues[start:end])
   tsValues
 }
-# Temporarily remove "date" column to call function that makes massive imputation
+# Temporarily remove "date" column to call function that makes massive normalization
 tmp_df_noDate <- seedDataset3[,!(colnames(seedDataset3) == "date")]
 # Perform data normalization to range 1:100
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=normalizeTo1000))
