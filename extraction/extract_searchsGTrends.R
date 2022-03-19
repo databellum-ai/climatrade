@@ -115,3 +115,16 @@ saveRDS(as_tibble(all_searches_ts), "data/data_searchesGoogle_ts.rds")
 
 
 
+
+
+# Temas de GoogleTrends:
+# INFLACION = "/m/09jx2"
+gtrends(keyword = "/m/09jx2", time = "all", onlyInterest = TRUE) 
+
+
+
+
+
+
+
+
