@@ -1,3 +1,11 @@
+# Imputación de huecos día a día en historicalIAI2
+# Eliminar posteriores a "2021-03-09" en historicalIAI2
+# Leer .csv actual y renombrar y fusionar al histórico
+
+historicalIAI2 <- readRDS("data/data_index_ts2.rds")
+
+
+
 # ================================
 # Extract index data
 # ================================
@@ -18,4 +26,5 @@ head(IAIindex)
 saveRDS(IAIindex, "data/data_index_ts.rds")
 
 print("IAI index extraction process FINISHED")
+
 
