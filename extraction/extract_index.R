@@ -1,4 +1,3 @@
-# Imputación de huecos día a día en historicalIAI2: del 2021-01-23 al 2021-03-08
 # Leer .csv actual y renombrar 
 
 # ================================
@@ -24,5 +23,4 @@ saveRDS(IAIindex, "data/data_indexHistorical_ts.rds")
 
 print("IAI index extraction process FINISHED")
 
-library(openxlsx)
-write.xlsx(IAIindex, "data/test1.xlsx")
+
