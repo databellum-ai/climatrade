@@ -1,3 +1,9 @@
+# IAI Constituent Subindicies
+# The IAI is driven by reader interest on Investopedia across three categories of topics:
+#   -Macroeconomic_Anxiety (macroeconomic anxiety, inflation/"Inflación", deflation/"Deflación") 
+# -Market_Anxiety(market anxiety, short selling/"Venta corta", volatility/"Volatilidad")
+# -DebtCredit_Anxiety(debt anxiety, credit anxiety, default on debt/"Impago", solvency/"Solvencia", bankruptcy/"Quiebra financiera")
+
 # ===============================================
 # Extract search trends from Google Trends
 # ===============================================

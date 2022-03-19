@@ -27,24 +27,24 @@ library(openxlsx)
 seed <- read.xlsx("userEdition/seed1.xlsx")
 names(seed)
 goalFeatures <- seed$FeatureCode[!is.na(seed$FeatureCode)]
-goalFeatureNames <- seed$FeatureName[!is.na(seed$FeatureName)]
-moodFeatures <- as.data.frame(do.call(rbind, strsplit(seed$PlanetMoodFeatures, "\\."))) %>% rename(source = V1, variable = V2)
-moodFeatures <- moodFeatures[!(is.na(seed$PlanetMoodFeatures)),]
+refZero <- seed$RefZero
+moodFeatures <- as.data.frame(do.call(rbind, strsplit(seed$Features, "\\."))) %>% rename(source = V1, variable = V2)
+moodFeatures <- moodFeatures[!(is.na(seed$Features)),]
+moodFeatures <- moodFeatures %>% cbind(refZero)
 searchTerms <- seed$SearchTerms[!(is.na(seed$SearchTerms))]
 events <- seed$Events[!(is.na(seed$Events))]  # GDELT event codes to filter (not implemented)
 Std_Geo <- seed$Std_Geo[!(is.na(seed$Std_Geo))]
 geoLocations <- Std_Geo
 seedFeatures_df <- 
   rbind(
-    data.frame(source="stocks", variable=goalFeatures, type="outcome"),
-    data.frame(moodFeatures, type="prescriptor"),
-    data.frame(source="searchesGoogle", variable=searchTerms, type="prescriptor"),
-    data.frame(source="locations", variable=geoLocations, type="dimension")) %>%
+    data.frame(moodFeatures, type="measure"), 
+    data.frame(source="searchesGoogle", variable=searchTerms, refZero=NA, type="measure"),
+    data.frame(source="locations", variable=geoLocations, refZero=NA, type="dimension")) %>%
   mutate(
     termsDetailed = str_extract(variable,  "(?<=\\().+?(?=\\))"), 
     termsDetailed = replace(termsDetailed, is.na(termsDetailed), ""), 
     variable = str_remove(variable, paste0("\\(",termsDetailed,"\\)"))) %>% 
-  select(source, variable, termsDetailed, type)
+  select(source, variable, termsDetailed, refZero, type)
 seedFeatures_df
 
 
