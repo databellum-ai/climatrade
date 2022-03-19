@@ -96,22 +96,25 @@ tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=removeOutliers))
 # Perform massive imputation to numeric time series (features)
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval))
 seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
-
-
 # ===============
 # BALANCING AROUND ZERO-REF VALUE
 # ---------------
 # Some features are always positive, other positive/negative (ref. zero), BUT others have a specific value as reference (for example VIX reference value to distinguish between "good" or "bad" is ~30)
 # We now proceed to balance values before normalization
-seedFeatures_df
-names(seedDataset3)
 
+# function to know what sbtract to each column
+valueToSubtractRefZero <- function(columnName) {
+  refsZero <- seedFeatures_df %>% filter(type == "measure") %>% mutate(feature = paste0(source,".",variable)) %>% select(feature, refZero)
+  refZeroToSubtract <- refsZero$refZero[refsZero$feature == str_split(columnName,"_")[[1]][1]]
+  refZeroToSubtract <- refZeroToSubtract[1]
+  refZeroToSubtract
+}
 
-
-
-
-
-
+#using function, we create a numeric vector of values to subtract to each column so we adjust to given "RefZero"
+vectorToSubtractRefZero <- sapply(colnames(seedDataset3), valueToSubtractRefZero)
+vectorToSubtractRefZero[is.na(vectorToSubtractRefZero)] <- 0
+vectorToSubtractRefZero
+seedDataset2 <- sweep(seedDataset2, 2, vectorToSubtractRefZero)
 # ===============
 # NORMALIZATION TO A RANGE
 # ---------------
