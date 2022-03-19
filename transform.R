@@ -96,12 +96,28 @@ tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=removeOutliers))
 # Perform massive imputation to numeric time series (features)
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=imputeFeatureWithinExistingInterval))
 seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
+
+
+# ===============
+# BALANCING AROUND ZERO-REF VALUE
+# ---------------
+# Some features are always positive, other positive/negative (ref. zero), BUT others have a specific value as reference (for example VIX reference value to distinguish between "good" or "bad" is ~30)
+# We now proceed to balance values before normalization
+seedFeatures_df
+names(seedDataset3)
+
+
+
+
+
+
+
 # ===============
 # NORMALIZATION TO A RANGE
 # ---------------
 # Load dataset to prepare changes
 seedDataset3 <- seedDataset2
-# Function to nomalize to a -1000 to 1000 range (using only one of the interval extremes)
+# Function to normalize to a -1000 to 1000 range (using only one of the interval extremes)
 normalizeTo1000 <- function(tsValues) {
   start <- which.min(is.na(tsValues))
   end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
