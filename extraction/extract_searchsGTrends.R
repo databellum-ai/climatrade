@@ -1,13 +1,10 @@
-# IAI Constituent Subindicies
-# The IAI is driven by reader interest on Investopedia across three categories of topics:
-#   -Macroeconomic_Anxiety (macroeconomic anxiety, inflation/"Inflación", deflation/"Deflación") 
-# -Market_Anxiety(market anxiety, short selling/"Venta corta", volatility/"Volatilidad")
-# -DebtCredit_Anxiety(debt anxiety, credit anxiety, default on debt/"Impago", solvency/"Solvencia", bankruptcy/"Quiebra financiera")
-
 # ===============================================
 # Extract search trends from Google Trends
 # ===============================================
-# https://www.rdocumentation.org/packages/gtrendsR/versions/1.3.5/topics/gtrends
+# NOTES ON IMPLEMENTATION:
+# -See README.rd for topics correspondence
+# -Test responses quality depending on grpop="web" or gprop="quality"
+# -Test responses quality depending on Category (Finance, News, etc.)
 
 library(tidyverse)
 library(lubridate)
@@ -42,6 +39,7 @@ for (i in c(1:length(searchTerms))) { # loop "vectors of terms" (KAM) within mai
     print(paste("...",search_periods[j]))
     # Connect with Google to obtain a list of dataframes
     queryTrends <- gtrends(
+      gprop = "news",
       keyword = search_term, 
       time = search_periods[j], 
       onlyInterest = TRUE) # only interest-over-time is faster
@@ -56,6 +54,7 @@ for (i in c(1:length(searchTerms))) { # loop "vectors of terms" (KAM) within mai
 }
 
 head(all_searches)
+
 
 # ===============================================
 # RESOLUTIONS BALANCING
@@ -91,7 +90,6 @@ all_searches <- all_searches %>%
 
 head(all_searches)
 
-
 # ===============================================
 # PREPARE OUTPUTS
 # ===============================================
@@ -117,9 +115,6 @@ saveRDS(as_tibble(all_searches_ts), "data/data_searchesGoogle_ts.rds")
 
 
 
-# Temas de GoogleTrends:
-# INFLACION = "/m/09jx2"
-gtrends(keyword = "/m/09jx2", time = "all", onlyInterest = TRUE) 
 
 
 

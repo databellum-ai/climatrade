@@ -1,3 +1,5 @@
+# PTE: probar/automatizar proceso Extract de GDELT/BigQuery (oauth, etc)
+# PTE: IAI: comprobar captura directa CSV
 
 source("initialize.R")
 
@@ -11,42 +13,6 @@ library(openxlsx)
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
-
-
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# OBTAIN SEED SPECIFICATIONS
-# INPUT: .XLSX user edited defining the seed (hypothesis)
-# OUTPUT: dataframe with the structured seed (hypethesis)
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# Establish what specific stocks, features, concepts and geography locations we want to analyze for a given seed
-# Determine what stocks, features, concepts and geography locations we want to analize.
-# Code convert table of "seed" tables (hypothesis) from .XLSX to a structured dataframe
-# Since this this dataframe identifies exactly what features and standard geolocations will be used as "seed", it will be later used during Extraction and Transformation phases
-seed <- read.xlsx("userEdition/seed1.xlsx")
-names(seed)
-goalFeatures <- seed$FeatureCode[!is.na(seed$FeatureCode)]
-refZero <- seed$RefZero
-moodFeatures <- as.data.frame(do.call(rbind, strsplit(seed$Features, "\\."))) %>% rename(source = V1, variable = V2)
-moodFeatures <- moodFeatures[!(is.na(seed$Features)),]
-moodFeatures <- moodFeatures %>% cbind(refZero)
-searchTerms <- seed$SearchTerms[!(is.na(seed$SearchTerms))]
-events <- seed$Events[!(is.na(seed$Events))]  # GDELT event codes to filter (not implemented)
-Std_Geo <- seed$Std_Geo[!(is.na(seed$Std_Geo))]
-geoLocations <- Std_Geo
-seedFeatures_df <- 
-  rbind(
-    data.frame(moodFeatures, type="measure"), 
-    data.frame(source="searchesGoogle", variable=searchTerms, refZero=NA, type="measure"),
-    data.frame(source="locations", variable=geoLocations, refZero=NA, type="dimension")) %>%
-  mutate(
-    termsDetailed = str_extract(variable,  "(?<=\\().+?(?=\\))"), 
-    termsDetailed = replace(termsDetailed, is.na(termsDetailed), ""), 
-    variable = str_remove(variable, paste0("\\(",termsDetailed,"\\)"))) %>% 
-  select(source, variable, termsDetailed, refZero, type)
-seedFeatures_df
-
 
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
