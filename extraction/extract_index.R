@@ -20,7 +20,7 @@ recentIAI <- recentIAI %>% mutate(date = as.Date(date, "%m/%d/%Y"), countryCode 
 IAIindex <- rbind(historicalIAI, recentIAI) %>% group_by(date,IAI,countryCode) %>% summarise(date = last(date), IAI = mean(IAI), countryCode = NA) %>% select(date, IAI, countryCode)
 
 head(IAIindex)
-
+IAIindex %>% arrange(desc(date))
 # Save to RDS
 saveRDS(IAIindex, "data/data_indexHistorical_ts.rds")
 
