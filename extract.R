@@ -20,7 +20,7 @@ library(openxlsx)
 # OUTPUT: dataframe with the structured seed (hypethesis)
 # ---------------------------------------------------------------------
 # ---------------------------------------------------------------------
-# Establish what specific stocks, features, concepts and geography locations we want to analize for a given seed
+# Establish what specific stocks, features, concepts and geography locations we want to analyze for a given seed
 # Determine what stocks, features, concepts and geography locations we want to analize.
 # Code convert table of "seed" tables (hypothesis) from .XLSX to a structured dataframe
 # Since this this dataframe identifies exactly what features and standard geolocations will be used as "seed", it will be later used during Extraction and Transformation phases
