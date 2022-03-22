@@ -110,6 +110,8 @@ head(all_searches_ts)
 # ===============================================
 saveRDS(as_tibble(all_searches_ts), "data/data_searchesGoogle_ts.rds")
 
+print("End of search categories extraction process")
+
 
 
 

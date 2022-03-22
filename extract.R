@@ -1,5 +1,6 @@
-# PTE: probar/automatizar proceso Extract de GDELT/BigQuery (oauth, etc)
 # PTE: IAI: comprobar captura directa CSV
+# PTE: probar/automatizar proceso Extract de GDELT/BigQuery (oauth, etc)
+
 
 source("initialize.R")
 
@@ -94,13 +95,38 @@ uniformExtractedData <- function(df_to_treat, preffix) {
 # Create empty dataframe to merge all extracted data
 fullDataset_raw <- data.frame(date=as.Date(character()), stdCountryCode=character())
 # Process each entity available
-
-for (i in 1:nrow(extractedEntities)) {
+# for (i in 1:nrow(extractedEntities)) {
+for (i in 8:8) { 
   print (paste("Merging: ",extractedEntities$Preffix[i],"::",extractedEntities$DataFileName[i]))
   fullDataset_raw <- merge(fullDataset_raw, uniformExtractedData(readRDS(extractedEntities$DataFileName[i]), extractedEntities$Preffix[i]), by = c("date", "stdCountryCode"), all=TRUE)
 }
 # NA values in countryCode indicate "GLOBAL" scope for those features
 fullDataset_raw <- fullDataset_raw %>% mutate(stdCountryCode = ifelse(is.na(stdCountryCode),"GLOBAL",stdCountryCode))
+
+
+
+
+test0 <- fullDataset_raw
+head(test0)
+i <- 7
+test7 <- uniformExtractedData(readRDS(extractedEntities$DataFileName[i]), extractedEntities$Preffix[i])
+head(test7)
+i <- 8
+test8 <- uniformExtractedData(readRDS(extractedEntities$DataFileName[i]), extractedEntities$Preffix[i])
+head(test8)
+
+test_merge <- merge(test0, test7, by = c("date", "stdCountryCode"), all=TRUE)
+test_merge2 <- merge(test_merge, test8, by = c("date", "stdCountryCode"), all=TRUE)
+test_merge2 %>% filter(stdCountryCode == "GLOBAL") %>% arrange(desc(date))
+
+# fullDataset_raw
+# 
+# test <- readRDS("data/data_music_ts.rds")
+# test %>% arrange(desc(date)) %>% filter(is.na(countryCode))
+
+
+
+
 
 
 # ===============

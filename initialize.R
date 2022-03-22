@@ -57,6 +57,7 @@ library(openxlsx)
 # Function to load available active sources to be used during extraction and transformation phases
 sourcesAvailable <- function() {
   extractedEntities <- data.frame()
+  extractedEntities <- rbind(extractedEntities, c("moonSunCalendar", "data/data_calendarMoon_ts.rds", "extraction/extract_calendarMoon.R", "Moon phase, calendar"))
   extractedEntities <- rbind(extractedEntities, c("airTraffic", "data/data_airTraffic_ts.rds", "extraction/extract_airTraffic.R", "Air traffic data"))
   extractedEntities <- rbind(extractedEntities, c("OECD", "data/data_OECD_ts.rds", "extraction/extract_indicatorsOECD.R", "Leading indicators from OECD"))
   extractedEntities <- rbind(extractedEntities, c("stocks", "data/data_stocks_ts.rds", "extraction/extract_stocksPrices.R", "Stock prices from Yahoo Finance"))
@@ -105,6 +106,9 @@ for (i in 1:nrow(extractedEntities)) {
   geoDataset <- rbind(geoDataset, tmpGeoDataset)
 }
 head(geoDataset)
+
+
+
 # ===============
 # DETAIL OF NAMES AND GEOGRAPHIC REGIONS (EXCEPTION)
 # ---------------
