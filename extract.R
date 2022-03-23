@@ -1,5 +1,6 @@
-# PTE: IAI: comprobar captura diaria directa CSV
+# PTE: IAI: comprobar captura diaria directa CSV (¿es siempre "data-aFQir.csv"?)
 # PTE: probar/automatizar proceso Extract de GDELT/BigQuery (oauth, etc)
+# PTE: probar/automatizar proceso Extract RSellenium (última versión compatible de Chrome)
 
 
 source("initialize.R")
