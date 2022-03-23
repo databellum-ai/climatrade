@@ -2,6 +2,11 @@
 # Extract music data
 # ================================
 
+#Shut Down Client and Server
+# remote_driver$close()
+# driver$server$stop()
+# system("taskkill /im java.exe /f", intern=FALSE, ignore.stdout=FALSE)
+
 library(tidyverse)
 # Libraries Spotify (including RSelenium)
 library(RSelenium)
@@ -12,8 +17,9 @@ library(spotifyr)# For certain functions and applications, you’ll need to log 
 
 numTopTracks <- 3 # how many tracks we extract per day/week
 lotSize <- 90  # dates processed in a run. If not enough, just repeat run
-# versionChrome <- "97.0.4692.71" # RSelenium requires current version of Chrome browser to launch it
-versionChrome <- "99.0.4844.51" # RSelenium requires current version of Chrome browser to launch it
+# RSelenium requires current version of Chrome browser to launch it
+# versionChrome <- "97.0.4692.71" 
+versionChrome <- "99.0.4844.51"
 
 # ================================
 # STEP 1: Determine countries and dates we need to collect
@@ -56,7 +62,7 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   # ================================
 
   # Start RSelenium server
-  driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = versionChrome)  
+  driver <- rsDriver(version = "latest", browser=c("chrome"), chromever = versionChrome)
   remote_driver <- driver[["client"]]
   
   # Page initialization prepartion (login + accept cookies)

@@ -1,4 +1,4 @@
-# PTE: IAI: comprobar captura directa CSV
+# PTE: IAI: comprobar captura diaria directa CSV
 # PTE: probar/automatizar proceso Extract de GDELT/BigQuery (oauth, etc)
 
 
