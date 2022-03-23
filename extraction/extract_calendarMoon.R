@@ -36,7 +36,7 @@ moonData
 
 # We add Weekday and reorder columns
 moonData <- moonData %>% 
-  mutate(weekday = weekdays(date, abbreviate = FALSE), 
+  mutate(weekday = wday(date), 
          yearWeek = week(ymd(date)), 
          countryCode = NA) %>% 
   select(date, moonPhase, weekday, yearWeek, countryCode)

@@ -85,8 +85,10 @@ uniformExtractedData <- function(df_to_treat, preffix) {
     rename(date = paste0(preffix,".date"), countryCode = paste0(preffix,".countryCode")) %>% 
     mutate(countryCode = toupper(countryCode))
   df_to_treat <- df_to_treat %>% 
-    left_join((reduced_std_geo %>% filter(source == preffix)), by = "countryCode") %>% 
-    select(-c("countryCode", "source"))
+    left_join((reduced_std_geo %>% 
+                 filter(source == preffix)), by = "countryCode") %>% 
+    mutate(stdCountryCode = ifelse(stdCountryCode == "GLOBAL", NA, stdCountryCode)) # we make sure that "Global" country is processed as NA
+  df_to_treat <- df_to_treat %>% select(-c("countryCode", "source"))
   df_to_treat
 }
 # ===============
@@ -95,38 +97,15 @@ uniformExtractedData <- function(df_to_treat, preffix) {
 # Create empty dataframe to merge all extracted data
 fullDataset_raw <- data.frame(date=as.Date(character()), stdCountryCode=character())
 # Process each entity available
-# for (i in 1:nrow(extractedEntities)) {
-for (i in 8:8) { 
+for (i in 1:nrow(extractedEntities)) {
   print (paste("Merging: ",extractedEntities$Preffix[i],"::",extractedEntities$DataFileName[i]))
-  fullDataset_raw <- merge(fullDataset_raw, uniformExtractedData(readRDS(extractedEntities$DataFileName[i]), extractedEntities$Preffix[i]), by = c("date", "stdCountryCode"), all=TRUE)
+  newDataToMerge <- readRDS(extractedEntities$DataFileName[i])
+  fullDataset_raw <- merge(fullDataset_raw, uniformExtractedData(newDataToMerge, extractedEntities$Preffix[i]), by = c("date", "stdCountryCode"), all=TRUE)
 }
 # NA values in countryCode indicate "GLOBAL" scope for those features
-fullDataset_raw <- fullDataset_raw %>% mutate(stdCountryCode = ifelse(is.na(stdCountryCode),"GLOBAL",stdCountryCode))
+fullDataset_raw <- fullDataset_raw %>% mutate(stdCountryCode = ifelse((is.na(stdCountryCode)),"GLOBAL",stdCountryCode))  # once merged, we convert country NA into "GLOBAL"
 
-
-
-
-test0 <- fullDataset_raw
-head(test0)
-i <- 7
-test7 <- uniformExtractedData(readRDS(extractedEntities$DataFileName[i]), extractedEntities$Preffix[i])
-head(test7)
-i <- 8
-test8 <- uniformExtractedData(readRDS(extractedEntities$DataFileName[i]), extractedEntities$Preffix[i])
-head(test8)
-
-test_merge <- merge(test0, test7, by = c("date", "stdCountryCode"), all=TRUE)
-test_merge2 <- merge(test_merge, test8, by = c("date", "stdCountryCode"), all=TRUE)
-test_merge2 %>% filter(stdCountryCode == "GLOBAL") %>% arrange(desc(date))
-
-# fullDataset_raw
-# 
-# test <- readRDS("data/data_music_ts.rds")
-# test %>% arrange(desc(date)) %>% filter(is.na(countryCode))
-
-
-
-
+fullDataset_raw %>% filter(date >= "2022-03-15") %>% filter(stdCountryCode == "GLOBAL")
 
 
 # ===============
