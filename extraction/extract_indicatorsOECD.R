@@ -44,11 +44,11 @@ leadingIndicatorsOECD <- get_dataset("MEI_CLI",
                                      start_time = selected_initial_year_OECD, 
                                      end_time = selected_end_year_OECD)
 leadingIndicatorsOECD <- leadingIndicatorsOECD %>% 
-  mutate(obsDate = paste(Time, "-15", sep = "")) %>% 
+  mutate(obsDate = paste(obsTime, "-15", sep = "")) %>% 
   select(date = obsDate,
          Indicator = SUBJECT, 
          countryCode = LOCATION, 
-         Value = ObsValue)
+         Value = obsValue)
 
 # Now we join current (fresh) and historical data:
 leadingIndicatorsOECD <- rbind(leadingIndicatorsOECD, leadingIndicatorsOECD_1960_2020)

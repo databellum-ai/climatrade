@@ -168,67 +168,69 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   # -Tempo (BPM: Numerical, Overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.
   # -Energy: Numerical, Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. Perceptual features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy.
   # (see description of other features here: https://rpubs.com/PeterDola/SpotifyTracks)
-  
-  # calling API for tracks features
-  Sys.setenv(SPOTIFY_CLIENT_ID = spotifyClientId)
-  Sys.setenv(SPOTIFY_CLIENT_SECRET = spotifySecretId)
-  access_token <- get_spotify_access_token()
-  # There is a limit of 100 track in each query to the API, so we slice tracks in lots
-  recsToProc <- nrow(listenedTracks)  # total records (tracks) to process
-  maxRec <- 90  # limit of records per API (100, but just in case...)
-  nCalls <- 1 + floor((recsToProc-1)/maxRec) # calculate number of calls required
-  allTracksFeatures <- data.frame()  # we will accumulate results here
-  
-  for (c in c(1:nCalls)) {
-    tmpFromRecord <- 1+((c-1)*maxRec)
-    tmpToRecord <- c*maxRec
-    tmpToRecord <- ifelse(tmpToRecord <= recsToProc, tmpToRecord, recsToProc)
-    print(paste("Obtaining features of tracks: ",tmpFromRecord, " to ", tmpToRecord))
-    tmpTracksFeatures <-
-      get_track_audio_features(
-        listenedTracks[tmpFromRecord:tmpToRecord, 1],
-        authorization = access_token)
-    allTracksFeatures <- rbind(allTracksFeatures, tmpTracksFeatures)
+  if (nrow(listenedTracks) > 0) {
+    # calling API for tracks features
+    Sys.setenv(SPOTIFY_CLIENT_ID = spotifyClientId)
+    Sys.setenv(SPOTIFY_CLIENT_SECRET = spotifySecretId)
+    access_token <- get_spotify_access_token()
+    # There is a limit of 100 track in each query to the API, so we slice tracks in lots
+    recsToProc <- nrow(listenedTracks)  # total records (tracks) to process
+    maxRec <- 90  # limit of records per API (100, but just in case...)
+    nCalls <- 1 + floor((recsToProc-1)/maxRec) # calculate number of calls required
+    allTracksFeatures <- data.frame()  # we will accumulate results here
+    
+    for (c in c(1:nCalls)) {
+      tmpFromRecord <- 1+((c-1)*maxRec)
+      tmpToRecord <- c*maxRec
+      tmpToRecord <- ifelse(tmpToRecord <= recsToProc, tmpToRecord, recsToProc)
+      print(paste("Obtaining features of tracks: ",tmpFromRecord, " to ", tmpToRecord))
+      tmpTracksFeatures <-
+        get_track_audio_features(
+          listenedTracks[tmpFromRecord:tmpToRecord, 1],
+          authorization = access_token)
+      allTracksFeatures <- rbind(allTracksFeatures, tmpTracksFeatures)
+    }
+    
+    listenedTracks  # source of tracks found
+    allTracksFeatures  # features extracted for those tracks
+    allTracksFeatures <- cbind(listenedTracks,allTracksFeatures) # we bind all columns
+    allTracksFeatures
+    
+    # Finally, let's group by date/country/feature using weighted mean of the values of top track's features 
+    allTracksFeatures <- allTracksFeatures %>% 
+      group_by(countryCode, country, date) %>% 
+      summarize(
+        danceability = weighted.mean(as.numeric(danceability), as.numeric(numStreams)), 
+        energy = weighted.mean(as.numeric(energy), as.numeric(numStreams)), 
+        tempo = weighted.mean(as.numeric(tempo), as.numeric(numStreams)), 
+        key = weighted.mean(as.numeric(key), as.numeric(numStreams)), 
+        loudness = weighted.mean(as.numeric(loudness), as.numeric(numStreams)),   
+        speechiness = weighted.mean(as.numeric(speechiness), as.numeric(numStreams)),  
+        acousticness = weighted.mean(as.numeric(acousticness), as.numeric(numStreams)),  
+        instrumentalness = weighted.mean(as.numeric(instrumentalness), as.numeric(numStreams)),  
+        liveness = weighted.mean(as.numeric(liveness), as.numeric(numStreams)),  
+        valence = weighted.mean(as.numeric(valence), as.numeric(numStreams)))
+    
+    # new data obtained
+    allTracksFeatures
+    
+    # consolidate with historical data
+    allTracksFeatures <- rbind(allTracksFeatures, historicTracksFeatures)
+    
+    unique(allTracksFeatures$date)
+    unique(allTracksFeatures$country)
+    
+    # ================================
+    # SAVE
+    # ================================
+    # # Save dataset
+    saveRDS(as_tibble(allTracksFeatures),"data/data_music_ts.rds")
+    # write.csv(allTracksFeatures,"data/data_music_ts.csv")
+    # # Save also countries and codes for further consolidation with other data
+    # geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
+    # geo_music
+    # saveRDS(geo_music,"data/geo_music.rds")
   }
-  
-  listenedTracks  # source of tracks found
-  allTracksFeatures  # features extracted for those tracks
-  allTracksFeatures <- cbind(listenedTracks,allTracksFeatures) # we bind all columns
-  allTracksFeatures
-  
-  # Finally, let's group by date/country/feature using weighted mean of the values of top track's features 
-  allTracksFeatures <- allTracksFeatures %>% 
-    group_by(countryCode, country, date) %>% 
-    summarize(
-      danceability = weighted.mean(as.numeric(danceability), as.numeric(numStreams)), 
-      energy = weighted.mean(as.numeric(energy), as.numeric(numStreams)), 
-      tempo = weighted.mean(as.numeric(tempo), as.numeric(numStreams)), 
-      key = weighted.mean(as.numeric(key), as.numeric(numStreams)), 
-      loudness = weighted.mean(as.numeric(loudness), as.numeric(numStreams)),   
-      speechiness = weighted.mean(as.numeric(speechiness), as.numeric(numStreams)),  
-      acousticness = weighted.mean(as.numeric(acousticness), as.numeric(numStreams)),  
-      instrumentalness = weighted.mean(as.numeric(instrumentalness), as.numeric(numStreams)),  
-      liveness = weighted.mean(as.numeric(liveness), as.numeric(numStreams)),  
-      valence = weighted.mean(as.numeric(valence), as.numeric(numStreams)))
-  
-  # new data obtained
-  allTracksFeatures
-  
-  # consolidate with historical data
-  allTracksFeatures <- rbind(allTracksFeatures, historicTracksFeatures)
-  
-  unique(allTracksFeatures$date)
-  unique(allTracksFeatures$country)
-  
-  # ================================
-  # SAVE
-  # ================================
-  # # Save dataset
-  saveRDS(as_tibble(allTracksFeatures),"data/data_music_ts.rds")
-  # write.csv(allTracksFeatures,"data/data_music_ts.csv")
-  # # Save also countries and codes for further consolidation with other data
-  # geo_music <- allTracksFeatures %>% group_by(countryCode, country) %>% summarise()
-  # geo_music
-  # saveRDS(geo_music,"data/geo_music.rds")
 }
 
+print("Music track data extraction process FINISHED")
