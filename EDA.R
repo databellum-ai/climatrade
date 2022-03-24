@@ -35,7 +35,9 @@ endDateAnalysis <- as_date("2022-02-15")
 notNecessaryFeatures <- c("music.tempo_IND", "music.tempo_RUS", "music.energy_IND", "music.energy_RUS", "music.danceability_IND", "music.danceability_RUS", "OECD.BCI_IND", "OECD.BCI_RUS", "OECD.CCI_RUS", "OECD.CLI_IND", "OECD.CLI_RUS")
 dataset_s1_001 <- dataset_s1 %>% filter(between(date, initialDateAnalysis, endDateAnalysis)) %>% select(-all_of(notNecessaryFeatures))
 range(dataset_s1_001$date)
-names(dataset_s1_001)
+features <- names(dataset_s1_001)
+features
+
 
 write.xlsx(dataset_s1_001, "data/dataset_s1_001.xlsx")
 
