@@ -10,19 +10,40 @@ source("initialize.R")
 # ---------------------------------------------------------------------
 
 library(tidyverse)
+library(lubridate)
 library(openxlsx)
 
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 # EDA
+# ANALYSIS 001
+# 2017-01-01 to 2022-03-20
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
+
+
 # ===============
 # LOAD TRANSFORMED DATASETS
 # ---------------
-seedDataset <- readRDS("data/dataset_seed1_p1.rds")  # Dataset with original values customized to the existing seed and spread to final columns format
-seedDataset2 <- readRDS("data/dataset_seed1_p2.rds")  # Dataset including imputation of missing values and removing empty columns
-seedDataset3 <- readRDS("data/dataset_seed1_p3.rds")  # Dataset adding conversion to 1:1000 range
+dataset_s1_raw <- readRDS("data/dataset_seed1_p1.rds")  # Dataset with original values customized to the existing seed and spread to final columns format
+dataset_s1 <- readRDS("data/dataset_seed1_p3.rds")  # Dataset, imputated, balanced, normalized to -1000:0:1000 range
+# ===============
+# DEFINE DATES SCOPE AND REMOVE NOT NECESSARY FEATURES
+# ---------------
+initialDateAnalysis <- as_date("2017-01-01")
+endDateAnalysis <- as_date("2022-02-15")
+notNecessaryFeatures <- c("music.tempo_IND", "music.tempo_RUS", "music.energy_IND", "music.energy_RUS", "music.danceability_IND", "music.danceability_RUS", "OECD.BCI_IND", "OECD.BCI_RUS", "OECD.CCI_RUS", "OECD.CLI_IND", "OECD.CLI_RUS")
+dataset_s1_001 <- dataset_s1 %>% filter(between(date, initialDateAnalysis, endDateAnalysis)) %>% select(-all_of(notNecessaryFeatures))
+range(dataset_s1_001$date)
+names(dataset_s1_001)
+
+write.xlsx(dataset_s1_001, "data/dataset_s1_001.xlsx")
+
+
+
+
+
+
 # ===============
 # GRAPHICAL ANALYSIS
 # ---------------
