@@ -1,6 +1,6 @@
-# COMPROBAR ULTIMAS FECHAS:
-readRDS("data/data_searchesGoogle_ts.rds") %>% arrange(desc(date))
-readRDS("data/data_GDELT_ts.rds") %>% arrange(desc(date)) 
+# PTE: COMPROBAR ULTIMAS FECHAS:
+# readRDS("data/data_searchesGoogle_ts.rds") %>% arrange(desc(date))
+# readRDS("data/data_GDELT_ts.rds") %>% arrange(desc(date)) 
 # PTE: probar/automatizar proceso Extract de GDELT/BigQuery (oauth, etc)
 # PTE: probar/automatizar proceso Extract RSellenium (última versión compatible de Chrome)
 
