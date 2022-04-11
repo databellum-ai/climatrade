@@ -13,6 +13,10 @@ library(tidyverse)
 library(lubridate)
 library(openxlsx)
 
+# COMPROBAR ULTIMA FECHA:
+readRDS("data/data_searchesGoogle_ts.rds") %>% arrange(desc(date))
+readRDS("data/data_GDELT_ts.rds") %>% arrange(desc(date))  
+
 # -----------------------------------------------------------------
 # -----------------------------------------------------------------
 # EDA
