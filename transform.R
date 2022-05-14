@@ -135,6 +135,7 @@ tmp_df_noDate <- seedDataset3[,!(colnames(seedDataset3) == "date")]
 # Perform data normalization to range 1:100
 tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=normalizeTo1000))
 seedDataset3 <- cbind(date = seedDataset3$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
+
 # ===============
 # SAVE TRANSFORMED DATASETS
 # ---------------
@@ -151,4 +152,4 @@ write.xlsx(seedDataset, "data/dataset_seed1_p1.xlsx")
 write.xlsx(seedDataset2, "data/dataset_seed1_p2.xlsx")
 write.xlsx(seedDataset3, "data/dataset_seed1_p3.xlsx")
 
-
+print("FINISHED transformation process")

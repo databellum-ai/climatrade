@@ -13,46 +13,47 @@ library(tidyverse)
 library(lubridate)
 library(openxlsx)
 
-# COMPROBAR ULTIMA FECHA:
-readRDS("data/data_searchesGoogle_ts.rds") %>% arrange(desc(date))
-readRDS("data/data_GDELT_ts.rds") %>% arrange(desc(date))  
-
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
-# EDA
-# ANALYSIS 001
-# 2017-01-01 to 2022-03-20
-# -----------------------------------------------------------------
-# -----------------------------------------------------------------
-
+# --------------------------------------------------------------
+# --------------------------------------------------------------
 # ===============
-# LOAD TRANSFORMED DATASETS
+# LOAD TRANSFORMED DATASETS, REDUCE FEATURES, ENSHORT DATE RANGE AND SAVE
 # ---------------
+# Define dates scope and features not necessary
+initialDateAnalysis <- as_date("2017-01-01")
+endDateAnalysis <- as_date("2022-04-15")
+notNecessaryFeatures <- c("music.tempo_IND", "music.tempo_RUS", "music.energy_IND", "music.energy_RUS", "music.danceability_IND", "music.danceability_RUS", "OECD.BCI_IND", "OECD.BCI_RUS", "OECD.CCI_RUS", "OECD.CLI_IND", "OECD.CLI_RUS")
 dataset_s1_raw <- readRDS("data/dataset_seed1_p1.rds")  # Dataset with original values customized to the existing seed and spread to final columns format
 dataset_s1 <- readRDS("data/dataset_seed1_p3.rds")  # Dataset, imputated, balanced, normalized to -1000:0:1000 range
-# ===============
-# DEFINE DATES SCOPE AND REMOVE NOT NECESSARY FEATURES
-# ---------------
-initialDateAnalysis <- as_date("2017-01-01")
-endDateAnalysis <- as_date("2022-02-15")
-notNecessaryFeatures <- c("music.tempo_IND", "music.tempo_RUS", "music.energy_IND", "music.energy_RUS", "music.danceability_IND", "music.danceability_RUS", "OECD.BCI_IND", "OECD.BCI_RUS", "OECD.CCI_RUS", "OECD.CLI_IND", "OECD.CLI_RUS")
 dataset_s1_001 <- dataset_s1 %>% filter(between(date, initialDateAnalysis, endDateAnalysis)) %>% select(-all_of(notNecessaryFeatures))
-range(dataset_s1_001$date)
 features <- names(dataset_s1_001)
-features
-
-
+print("All Features available:")
+print(names(dataset_s1_raw))
+print("All Dates available:")
+print(range(dataset_s1_raw$date))
+print("Features for analysis:")
+print(features)
+print("Dates range for analysis:")
+range(dataset_s1_001$date)
+# Save to .XLSX
+saveRDS(dataset_s1_001,"data/dataset_s1_001.rds")  # Dataset (1000-normalized version) reduced in features and dates scope
 write.xlsx(dataset_s1_001, "data/dataset_s1_001.xlsx")
-
-
-
-
+# --------------------------------------------------------------
+# --------------------------------------------------------------
 
 
 # ===============
 # GRAPHICAL ANALYSIS
 # ---------------
 library(ggplot2)
+
+dataset_s1_001 <- readRDS("data/dataset_s1_001.rds")  # Load dataset for analysis
+names(dataset_s1_001)
+
+
+
+
+
+
 
 # Google searches chart
 all_searches %>% group_by(KAM) %>%
@@ -85,7 +86,7 @@ stocksData %>%
 
 
 
-test_data <- seedDataset3 %>% select(date, `stocks.^VIX_GLOBAL`, `stocks.^VVIX_GLOBAL`, `OECD.CLI_OECD`, `index.IAI_GLOBAL`)
+test_data <- seedDataset3 %>% select(date, `stocks.^VIX_GLOBAL`, `stocks.^VVIX_GLOBAL`, `OECD.CLI_GER`, `index.IAI_GLOBAL`)
 
 test_data_gathered <- test_data %>% gather(key = "variable", value = "value", -date)
 ggplot(test_data_gathered, 

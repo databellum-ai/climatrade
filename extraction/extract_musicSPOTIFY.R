@@ -19,7 +19,9 @@ numTopTracks <- 3 # how many tracks we extract per day/week
 lotSize <- 90  # dates processed in a run. If not enough, just repeat run
 # RSelenium requires current version of Chrome browser to launch it
 # versionChrome <- "97.0.4692.71" 
-versionChrome <- "99.0.4844.51"
+# versionChrome <- "99.0.4844.51"
+versionChrome <- "101.0.4951.41" # see last ChromeDriver last available version: https://chromedriver.storage.googleapis.com/LATEST_RELEASE 
+
 
 # ================================
 # STEP 1: Determine countries and dates we need to collect
@@ -234,3 +236,4 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
 }
 
 print("Music track data extraction process FINISHED")
+

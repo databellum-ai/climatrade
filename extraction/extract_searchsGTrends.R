@@ -124,4 +124,3 @@ print("End of search categories extraction process")
 
 
 
-
