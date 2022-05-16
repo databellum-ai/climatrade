@@ -2,8 +2,9 @@
 # ======================
 # CURSO-TUTORIALES:
 # Blog: https://bookdown.org/singh_pratap_tejendra/intro_time_series_r/
-# Blog: https://otexts.com/fpp2/
 # Blog: https://www.kaggle.com/code/ninetyninenewton/prediction-of-stock-market-volatility/notebook
+# Blog: https://otexts.com/fpp2/
+
 # Video tutorial: https://youtu.be/eeje8DqN0bQ
 # 
 # 
@@ -30,4 +31,35 @@
 # ==================================================================
 # ==================================================================
   
+
+
+
+
+# Blog: https://bookdown.org/singh_pratap_tejendra/intro_time_series_r/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   
