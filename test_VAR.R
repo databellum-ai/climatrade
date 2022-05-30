@@ -58,16 +58,13 @@ dum_season    <- dum_season[,-1]
 str.main <- c(
   'LRM=ln(real money M2)', 'LRY=ln(real income)', 
   'IBO=bond rate', 'IDE=bank deposit rate')
-
 x11(width=12, height = 6); 
 par(mfrow=c(2,2), mar=c(5,3,3,3))
 for(i in 1:4) {
   matplot(m.lev[,i], axes=FALSE,
           type=c('l'), col = c('blue'), 
           main = str.main[i])
-  
   axis(2) # show y axis
-  
   # show x axis and replace it with 
   # an user defined sting vector
   axis(1, at=seq_along(1:nrow(df.lev)),
@@ -78,13 +75,12 @@ for(i in 1:4) {
 # VAR model in level
 #========================================================
 
-# lag length
-VARselect(df.lev, lag.max = 4,
-          type = 'const', season = 4)
+# lag length p
+# Lag length (p) is selected by using several information criteria : AIC, HQ, SC, and so on. Lower these scores are better since these criteria penalize models that use more parameters. This work can be done easily by using VARselect() function with a maximum lag. From the following results, we set lag lengths of VAR in level and VAR in difference to 2 and 1 respectively.
+VARselect(df.lev, lag.max = 4, type = 'const', season = 4)
 
 # estimation
-var.model_lev <- VAR(df.lev, p = 2, 
-                     type = 'const', season = 4)
+var.model_lev <- VAR(df.lev, p = 2, type = 'const', season = 4)
 
 # forecast of lev data
 var.pred <- predict(var.model_lev, n.ahead = nhor)
