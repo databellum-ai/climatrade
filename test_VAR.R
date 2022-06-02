@@ -98,12 +98,10 @@ colnames(df.diff) <- c('dLRM', 'dLRY', 'dIBO', 'dIDE')
 m.diff <- as.matrix(df.diff)
 
 # lag length
-VARselect(df.diff, lag.max = 4,
-          type = 'const', season = 4)
+VARselect(df.diff, lag.max = 4, type = 'const', season = 4)
 
 # estimation
-vare_diff <- VAR(df.diff, p = 1, 
-                 type = 'const', season = 4)
+vare_diff <- VAR(df.diff, p = 1, type = 'const', season = 4)
 
 # forecast of differenced data
 varf_diff <- predict(vare_diff, n.ahead = nhor)
