@@ -20,20 +20,53 @@ df_planetMood <- readRDS("data/dataset_seed1_p2.rds")  # Dataset, imputated, bal
 # Define dates scope and features not necessary
 initialDateAnalysis <- as_date("2017-01-01")
 endDateAnalysis <- as_date("2022-04-15")
+
 notNecessaryFeatures <- c(
-  "music.tempo_IND", 
-  "music.tempo_RUS", 
-  "music.energy_IND", 
-  "music.energy_RUS", 
-  "music.danceability_IND", 
-  "music.danceability_RUS", 
-  "OECD.BCI_IND", 
-  "OECD.BCI_RUS", 
-  "OECD.CCI_RUS", 
-  "OECD.CLI_IND", 
-  "OECD.CLI_RUS"
+  'music.tempo_ESP', 
+  'music.tempo_GER', 
+  'music.tempo_IND', 
+  'music.tempo_RUS', 
+  'music.energy_ESP', 
+  'music.energy_GER', 
+  'music.energy_IND', 
+  'music.energy_RUS', 
+  'music.danceability_ESP', 
+  'music.danceability_GER', 
+  'music.danceability_IND', 
+  'music.danceability_RUS', 
+  'OECD.BCI_ESP', 
+  'OECD.BCI_IND', 
+  'OECD.BCI_RUS', 
+  'OECD.CCI_ESP', 
+  'OECD.CCI_RUS', 
+  'OECD.CLI_ESP', 
+  'OECD.CLI_IND', 
+  'OECD.CLI_RUS'
   )
-df_planetMood <- df_planetMood %>% filter(between(date, initialDateAnalysis, endDateAnalysis)) %>% select(-all_of(notNecessaryFeatures))
+
+df_planetMood <- df_planetMood %>% 
+  filter(between(date, initialDateAnalysis, endDateAnalysis)) %>% arrange(date) %>% 
+  select(-all_of(notNecessaryFeatures)) %>% 
+  rename(
+    "VIX" = "stocks.^VIX_GLOBAL", 
+    "VVIX" = "stocks.^VVIX_GLOBAL", 
+    "Flights" = "airTraffic.worldFlights_GLOBAL", 
+    "Tempo" = "music.tempo_GLOBAL", 
+    "Energy" = "music.energy_GLOBAL", 
+    "Danceability" = "music.danceability_GLOBAL", 
+    "BCI_DE" = "OECD.BCI_GER", 
+    "CCI_DE"= "OECD.CCI_GER", 
+    "CLI_DE" = "OECD.CLI_GER",
+    "IAI" = "index.IAI_GLOBAL" , 
+    "NewsTone" = "GDELT.tone_GLOBAL", 
+    "Goldstein" = "GDELT.goldstein_GLOBAL", 
+    "MoonPhase" = "moonSunCalendar.moonPhase_GLOBAL", 
+    "WkDay" = "moonSunCalendar.weekday_GLOBAL", 
+    "YrWeek" = "moonSunCalendar.yearWeek_GLOBAL", 
+    "DAI1" = "searchesGoogle.DAI1_GLOBAL", 
+    "DAI2" = "searchesGoogle.DAI2_GLOBAL", 
+    "DAI3" = "searchesGoogle.DAI3_GLOBAL"
+    )
 print(paste("ALL DATES RANGE AVAILABLE:", paste(shQuote(range(dataset_s1_raw$date), type="sh"), collapse=" to ")))
 print(paste("ALL FEATURES AVAILABLE:", paste(shQuote(names(dataset_s1_raw), type="sh"), collapse=", ")))
 print("-----")

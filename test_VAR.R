@@ -1,5 +1,5 @@
 # Entender y decidir entre VAR y VECM
-# PTE: quarters/estacionalidad_4_seasons?
+# PTE: vbles endógenas: quarters/estacionalidad_4_seasons?/weekDay?/yearWeek?/faseLunar?
 # PTE: horizon: 90 días?
 
 
@@ -30,14 +30,19 @@ library(tsDyn) # VECM
 #========================================================
 
 # forecasting horizon
-nhor <- 12
+nhor <- 365
 
 df_planetMood <- readRDS("data/df_planetMood.rds")  # Dataset ready for analysis 
 names(df_planetMood)
 head(as_tibble(df_planetMood))
 
 # selected variables
-df.lev <- df_planetMood[,c('stocks.^VIX_GLOBAL','stocks.^VVIX_GLOBAL','music.tempo_GLOBAL','GDELT.tone_GLOBAL')]
+allVbles <- c("VIX", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI_DE", "CCI_DE", "CLI_DE", "IAI", "NewsTone", "Goldstein", "MoonPhase", "WkDay", "YrWeek", "DAI1", "DAI2", "DAI3")
+selectedVbles_4 <- c("VIX", "VVIX", "Tempo", "NewsTone")
+selectedVbles_15 <- c("VIX", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI_DE", "CCI_DE", "CLI_DE", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
+str.main <- selectedVbles_4
+
+df.lev <- df_planetMood[,selectedVbles_4]
 m.lev  <- as.matrix(df.lev)
 nr_lev <- nrow(df.lev)
 
@@ -49,8 +54,7 @@ dum_season$Q3 <- (substr.q==3)-1/4
 dum_season$Q4 <- (substr.q==4)-1/4
 dum_season    <- dum_season[,-1]
 
-# Draw Graph
-str.main <- c('^VIX','^VVIX','music.tempo_GLOBAL','GDELT.tone')
+# Draw Graph 2x2
 par(mfrow=c(2,2), mar=c(5,3,3,3))
 for(i in 1:4) {
   matplot(m.lev[,i], axes=FALSE,
@@ -62,6 +66,34 @@ for(i in 1:4) {
   axis(1, at=seq_along(1:nrow(df.lev)),
        labels=df_planetMood$date, las=2)
 }
+
+# Draw Graph 3x5
+df.lev_15 <- df_planetMood[,selectedVbles_15]
+m.lev_15  <- as.matrix(df.lev_15)
+nr_lev_15 <- nrow(df.lev_15)
+par(mfrow=c(3,5), mar=c(5,3,3,3))
+for(i in 1:15) {
+  matplot(m.lev_15[,i], axes=FALSE,
+          type=c('l'), col = c('blue'), 
+          main = selectedVbles_15[i])
+  axis(2) # show y axis
+  # show x axis and replace it with 
+  # an user defined sting vector
+  axis(1, at=seq_along(1:nrow(df.lev_15)),
+       labels=df_planetMood$date, las=2)
+}
+
+# Draw Graph 1
+par(mfrow=c(1,1), mar=c(5,3,3,3))
+matplot(m.lev_15[,c("Danceability")], axes=FALSE,
+        type=c('l'), col = c('blue'), 
+        main = c("Danceability"))
+axis(2) # show y axis
+# show x axis and replace it with 
+# an user defined sting vector
+axis(1, at=seq_along(1:nrow(df.lev)),
+     labels=df_planetMood$date, las=2)
+
 
 #========================================================
 # VAR model in level
