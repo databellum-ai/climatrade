@@ -5,7 +5,7 @@ source("10_initialize.R")
 
 
 #========================================================#
-# VAR ()Vector Autoregressive Model
+# VAR (Vector Autoregressive Model)
 # https://www.r-bloggers.com/2021/11/vector-autoregressive-model-var-using-r/
 #
 # https://kiandlee.blogspot.com
@@ -42,7 +42,6 @@ dum_season    <- dum_season[,-1]
 
 # Draw Graph
 str.main <- c('LRM=ln(real money M2)', 'LRY=ln(real income)', 'IBO=bond rate', 'IDE=bank deposit rate')
-x11(width=12, height = 6); 
 par(mfrow=c(2,2), mar=c(5,3,3,3))
 for(i in 1:4) {
   matplot(m.lev[,i], axes=FALSE,
@@ -67,8 +66,8 @@ var.model_lev <- VAR(df.lev, p = 2, type = 'const', season = 4)
 
 # forecast of lev data
 var.pred <- predict(var.model_lev, n.ahead = nhor)
-x11(); par(mai=rep(0.4, 4)); plot(var.pred)
-x11(); par(mai=rep(0.4, 4)); fanchart(var.pred)
+par(mai=rep(0.4, 4)); plot(var.pred)
+par(mai=rep(0.4, 4)); fanchart(var.pred)
 
 
 #========================================================
@@ -88,8 +87,8 @@ vare_diff <- VAR(df.diff, p = 1, type = 'const', season = 4)
 
 # forecast of differenced data
 varf_diff <- predict(vare_diff, n.ahead = nhor)
-x11(); par(mai=rep(0.4,4)); plot(varf_diff)
-x11(); par(mai=rep(0.4,4)); fanchart(varf_diff)
+par(mai=rep(0.4,4)); plot(varf_diff)
+par(mai=rep(0.4,4)); fanchart(varf_diff)
 
 # recover lev forecast
 m.varf_lev_ft <- rbind(m.lev, matrix(NA, nhor, 4))
@@ -103,7 +102,6 @@ for(h in (nr_lev+1):(nr_lev+nhor)) {
 }
 
 # Draw Graph
-x11(width=8, height = 8); 
 par(mfrow=c(4,1), mar=c(2,2,2,2))
 
 for(i in 1:4) {
@@ -134,7 +132,6 @@ dumf_season <- rbind(tail(dum_season,4),
 linevarf_diff <- predict(linevare_diff, n.ahead = nhor, 
                          exoPred = dumf_season) 
 # Draw Graph
-x11(width=8, height = 8); 
 par(mfrow=c(4,1), mar=c(2,2,2,2))
 
 df <- rbind(df.lev, linevarf_diff)

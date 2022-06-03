@@ -14,7 +14,8 @@ library(lubridate)
 library(openxlsx)
 
 dataset_s1_raw <- readRDS("data/dataset_seed1_p1.rds")  # Dataset with original values customized to the existing seed and spread to final columns format
-df_planetMood <- readRDS("data/dataset_seed1_p3.rds")  # Dataset, imputated, balanced, normalized to -1000:0:1000 range
+df_planetMood <- readRDS("data/dataset_seed1_p2.rds")  # Dataset, imputated, balanced
+# df_planetMood <- readRDS("data/dataset_seed1_p3.rds")  # Dataset, imputated, balanced, normalized to -1000:0:1000 range
 
 # Define dates scope and features not necessary
 initialDateAnalysis <- as_date("2017-01-01")

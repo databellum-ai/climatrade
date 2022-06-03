@@ -1,5 +1,3 @@
-# PTE: PARAMETRIZAR LÍNEA 158 VARIABLES...! (Y/O QUITAR ^ DE VIX Y VVIX)
-
 
 # install.packages("vars")
 # install.packages("tsDyn")
@@ -26,13 +24,13 @@ library(tsDyn) # VECM
 # Data
 #========================================================
 
-df_planetMood <- readRDS("data/df_planetMood.rds")  # Dataset ready for analysis 
-# selected variables
-lev <- df_planetMood[,c('stocks.^VIX_GLOBAL','stocks.^VVIX_GLOBAL','music.tempo_GLOBAL','GDELT.tone_GLOBAL')]
-nr_lev <- nrow(lev)
+# level data : 1958q1 - 1984q2
+data(finland)
+lev <- finland; nr_lev <- nrow(lev)
 
-yq <- data.frame(q = as.numeric(quarter(df_planetMood$date)), year = year(df_planetMood$date))
-rownames(yq) <- NULL
+# the sample period
+yq <- expand.grid(1:4, 1958:1984)[1:nr_lev,]
+colnames(yq) <- c('q', 'yyyy'); rownames(yq) <- NULL
 
 # quarterly centered dummy variables
 yq$Q1 <- (yq$q==1)-1/4
@@ -42,6 +40,8 @@ dum_season <- yq[,-c(1,2)]
 
 # 1st differenced data
 dif <- as.data.frame(diff(as.matrix(lev), lag = 1))
+
+str.main <- c('LRM=ln(real money M2)', 'LRY=ln(real income)', 'IBO=bond rate', 'IDE=bank deposit rate')
 
 #========================================================
 # Cointegration Test
@@ -137,7 +137,6 @@ par(mfrow=c(4,1), mar=c(2,2,2,2))
 # historical data + forecast data
 df <- rbind(lev, VECM_pred_tsDyn)
 
-str.main <- c('^VIX','^VVIX','music.tempo_GLOBAL','GDELT.tone')
 for(i in 1:4) {
   matplot(df[,i], type=c('l'), col = c('blue'), 
           main = str.main[i]) 
@@ -155,12 +154,11 @@ pred_vec2var_ca.jo <- predict(vec2var_ca.jo, n.ahead=nhor)
 par(mai=rep(0.4, 4)); plot(pred_vec2var_ca.jo)
 par(mai=rep(0.4, 4)); fanchart(pred_vec2var_ca.jo)
 
-# !! PARAMETRIZAR ESTAS VARIABLES...! (Y/O QUITAR ^ DE VIX Y VVIX)
 m.pred_vec2var_ca.jo <- cbind(
-  pred_vec2var_ca.jo$fcst$stocks..VIX_GLOBAL[,1], 
-  pred_vec2var_ca.jo$fcst$stocks..VVIX_GLOBAL[,1],
-  pred_vec2var_ca.jo$fcst$music.tempo_GLOBAL[,1], 
-  pred_vec2var_ca.jo$fcst$GDELT.tone_GLOBAL[,1])
+  pred_vec2var_ca.jo$fcst$lrm1[,1], 
+  pred_vec2var_ca.jo$fcst$lny[,1],
+  pred_vec2var_ca.jo$fcst$lnmr[,1], 
+  pred_vec2var_ca.jo$fcst$difp[,1])
 
 colnames(m.pred_vec2var_ca.jo) <- colnames(lev)
 
