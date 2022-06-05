@@ -1,6 +1,4 @@
-# Entender y decidir entre VAR y VECM
-# PTE: vbles endógenas: quarters/estacionalidad_4_seasons?/weekDay?/yearWeek?/faseLunar?
-# PTE: horizon: 90 días?
+
 
 
 
@@ -63,7 +61,7 @@ for(i in 1:4) {
   axis(2) # show y axis
   # show x axis and replace it with 
   # an user defined sting vector
-  axis(1, at=seq_along(1:nrow(df.lev)),
+  axis(1, at=seq_along(1:nrow(df_planetMood)),
        labels=df_planetMood$date, las=2)
 }
 
