@@ -32,25 +32,117 @@ library(tsDyn) # VECM
 # Data
 #========================================================
 
+df_planetMood <- readRDS("data/df_planetMood.rds")  # Dataset ready for analysis 
+num_test_records <- round(nrow(df_planetMood)*0.2)
+df_planetMood_test <- df_planetMood[(nrow(df_planetMood)-num_test_records+1):nrow(df_planetMood),]
+df_planetMood_train <- df_planetMood[1:(nrow(df_planetMood)-num_test_records),]
+
 # selected variables
 allVbles <- c("VIX", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI_DE", "CCI_DE", "CLI_DE", "IAI", "NewsTone", "Goldstein", "MoonPhase", "WkDay", "YrWeek", "DAI1", "DAI2", "DAI3")
+selectedVbles_2 <- c("VIX", "VVIX")
+selectedVbles_3 <- c("VIX", "VVIX", "Tempo")
 selectedVbles_4 <- c("VIX", "VVIX", "Tempo", "NewsTone")
-selectedVbles_n <- c("VIX", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI_DE", "CCI_DE", "CLI_DE", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
+selectedVbles_1 <- c("NewsTone")
+selectedVbles_15 <- c("VIX", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI_DE", "CCI_DE", "CLI_DE", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
+
+# Draw Graph 2x1
+par(mfrow=c(2,1), mar=c(5,3,3,3))
+for(i in 1:2) {
+  matplot(df_planetMood_train[,selectedVbles_2][,i], axes=FALSE,
+          type=c('l'), col = c('blue'), 
+          main = names(df_planetMood_train[,selectedVbles_2])[i])
+  axis(2) # show y axis
+  axis(1, at=seq_along(1:nrow(df_planetMood_train)),
+       labels=df_planetMood_train$date, las=2)
+}
+
+# Draw Graph 2x2
+par(mfrow=c(2,2), mar=c(5,3,3,3))
+for(i in 1:4) {
+  matplot(df_planetMood_train[,selectedVbles_4][,i], axes=FALSE,
+          type=c('l'), col = c('blue'), 
+          main = names(df_planetMood_train[,selectedVbles_4])[i])
+  axis(2) # show y axis
+  axis(1, at=seq_along(1:nrow(df_planetMood_train)),
+       labels=df_planetMood_train$date, las=2)
+}
+
+# Draw Graph 3x5
+par(mfrow=c(3,5), mar=c(5,3,3,3))
+for(i in 1:15) {
+  matplot(df_planetMood_train[,selectedVbles_15][,i], axes=FALSE,
+          type=c('l'), col = c('blue'), 
+          main = names(df_planetMood_train[,selectedVbles_15])[i])
+  axis(2) # show y axis
+  axis(1, at=seq_along(1:nrow(df_planetMood_train)),
+       labels=df_planetMood_train$date, las=2)
+}
+
+# Draw Graph 1
+par(mfrow=c(1,1), mar=c(5,3,3,3))
+matplot(df_planetMood_train[,selectedVbles_1], axes=FALSE,
+        type=c('l'), col = c('blue'), 
+        main = names(df_planetMood_train[,selectedVbles_1]))
+axis(2) # show y axis
+axis(1, at=seq_along(1:nrow(df_planetMood_train)),
+     labels=df_planetMood_train$date, las=2)
+
+
+
+
+
+
+
+
+
+
+
+
+# Draw Graph 1-1
+# df_planetMood_train_long <- df_planetMood_train %>% gather(key = "Feature", value = "Valores", 2:ncol(df_planetMood_train))
+# df_planetMood_train_long %>% filter(Feature %in% c("VIX", "VVIX")) %>% ggplot(aes(date, Valores, colour=Feature)) + geom_point()
+
+vblesToCompare <- c("VIX", "VVIX")
+df_planetMood_train[,c("date", vblesToCompare)] %>%
+  ggplot(aes(x = date)) +
+  geom_line(aes(y = VIX, colour = vblesToCompare[1])) +
+  geom_line(aes(y = VVIX, color = vblesToCompare[2])) + 
+  scale_y_continuous("VVIX", sec.axis = sec_axis(~./10, name = "Relative humidity [%]"))
+  ggtitle("Climatogram for Oslo (1961-1990)")
+
+library(xts)    
+testData <- df_planetMood_train[,c("date", selectedVbles_4)]
+testData <- as.xts(testData [, -1], order.by = testData$date)
+plot(testData, main = "VIX")
+
+pairs(coredata(testData), lower.panel = NULL)
+
+# install.packages("tseries")
+library(tseries)
+testData2 <- as_tibble(testData)
+ccf(testData2$VIX, testData2$VVIX, lag=90, pl=TRUE)
+
+# install.packages("astsa")
+library(astsa)
+VIX <- testData2$VIX
+VVIX <- testData2$VVIX
+lag2.plot(VVIX, VIX, 40)
+
+
+
+
+
+
+
+
+
 str.main <- selectedVbles_4
-
-df_planetMood_train <- readRDS("data/df_planetMood.rds")  # Dataset ready for analysis 
-num_test_records <- round(nrow(df_planetMood_train)/10)
-df_planetMood_test <- df_planetMood_train[(nrow(df_planetMood_train)-num_test_records+1):nrow(df_planetMood_train),]
-df_planetMood_train <- df_planetMood_train[1:(nrow(df_planetMood_train)-num_test_records),]
-
-# selected variables
-lev <- df_planetMood_train[,c('VIX','VVIX','Tempo','NewsTone')]
+lev <- df_planetMood_train[,str.main]
 nr_lev <- nrow(lev)
 
+# quarterly centered dummy variables
 yq <- data.frame(q = as.numeric(quarter(df_planetMood_train$date)), year = year(df_planetMood_train$date))
 rownames(yq) <- NULL
-
-# quarterly centered dummy variables
 yq$Q1 <- (yq$q==1)-1/4
 yq$Q2 <- (yq$q==2)-1/4
 yq$Q3 <- (yq$q==3)-1/4
@@ -58,50 +150,6 @@ dum_season <- yq[,-c(1,2)]
 
 # 1st differenced data
 dif <- as.data.frame(diff(as.matrix(lev), lag = 1))
-
-
-
-
-# Draw Graph 2x2
-par(mfrow=c(2,2), mar=c(5,3,3,3))
-for(i in 1:4) {
-  matplot(lev[,i], axes=FALSE,
-          type=c('l'), col = c('blue'), 
-          main = str.main[i])
-  axis(2) # show y axis
-  # show x axis and replace it with 
-  # an user defined sting vector
-  axis(1, at=seq_along(1:nrow(df_planetMood_train)),
-       labels=df_planetMood_train$date, las=2)
-}
-
-# Draw Graph 3x5
-df.lev_15 <- df_planetMood_train[,selectedVbles_15]
-nr_lev_15 <- nrow(df.lev_15)
-par(mfrow=c(3,5), mar=c(5,3,3,3))
-for(i in 1:15) {
-  matplot(df.lev_15[,i], axes=FALSE,
-          type=c('l'), col = c('blue'), 
-          main = selectedVbles_15[i])
-  axis(2) # show y axis
-  # show x axis and replace it with 
-  # an user defined sting vector
-  axis(1, at=seq_along(1:nrow(df.lev_15)),
-       labels=df_planetMood_train$date, las=2)
-}
-
-# Draw Graph 1
-par(mfrow=c(1,1), mar=c(5,3,3,3))
-matplot(df.lev_15[,c("Danceability")], axes=FALSE,
-        type=c('l'), col = c('blue'), 
-        main = c("Danceability"))
-axis(2) # show y axis
-# show x axis and replace it with 
-# an user defined sting vector
-axis(1, at=seq_along(1:nrow(df.lev_15)),
-     labels=df_planetMood_train$date, las=2)
-
-
 
 #========================================================
 # Cointegration Test
