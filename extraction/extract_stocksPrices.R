@@ -16,7 +16,6 @@ print("Extracting stocks")
 
 endDateTicker <- today()
 startingDateTicker <- "1900-01-01"
-
 stocksData <- tq_get(chosenTickers,
                  from = startingDateTicker,
                  to = endDateTicker,

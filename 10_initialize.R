@@ -11,7 +11,7 @@
 # ===============
 # CLEAN ENVIRONMENT
 # ---------------
-# rm(list = ls())
+rm(list = ls())
 
 # ===============
 # PACKAGES REQUIRED

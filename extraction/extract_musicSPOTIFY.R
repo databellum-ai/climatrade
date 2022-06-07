@@ -18,10 +18,24 @@ library(spotifyr)# For certain functions and applications, you’ll need to log 
 numTopTracks <- 3 # how many tracks we extract per day/week
 lotSize <- 90  # dates processed in a run. If not enough, just repeat run
 # RSelenium requires current version of Chrome browser to launch it
+
+# SEE last ChromeDriver last available version: https://chromedriver.storage.googleapis.com/LATEST_RELEASE:
 # versionChrome <- "97.0.4692.71" 
 # versionChrome <- "99.0.4844.51"
-versionChrome <- "101.0.4951.41" # see last ChromeDriver last available version: https://chromedriver.storage.googleapis.com/LATEST_RELEASE 
+# versionChrome <- "101.0.4951.41"
+# versionChrome <- "102.0.5005.63"
+versionChrome <- "102.0.5005.61"
 
+# versions available = 
+# 100.0.4896.20
+# 102.0.5005.27
+# 102.0.5005.61
+# 103.0.5060.24
+# 97.0.4692.20
+# 97.0.4692.36
+# 97.0.4692.71
+# 99.0.4844.35
+# 99.0.4844.51
 
 # ================================
 # STEP 1: Determine countries and dates we need to collect
@@ -80,11 +94,11 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   address_element$sendKeysToElement(list(accountSpotify))
   password_element$sendKeysToElement(list(passwordSpotify))
   button_element$clickElement()
-  Sys.sleep(5)  # delay to facilitate full load
+  Sys.sleep(10)  # delay to facilitate full load
   # Accept cookies...
   cookies_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="onetrust-accept-btn-handler"]')
   cookies_element$clickElement()
-  
+    
   listenedTracks <- data.frame()
   # LOOPING dates
   for (i in c(1:length(unProcessedDates))) {

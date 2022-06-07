@@ -39,16 +39,18 @@ leadingIndicatorsOECD_1960_2020 <- readRDS("data/historical_OECD_1960_2020.rds")
 # Extract fresh data (>=2021) from OECD
 selected_initial_year_OECD <- "2021"
 selected_end_year_OECD <-as.character(year(Sys.Date()))  # current year
-leadingIndicatorsOECD <- get_dataset("MEI_CLI", 
+
+# We specify OECD::get_dataset() to avoid conflict with same name function in package bigrquery
+leadingIndicatorsOECD <- OECD::get_dataset("MEI_CLI", 
                                      filter = list(c("LOLITOAA", "BSCICP03", "CSCICP03"), "",c("M")), 
                                      start_time = selected_initial_year_OECD, 
                                      end_time = selected_end_year_OECD)
 leadingIndicatorsOECD <- leadingIndicatorsOECD %>% 
-  mutate(obsDate = paste(obsTime, "-15", sep = "")) %>% 
-  select(date = obsDate,
+  mutate(obsDate = paste(Time, "-15", sep = "")) %>% 
+  select(date = Time,
          Indicator = SUBJECT, 
          countryCode = LOCATION, 
-         Value = obsValue)
+         Value = ObsValue)
 
 # Now we join current (fresh) and historical data:
 leadingIndicatorsOECD <- rbind(leadingIndicatorsOECD, leadingIndicatorsOECD_1960_2020)
