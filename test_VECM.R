@@ -9,6 +9,7 @@
 
 # install.packages("vars")
 # install.packages("tsDyn")
+
 source("10_initialize.R")
 
 #========================================================#
@@ -79,16 +80,9 @@ for(i in 1:15) {
 }
 
 # Draw Graph 1
-par(mfrow=c(1,1), mar=c(5,3,3,3))
-matplot(df_planetMood_train[,selectedVbles_1], axes=FALSE,
-        type=c('l'), col = c('blue'), 
-        main = names(df_planetMood_train[,selectedVbles_1]))
-axis(2) # show y axis
-axis(1, at=seq_along(1:nrow(df_planetMood_train)),
-     labels=df_planetMood_train$date, las=2)
-
-
-
+df_planetMood_train %>% ggplot(aes(x = date, y = VIX)) + 
+  geom_line() + 
+  scale_x_date(date_labels = "%Y-%m")
 
 
 
@@ -108,7 +102,7 @@ df_planetMood_train[,c("date", vblesToCompare)] %>%
   geom_line(aes(y = VIX, colour = vblesToCompare[1])) +
   geom_line(aes(y = VVIX, color = vblesToCompare[2])) + 
   scale_y_continuous("VVIX", sec.axis = sec_axis(~./10, name = "Relative humidity [%]"))
-  ggtitle("Climatogram for Oslo (1961-1990)")
+  ggtitle("Variables comparison")
 
 library(xts)    
 testData <- df_planetMood_train[,c("date", selectedVbles_4)]
