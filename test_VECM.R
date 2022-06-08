@@ -83,37 +83,36 @@ df_planetMood_train %>% ggplot(aes(x = date, y = VIX)) +
   geom_line() + 
   scale_x_date(date_labels = "%Y-%m")
 
+# Draw 1:1 comparison
+x <- df_planetMood_train$date
+y1_name <- "VIX"
+y1 <- df_planetMood_train$VIX
+y2_name <- "VVIX"
+y2 <- df_planetMood_train$VVIX
+par(mar=c(5,5,5,5)+0.1, las=1)
+plot.new()
+plot.window(xlim=range(x), ylim=range(y1))
+lines(x, y1, col="red", pch=19, lwd=1)
+axis(1, col.axis="blue")
+axis(2, col.axis="red")
+box()
+plot.window(xlim=range(x), ylim=range(y2))
+lines(x, y2, col="limegreen", pch=19, lwd=1)
+axis(4, col.axis="limegreen")
+title(paste("1:1 compared history", y1_name, "vs", y2_name), adj=0)
+mtext(y2_name, side = 4, las=3, line=3, col="limegreen")
+mtext(y1_name, side = 2, las=3, line=3, col="red")
 
 
-
-
-
-
-
-
-# GRÁFICO DE DOBLE EJE:
-# http://freerangestats.info/blog/2016/08/18/dualaxes
-# ...
-# ...
-
-# Draw Graph 1-1
-# df_planetMood_train_long <- df_planetMood_train %>% gather(key = "Feature", value = "Valores", 2:ncol(df_planetMood_train))
-# df_planetMood_train_long %>% filter(Feature %in% c("VIX", "VVIX")) %>% ggplot(aes(date, Valores, colour=Feature)) + geom_point()
-
-vblesToCompare <- c("VIX", "VVIX")
-df_planetMood_train[,c("date", vblesToCompare)] %>%
-  ggplot(aes(x = date)) +
-  geom_line(aes(y = VIX, colour = vblesToCompare[1])) +
-  geom_line(aes(y = VVIX, color = vblesToCompare[2])) + 
-  scale_y_continuous("VVIX", sec.axis = sec_axis(~./10, name = "Relative humidity [%]"))
-  ggtitle("Variables comparison")
-
+# Pairs correlations
 library(xts)    
 testData <- df_planetMood_train[,c("date", selectedVbles_4)]
 testData <- as.xts(testData [, -1], order.by = testData$date)
-plot(testData, main = "VIX")
-
-pairs(coredata(testData), lower.panel = NULL)
+pairs(coredata(testData), 
+      lower.panel = NULL,
+      col = "red",
+      pch = 18,
+      main = "Pairs correlations")
 
 # install.packages("tseries")
 library(tseries)
