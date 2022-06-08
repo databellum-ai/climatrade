@@ -104,26 +104,39 @@ mtext(y2_name, side = 4, las=3, line=3, col="limegreen")
 mtext(y1_name, side = 2, las=3, line=3, col="red")
 
 
-# Pairs correlations
+# Pairs correlations in date groups
 library(xts)    
-testData <- df_planetMood_train[,c("date", selectedVbles_4)]
-testData <- as.xts(testData [, -1], order.by = testData$date)
-pairs(coredata(testData), 
+tmpData <- df_planetMood_train[,c("date", selectedVbles_4)]
+tmpData <- as.xts(tmpData[, -1], order.by = tmpData$date)
+group <- NA
+firstQuartileDates <- as.Date(as.integer(summary(df_planetMood_train$date)[2]))
+thirdQuartileDates <- as.Date(as.integer(summary(df_planetMood_train$date)[5]))
+group[df_planetMood_train$date < firstQuartileDates] <- 1
+group[df_planetMood_train$date >= firstQuartileDates & df_planetMood_train$date <= thirdQuartileDates] <- 2
+group[df_planetMood_train$date > thirdQuartileDates] <- 3
+pairs(coredata(tmpData), 
       lower.panel = NULL,
-      col = "red",
+      col = c("red", "blue", "green")[group],
       pch = 18,
-      main = "Pairs correlations")
+      main = "Pairs correlationscolorred by dates")
 
+# Pairs correlations in date groups
 # install.packages("tseries")
 library(tseries)
-testData2 <- as_tibble(testData)
-ccf(testData2$VIX, testData2$VVIX, lag=90, pl=TRUE)
+ccf(df_planetMood_train$VIX, df_planetMood_train$VVIX, 
+    lag=90, 
+    plot=TRUE, 
+    xlim=range(-90,-1)
+    )
 
 # install.packages("astsa")
 library(astsa)
 VIX <- testData2$VIX
 VVIX <- testData2$VVIX
-lag2.plot(VVIX, VIX, 40)
+lag2.plot(VVIX, VIX, 
+          max.lag = 12, 
+          smooth = TRUE, 
+          cex=0.2, pch=19, col=5, bgl='transparent', lwl=2, gg=T, box.col=gray(1))
 
 
 
