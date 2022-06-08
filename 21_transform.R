@@ -21,26 +21,37 @@ library(data.table)  # For dcast() to spread multiple columns
 library(reshape2)  # For dcast() to spread multiple columns
 library(imputeTS)  # To impute missing values with imputeTS()
 # ===============
+# LOAD  CONVERSION-TABLE TO STANDARD GEOGRAPHY
+# ---------------
+# (previously edited/validated by user)
+std_geo <- read.xlsx("userEdition/standardGeography.xlsx")
+# ===============
 # REMOVE FEATURES NOT APPLYING ACCORDING TO SEED
 # ---------------
 fullDataset_raw <- readRDS("data/dataset_raw.rds")  # Load consolidated raw dataset, still to refine
-seedFeatures_df
 # Extract header names of the seed features
 seedVbles <- seedFeatures_df %>% 
   filter(source != "locations") %>% 
   mutate(vbleName = paste0(source, ".", variable)) %>% 
   pull(vbleName)
 seedVbles
+
+
 # convert country names from seed into standard codes
-geoCodesSeed <- seedFeatures_df %>% 
-  filter(source=="locations") %>% select(variable) %>% 
-  left_join(std_geo, by = c("variable" = "countryName")) %>% pull(stdCountryCode)
+# geoCodesSeed <- seedFeatures_df %>% 
+#   filter(source=="locations") %>% select(variable) %>% 
+#   left_join(std_geo, by = c("variable" = "countryName")) %>% pull(stdCountryCode)
+# !!:
+geoCodesSeed <- seedFeatures_df %>% filter(source=="locations") %>% pull(variable)
+geoCodesSeed
+
 # filter only geolocations specified in the seed
 fullDataset_raw <- fullDataset_raw %>% filter(stdCountryCode %in% c("GLOBAL", geoCodesSeed))
 # Reduce features to those in seed and also in actually obtained data
 seedVbles <- seedVbles[seedVbles %in% names(fullDataset_raw)]
 # Keep remaining columns not forgetting to include date and geo dimensions
 seedDataset <- fullDataset_raw %>% select(date, stdCountryCode, seedVbles)
+
 # ===============
 # SPREAD FEATURE AND _GEO
 # ---------------
@@ -50,10 +61,12 @@ seedDataset <- melt(seedDataset, id.vars = c("date", "stdCountryCode"))
 seedDataset <- seedDataset %>% 
   filter(!is.na(value)) %>% 
   mutate(value = as.numeric(value))
+
 # Spread with existing geolocation as suffix
 seedDataset <- reshape2::dcast(
-  seedDataset, date ~ variable + stdCountryCode, 
+  seedDataset, date ~ variable + stdCountryCode,
   fun.aggregate = function(x) if(length(x) == 0) NA_real_ else sum(x, na.rm = TRUE))
+
 # Ensure there are records for all possible dates, even if they have no value o any feature
 allAbsoluteDates <- as_tibble(as.Date(seq(ymd(absoluteInitialDate, tz = "UTC"), as.POSIXct(Sys.Date()), by="days")))
 colnames(allAbsoluteDates) <- c("date")
@@ -111,7 +124,7 @@ valueToSubtractRefZero <- function(columnName) {
 }
 
 #using function, we create a numeric vector of values to subtract to each column so we adjust to given "RefZero"
-vectorToSubtractRefZero <- sapply(colnames(seedDataset3), valueToSubtractRefZero)
+vectorToSubtractRefZero <- sapply(colnames(seedDataset2), valueToSubtractRefZero)
 vectorToSubtractRefZero[is.na(vectorToSubtractRefZero)] <- 0
 vectorToSubtractRefZero
 seedDataset2 <- sweep(seedDataset2, 2, vectorToSubtractRefZero)

@@ -68,7 +68,9 @@ print(unProcessedDates)
 std_geo <- read.xlsx("userEdition/standardGeography.xlsx")
 # Determine what countries we'll process:
 allPossibleCountries <- std_geo %>% filter(source=="music") %>% select(countryCode, country = countryName)
-print("Countries to process:")
+# EXCEPTIONAL REDUCTION TO EXTRACT ONLY THESE COUNTRIES (from 08jun2022):
+allPossibleCountries <- allPossibleCountries %>% filter(countryCode %in% c("GLOBAL", "US", "ES")) 
+print("Countries to process (EXCEPTION TO GENERAL PROCESS):")
 print(allPossibleCountries$countryCode)
 
 # if (TRUE) {  # We finish here if no dates to process
@@ -94,7 +96,7 @@ if (!is.null(unProcessedDates) & !is.na(unProcessedDates)) {  # We finish here i
   address_element$sendKeysToElement(list(accountSpotify))
   password_element$sendKeysToElement(list(passwordSpotify))
   button_element$clickElement()
-  Sys.sleep(10)  # delay to facilitate full load
+  Sys.sleep(20)  # delay to facilitate full load
   # Accept cookies...
   cookies_element <- remote_driver$findElement(using = 'xpath', value = '//*[@id="onetrust-accept-btn-handler"]')
   cookies_element$clickElement()

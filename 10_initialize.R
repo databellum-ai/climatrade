@@ -107,8 +107,6 @@ for (i in 1:nrow(extractedEntities)) {
 }
 head(geoDataset)
 
-
-
 # ===============
 # DETAIL OF NAMES AND GEOGRAPHIC REGIONS (EXCEPTION)
 # ---------------

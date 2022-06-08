@@ -45,8 +45,9 @@ leadingIndicatorsOECD <- OECD::get_dataset("MEI_CLI",
                                      filter = list(c("LOLITOAA", "BSCICP03", "CSCICP03"), "",c("M")), 
                                      start_time = selected_initial_year_OECD, 
                                      end_time = selected_end_year_OECD)
+
 leadingIndicatorsOECD <- leadingIndicatorsOECD %>% 
-  mutate(obsDate = paste(Time, "-15", sep = "")) %>% 
+  mutate(Time = paste(Time, "-15", sep = "")) %>% 
   select(date = Time,
          Indicator = SUBJECT, 
          countryCode = LOCATION, 
@@ -62,7 +63,6 @@ leadingIndicatorsOECD <- leadingIndicatorsOECD %>%
          Indicator = replace(Indicator, Indicator == "BSCICP03", "BCI"), 
          Indicator = replace(Indicator, Indicator == "CSCICP03", "CCI")) %>% 
   spread(key = Indicator, value = Value)
-
 
 # Save to RDS
 # Collect countries (not online updated. See: https://fgeerolf.com/data/oecd/MEI_CLI.html)

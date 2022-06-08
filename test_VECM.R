@@ -1,6 +1,5 @@
 # PTE: PARAMETRIZAR LÍNEA 158 VARIABLES...! (Y/O QUITAR ^ DE VIX Y VVIX)
 # PTE: horizon: 90 días?
-# Añadir Gold
 # PTE: vbles endógenas: quarters/estacionalidad_4_seasons?/weekDay?/yearWeek?/faseLunar?
 # Entender y decidir entre VAR y VECM
 
@@ -39,12 +38,12 @@ df_planetMood_test <- df_planetMood[(nrow(df_planetMood)-num_test_records+1):nro
 df_planetMood_train <- df_planetMood[1:(nrow(df_planetMood)-num_test_records),]
 
 # selected variables
-allVbles <- c("VIX", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI_DE", "CCI_DE", "CLI_DE", "IAI", "NewsTone", "Goldstein", "MoonPhase", "WkDay", "YrWeek", "DAI1", "DAI2", "DAI3")
+allVbles <- c("VIX", "Gold", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI", "CCI", "CLI", "IAI", "NewsTone", "Goldstein", "MoonPhase", "WkDay", "YrWeek", "DAI1", "DAI2", "DAI3")
 selectedVbles_2 <- c("VIX", "VVIX")
 selectedVbles_3 <- c("VIX", "VVIX", "Tempo")
 selectedVbles_4 <- c("VIX", "VVIX", "Tempo", "NewsTone")
 selectedVbles_1 <- c("NewsTone")
-selectedVbles_15 <- c("VIX", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI_DE", "CCI_DE", "CLI_DE", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
+selectedVbles_16 <- c("VIX", "Gold", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI", "CCI", "CLI", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
 
 # Draw Graph 2x1
 par(mfrow=c(2,1), mar=c(5,3,3,3))
@@ -68,12 +67,12 @@ for(i in 1:4) {
        labels=df_planetMood_train$date, las=2)
 }
 
-# Draw Graph 3x5
-par(mfrow=c(3,5), mar=c(5,3,3,3))
-for(i in 1:15) {
-  matplot(df_planetMood_train[,selectedVbles_15][,i], axes=FALSE,
+# Draw Graph 4x4
+par(mfrow=c(4,4), mar=c(5,3,3,3))
+for(i in 1:16) {
+  matplot(df_planetMood_train[,selectedVbles_16][,i], axes=FALSE,
           type=c('l'), col = c('blue'), 
-          main = names(df_planetMood_train[,selectedVbles_15])[i])
+          main = names(df_planetMood_train[,selectedVbles_16])[i])
   axis(2) # show y axis
   axis(1, at=seq_along(1:nrow(df_planetMood_train)),
        labels=df_planetMood_train$date, las=2)
@@ -91,6 +90,11 @@ df_planetMood_train %>% ggplot(aes(x = date, y = VIX)) +
 
 
 
+
+# GRÁFICO DE DOBLE EJE:
+# http://freerangestats.info/blog/2016/08/18/dualaxes
+# ...
+# ...
 
 # Draw Graph 1-1
 # df_planetMood_train_long <- df_planetMood_train %>% gather(key = "Feature", value = "Valores", 2:ncol(df_planetMood_train))
@@ -121,6 +125,8 @@ library(astsa)
 VIX <- testData2$VIX
 VVIX <- testData2$VVIX
 lag2.plot(VVIX, VIX, 40)
+
+
 
 
 

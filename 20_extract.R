@@ -108,13 +108,9 @@ for (i in 1:nrow(extractedEntities)) {
 # NA values in countryCode indicate "GLOBAL" scope for those features
 fullDataset_raw <- fullDataset_raw %>% mutate(stdCountryCode = ifelse((is.na(stdCountryCode)),"GLOBAL",stdCountryCode))  # once merged, we convert country NA into "GLOBAL"
 
-fullDataset_raw %>% filter(date >= "2022-03-15") %>% filter(stdCountryCode == "GLOBAL")
-
-
 # ===============
 # SAVE CONSOLIDATED RAW DATASET, STILL TO REFINE
 # ---------------
 saveRDS(fullDataset_raw,"data/dataset_raw.rds")
 print("All data merged and stored")
-
 
