@@ -83,7 +83,8 @@ seedDataset2 <- seedDataset
 # Missing Values Very recent (nor yet extracted) or very old (before historic availability) will remain NA 
 # On imputation function: https://cran.r-project.org/web/packages/imputeTS/imputeTS.pdf
 imputeFeatureWithinExistingInterval <- function(tsValues) {
-  start <- which.min(is.na(tsValues))
+  # start <- which.min(is.na(tsValues))  # In case we want to do imputation only until most recent KNOWN value and not beyond
+  start <- 1
   end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1]))
   imputedWithinExistingInterval <- na_interpolation(tsValues[start:end])
   tsValues[start:end] <- imputedWithinExistingInterval
@@ -99,6 +100,7 @@ removeOutliers <- function(tsValues) {
   tsValues <- ifelse(!(between(tsValues,low,up)),NA,tsValues)
   tsValues
 }
+
 # Remove columns with <= 2 valid values to avoid imputation issues
 empty_columns <- sapply(seedDataset2, function(x) sum(!is.na(x)) <= 2)
 seedDataset2 <- seedDataset2[, !empty_columns]
@@ -115,7 +117,7 @@ seedDataset2 <- cbind(date = seedDataset2$date, as.data.frame(tmp_df_noDate)) # 
 # Some features are always positive, other positive/negative (ref. zero), BUT others have a specific value as reference (for example VIX reference value to distinguish between "good" or "bad" is ~30)
 # We now proceed to balance values before normalization
 
-# function to know what sutract to each column
+# function to know what substract to each column
 valueToSubtractRefZero <- function(columnName) {
   refsZero <- seedFeatures_df %>% filter(type == "measure") %>% mutate(feature = paste0(source,".",variable)) %>% select(feature, refZero)
   refZeroToSubtract <- refsZero$refZero[refsZero$feature == str_split(columnName,"_")[[1]][1]]
