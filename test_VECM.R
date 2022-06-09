@@ -42,6 +42,7 @@ allVbles <- c("VIX", "Gold", "VVIX", "Flights", "Tempo", "Energy", "Danceability
 selectedVbles_2 <- c("VIX", "VVIX")
 selectedVbles_3 <- c("VIX", "VVIX", "Tempo")
 selectedVbles_4 <- c("VIX", "VVIX", "Tempo", "NewsTone")
+selectedVbles_6 <- c("VIX", "VVIX", "Tempo", "NewsTone", "Gold", "IAI")
 selectedVbles_1 <- c("NewsTone")
 selectedVbles_16 <- c("VIX", "Gold", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI", "CCI", "CLI", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
 
@@ -132,7 +133,7 @@ lag2.plot(VVIX, VIX,
 # VECM
 #========================================================
 
-str.main <- selectedVbles_4
+str.main <- selectedVbles_6
 lev <- df_planetMood_train[,str.main]
 nr_lev <- nrow(lev)
 
@@ -165,18 +166,8 @@ dif <- as.data.frame(diff(as.matrix(lev), lag = 1))
 # dumvar = another dummy variables
 #———————————————-
 
-# 4 variables:
-coint_ca.jo <- ca.jo(lev, 
-                     ecdet = 'none', type  = 'eigen', K = 2, 
-  spec = 'transitory', season = 4, dumvar = NULL)
+coint_ca.jo <- ca.jo(lev, ecdet = 'none', type  = 'eigen', K = 2, spec = 'transitory', season = 7, dumvar = NULL)
 summary(coint_ca.jo)
-
-# n variables:
-# selectedVbles_n <- c(names(lev), c("Energy", "Danceability", "BCI_DE", "CCI_DE"))
-# coint_ca.jo <- ca.jo(selectedVbles_n, 
-#                      ecdet = 'none', type  = 'eigen', K = 2, 
-#                      spec = 'transitory', season = 4, dumvar = NULL)
-# summary(coint_ca.jo)
 
 #========================================================
 # VECM model estimation
@@ -192,10 +183,7 @@ summary(coint_ca.jo)
 #      exogen = NULL)
 #————————————————
 
-VECM_tsDyn <- VECM(lev, lag=1, r=2,
-                   estim = 'ML',
-                   LRinclude = 'none',
-                   exogen = dum_season)
+VECM_tsDyn <- VECM(lev, lag=1, r=2, estim = 'ML', LRinclude = 'none', exogen = dum_season)
 summary(VECM_tsDyn)
 
 #————————————————
@@ -241,22 +229,24 @@ dumf_season <- rbind(tail(dum_season,4),
                      tail(dum_season,4),
                      tail(dum_season,4))
 
-VECM_pred_tsDyn <- predict(VECM_tsDyn, 
-                           exoPred = dumf_season, n.ahead=nhor)
+VECM_pred_tsDyn <- predict(VECM_tsDyn, exoPred = dumf_season, n.ahead=nhor)
 
-# Draw Graph
-par(mfrow=c(4,1), mar=c(2,2,2,2))
 
 # historical data + forecast data
 df <- rbind(lev, VECM_pred_tsDyn)
-
-for(i in 1:4) {
+# Draw Graph
+par(mfrow=c(6,1), mar=c(2,2,2,2))
+for(i in 1:6) {
   matplot(df[,i], type=c('l'), col = c('blue'), 
           main = str.main[i]) 
   abline(v=nr_lev, col='blue')
 }
 
-VECM_pred_tsDyn
+numRows <- nrow(lev)
+df_planetMood[(numRows-3):(numRows+3),c("date", str.main)]   # All data (training + test)
+lev[(numRows-12):numRows,]  # Training history
+VECM_pred_tsDyn # Forecast
+df_planetMood_test[1:12,str.main] # Actual data
 
 # JES: delta forecasted:
 print("Last known values for VIX:")
@@ -265,7 +255,6 @@ print("Prediction for VIX:")
 print(VECM_pred_tsDyn[,1])
 print("Actual for VIX:")
 print(df_planetMood_test[1:nhor,"VIX"])
-(VECM_pred_tsDyn[,"VIX"] - -7.8)
 
 #———————————————-
 # Forecast from ca.jo() using vec2var()
@@ -278,10 +267,12 @@ par(mai=rep(0.4, 4)); fanchart(pred_vec2var_ca.jo)
 
 # !! PARAMETRIZAR ESTAS VARIABLES...! (Y/O QUITAR ^ DE VIX Y VVIX)
 m.pred_vec2var_ca.jo <- cbind(
-  pred_vec2var_ca.jo$fcst$stocks..VIX_GLOBAL[,1], 
-  pred_vec2var_ca.jo$fcst$stocks..VVIX_GLOBAL[,1],
-  pred_vec2var_ca.jo$fcst$music.tempo_GLOBAL[,1], 
-  pred_vec2var_ca.jo$fcst$GDELT.tone_GLOBAL[,1])
+  pred_vec2var_ca.jo$fcst$VIX[,1], 
+  pred_vec2var_ca.jo$fcst$VVIX[,1],
+  pred_vec2var_ca.jo$fcst$Tempo[,1], 
+  pred_vec2var_ca.jo$fcst$NewsTone[,1], 
+  pred_vec2var_ca.jo$fcst$Gold[,1], 
+  pred_vec2var_ca.jo$fcst$IAI[,1])
 
 colnames(m.pred_vec2var_ca.jo) <- colnames(lev)
 
