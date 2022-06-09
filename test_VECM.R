@@ -45,16 +45,10 @@ selectedVbles_4 <- c("VIX", "VVIX", "Tempo", "NewsTone")
 selectedVbles_1 <- c("NewsTone")
 selectedVbles_16 <- c("VIX", "Gold", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI", "CCI", "CLI", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
 
-# Draw Graph 2x1
-par(mfrow=c(2,1), mar=c(5,3,3,3))
-for(i in 1:2) {
-  matplot(df_planetMood_train[,selectedVbles_2][,i], axes=FALSE,
-          type=c('l'), col = c('blue'), 
-          main = names(df_planetMood_train[,selectedVbles_2])[i])
-  axis(2) # show y axis
-  axis(1, at=seq_along(1:nrow(df_planetMood_train)),
-       labels=df_planetMood_train$date, las=2)
-}
+
+#========================================================
+# EDA - Charts
+#========================================================
 
 # Draw Graph 2x2
 par(mfrow=c(2,2), mar=c(5,3,3,3))
@@ -78,31 +72,24 @@ for(i in 1:16) {
        labels=df_planetMood_train$date, las=2)
 }
 
-# Draw Graph 1
-df_planetMood_train %>% ggplot(aes(x = date, y = VIX)) + 
-  geom_line() + 
-  scale_x_date(date_labels = "%Y-%m")
-
-# Draw 1:1 comparison
-x <- df_planetMood_train$date
-y1_name <- "VIX"
-y1 <- df_planetMood_train$VIX
-y2_name <- "VVIX"
-y2 <- df_planetMood_train$VVIX
-par(mar=c(5,5,5,5)+0.1, las=1)
-plot.new()
-plot.window(xlim=range(x), ylim=range(y1))
-lines(x, y1, col="red", pch=19, lwd=1)
-axis(1, col.axis="blue")
-axis(2, col.axis="red")
-box()
-plot.window(xlim=range(x), ylim=range(y2))
-lines(x, y2, col="limegreen", pch=19, lwd=1)
-axis(4, col.axis="limegreen")
-title(paste("1:1 compared history", y1_name, "vs", y2_name), adj=0)
-mtext(y2_name, side = 4, las=3, line=3, col="limegreen")
-mtext(y1_name, side = 2, las=3, line=3, col="red")
-
+# Function to draw 1:1 comparison in two different axis
+chartTwoAxis <- function(x, y1, y2, y1_name, y2_name) {
+  par(mfrow=c(1,1))
+  par(mar=c(5,5,5,5)+0.1, las=1)
+  plot.new()
+  plot.window(xlim=range(x), ylim=range(y1))
+  lines(x, y1, col="red", pch=19, lwd=1)
+  axis(1, col.axis="blue")
+  axis(2, col.axis="red")
+  box()
+  plot.window(xlim=range(x), ylim=range(y2))
+  lines(x, y2, col="limegreen", pch=19, lwd=1)
+  axis(4, col.axis="limegreen")
+  title(paste("1:1 compared history", y1_name, "vs", y2_name), adj=0)
+  mtext(y2_name, side = 4, las=3, line=3, col="limegreen")
+  mtext(y1_name, side = 2, las=3, line=3, col="red") }
+# Call the function to draw 1:1 comparison in two different axis
+chartTwoAxis(df_planetMood_train$date, df_planetMood_train$VIX, df_planetMood_train$VVIX, "VIX", "VVIX")
 
 # Pairs correlations in date groups
 library(xts)    
@@ -123,30 +110,27 @@ pairs(coredata(tmpData),
 # Pairs correlations in date groups
 # install.packages("tseries")
 library(tseries)
-ccf(df_planetMood_train$VIX, df_planetMood_train$VVIX, 
-    lag=90, 
-    plot=TRUE, 
-    xlim=range(-90,-1)
-    )
+yt <- df_planetMood_train$VIX
+xt <- df_planetMood_train$VVIX 
+ccf(yt, xt, lag=90, plot=TRUE, xlim=range(-90,-1))
+ccf(yt, xt, lag=90, plot=FALSE, xlim=range(-90,-1))
 
+# Pairs correlations in date groups
 # install.packages("astsa")
 library(astsa)
-VIX <- testData2$VIX
-VVIX <- testData2$VVIX
+VIX <- df_planetMood_train$VIX
+VVIX <- df_planetMood_train$VVIX
 lag2.plot(VVIX, VIX, 
-          max.lag = 12, 
+          max.lag = 15, 
           smooth = TRUE, 
           cex=0.2, pch=19, col=5, bgl='transparent', lwl=2, gg=T, box.col=gray(1))
 
 
 
 
-
-
-
-
-
-
+#========================================================
+# VECM
+#========================================================
 
 str.main <- selectedVbles_4
 lev <- df_planetMood_train[,str.main]
