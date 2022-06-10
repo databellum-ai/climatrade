@@ -32,15 +32,12 @@ df_planetMood_ts_lagged
 
 # FPP3 examples
 
-# seasonality
-df_planetMood_ts %>% gg_season(VIX, period = "week", labels = "both") +
-  labs(y = "$ (millions)",
-       title = "Seasonal plot: Antidiabetic drug sales")
 # cross-correlation and distribution
 df_planetMood_ts %>%
   GGally::ggpairs(columns = (2:4))
+
 # lag-plot by season
-df_planetMood_ts %>% gg_lag(Gold, geom = "point")
+df_planetMood_ts %>% gg_lag(VIX, geom = "point")
 
 # decomposition
 dcmp <- df_planetMood_ts %>%
@@ -60,45 +57,18 @@ components(dcmp) %>%
   autoplot(VIX, colour="gray") +
   geom_line(aes(y=season_adjust), colour = "#D55E00")
 
+df_planetMood_ts %>%
+  model(
+    STL(VIX ~ trend(window = 7) +
+          season(window = "periodic"),
+        robust = TRUE)) %>%
+  components() %>%
+  autoplot()
 
 
 
 
 
 
-us_retail_employment <- us_employment %>%
-  filter(year(Month) >= 1990, Title == "Retail Trade") %>%
-  select(-Series_ID)
-autoplot(us_retail_employment, Employed)
 
-dcmp <- us_retail_employment %>%
-  model(stl = STL(Employed))
-components(dcmp)
-
-
-
-PBS %>%
-  filter(ATC2 == "A10") %>%
-  select(Month, Concession, Type, Cost) %>%
-  summarise(TotalC = sum(Cost)) %>%
-  mutate(Cost = TotalC / 1e6) -> a10
-
-visitors <- tourism %>%
-  group_by(State) %>%
-  summarise(Trips = sum(Trips))
-visitors %>%
-  ggplot(aes(x = Quarter, y = Trips)) +
-  geom_line() +
-  facet_grid(vars(State), scales = "free_y") +
-  labs(title = "Australian domestic tourism",
-       y= "Overnight trips ('000)")
-visitors %>%
-  pivot_wider(values_from=Trips, names_from=State) %>%
-  GGally::ggpairs(columns = 2:9)
-
-recent_production <- aus_production %>%
-  filter(year(Quarter) >= 2000)
-recent_production %>%
-  gg_lag(Beer, geom = "point") +
-  labs(x = "lag(Beer, k)")
 
