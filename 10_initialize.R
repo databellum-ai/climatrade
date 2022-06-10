@@ -11,7 +11,8 @@
 # ===============
 # CLEAN ENVIRONMENT
 # ---------------
-rm(list = ls())
+rm(list = ls())  # clear all environment variables
+graphics.off()  # clear all graphs
 
 # ===============
 # PACKAGES REQUIRED

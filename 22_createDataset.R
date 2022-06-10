@@ -27,22 +27,22 @@ df_planetMood <- df_planetMood %>%
     "VIX" = "stocks.^VIX_GLOBAL", 
     "VVIX" = "stocks.^VVIX_GLOBAL", 
     "Gold" = "stocks.GC=F_GLOBAL", 
+    "NewsTone" = "GDELT.tone_GLOBAL", 
+    "Goldstein" = "GDELT.goldstein_GLOBAL",     
+    "IAI" = "index.IAI_GLOBAL" , 
+    "DAI1" = "searchesGoogle.DAI1_GLOBAL", 
+    "DAI2" = "searchesGoogle.DAI2_GLOBAL", 
+    "DAI3" = "searchesGoogle.DAI3_GLOBAL",      
+    "BCI" = "OECD.BCI_OECD", 
+    "CCI"= "OECD.CCI_OECD", 
+    "CLI" = "OECD.CLI_OECD",   
     "Flights" = "airTraffic.worldFlights_GLOBAL", 
     "Tempo" = "music.tempo_GLOBAL", 
     "Energy" = "music.energy_GLOBAL", 
     "Danceability" = "music.danceability_GLOBAL", 
-    "BCI" = "OECD.BCI_OECD", 
-    "CCI"= "OECD.CCI_OECD", 
-    "CLI" = "OECD.CLI_OECD",
-    "IAI" = "index.IAI_GLOBAL" , 
-    "NewsTone" = "GDELT.tone_GLOBAL", 
-    "Goldstein" = "GDELT.goldstein_GLOBAL", 
     "MoonPhase" = "moonSunCalendar.moonPhase_GLOBAL", 
     "WkDay" = "moonSunCalendar.weekday_GLOBAL", 
-    "YrWeek" = "moonSunCalendar.yearWeek_GLOBAL", 
-    "DAI1" = "searchesGoogle.DAI1_GLOBAL", 
-    "DAI2" = "searchesGoogle.DAI2_GLOBAL", 
-    "DAI3" = "searchesGoogle.DAI3_GLOBAL"
+    "YrWeek" = "moonSunCalendar.yearWeek_GLOBAL"
   )
 
 print(paste("ALL DATES RANGE AVAILABLE:", paste(shQuote(range(dataset_s1_raw$date), type="sh"), collapse=" to ")))
