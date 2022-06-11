@@ -1,9 +1,6 @@
-# PTE: PARAMETRIZAR LÍNEA 158 VARIABLES...! (Y/O QUITAR ^ DE VIX Y VVIX)
 # PTE: horizon: 90 días?
 # PTE: vbles endógenas: quarters/estacionalidad_4_seasons?/weekDay?/yearWeek?/faseLunar?
 # Entender y decidir entre VAR y VECM
-
-
 
 
 # install.packages("vars")
@@ -37,103 +34,13 @@ num_test_records <- round(nrow(df_planetMood)*0.2)
 df_planetMood_test <- df_planetMood[(nrow(df_planetMood)-num_test_records+1):nrow(df_planetMood),]
 df_planetMood_train <- df_planetMood[1:(nrow(df_planetMood)-num_test_records),]
 
-# selected variables
-allVbles <- c("VIX", "Gold", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI", "CCI", "CLI", "IAI", "NewsTone", "Goldstein", "MoonPhase", "WkDay", "YrWeek", "DAI1", "DAI2", "DAI3")
-selectedVbles_2 <- c("VIX", "VVIX")
-selectedVbles_3 <- c("VIX", "VVIX", "Tempo")
-selectedVbles_4 <- c("VIX", "VVIX", "Tempo", "NewsTone")
-selectedVbles_6 <- c("VIX", "VVIX", "Tempo", "NewsTone", "Gold", "IAI")
-selectedVbles_1 <- c("NewsTone")
-selectedVbles_16 <- c("VIX", "Gold", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI", "CCI", "CLI", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
-
-
-#========================================================
-# EDA - Charts
-#========================================================
-
-# Draw Graph 2x2
-par(mfrow=c(2,2), mar=c(5,3,3,3))
-for(i in 1:4) {
-  matplot(df_planetMood_train[,selectedVbles_4][,i], axes=FALSE,
-          type=c('l'), col = c('blue'), 
-          main = names(df_planetMood_train[,selectedVbles_4])[i])
-  axis(2) # show y axis
-  axis(1, at=seq_along(1:nrow(df_planetMood_train)),
-       labels=df_planetMood_train$date, las=2)
-}
-
-# Draw Graph 4x4
-par(mfrow=c(4,4), mar=c(5,3,3,3))
-for(i in 1:16) {
-  matplot(df_planetMood_train[,selectedVbles_16][,i], axes=FALSE,
-          type=c('l'), col = c('blue'), 
-          main = names(df_planetMood_train[,selectedVbles_16])[i])
-  axis(2) # show y axis
-  axis(1, at=seq_along(1:nrow(df_planetMood_train)),
-       labels=df_planetMood_train$date, las=2)
-}
-
-# Function to draw 1:1 comparison in two different axis
-chartTwoAxis <- function(x, y1, y2, y1_name, y2_name) {
-  par(mfrow=c(1,1))
-  par(mar=c(5,5,5,5)+0.1, las=1)
-  plot.new()
-  plot.window(xlim=range(x), ylim=range(y1))
-  lines(x, y1, col="red", pch=19, lwd=1)
-  axis(1, col.axis="blue")
-  axis(2, col.axis="red")
-  box()
-  plot.window(xlim=range(x), ylim=range(y2))
-  lines(x, y2, col="limegreen", pch=19, lwd=1)
-  axis(4, col.axis="limegreen")
-  title(paste("1:1 compared history", y1_name, "vs", y2_name), adj=0)
-  mtext(y2_name, side = 4, las=3, line=3, col="limegreen")
-  mtext(y1_name, side = 2, las=3, line=3, col="red") }
-# Call the function to draw 1:1 comparison in two different axis
-chartTwoAxis(df_planetMood_train$date, df_planetMood_train$VIX, df_planetMood_train$VVIX, "VIX", "VVIX")
-
-# Pairs correlations in date groups
-library(xts)    
-tmpData <- df_planetMood_train[,c("date", selectedVbles_4)]
-tmpData <- as.xts(tmpData[, -1], order.by = tmpData$date)
-group <- NA
-firstQuartileDates <- as.Date(as.integer(summary(df_planetMood_train$date)[2]))
-thirdQuartileDates <- as.Date(as.integer(summary(df_planetMood_train$date)[5]))
-group[df_planetMood_train$date < firstQuartileDates] <- 1
-group[df_planetMood_train$date >= firstQuartileDates & df_planetMood_train$date <= thirdQuartileDates] <- 2
-group[df_planetMood_train$date > thirdQuartileDates] <- 3
-pairs(coredata(tmpData), 
-      lower.panel = NULL,
-      col = c("red", "blue", "green")[group],
-      pch = 18,
-      main = "Pairs correlationscolorred by dates")
-
-# Pairs correlations in date groups
-# install.packages("tseries")
-library(tseries)
-yt <- df_planetMood_train$VIX
-xt <- df_planetMood_train$VVIX 
-ccf(yt, xt, lag=90, plot=TRUE, xlim=range(-90,-1))
-ccf(yt, xt, lag=90, plot=FALSE, xlim=range(-90,-1))
-
-# Pairs correlations in date groups
-# install.packages("astsa")
-library(astsa)
-VIX <- df_planetMood_train$VIX
-VVIX <- df_planetMood_train$VVIX
-lag2.plot(VVIX, VIX, 
-          max.lag = 15, 
-          smooth = TRUE, 
-          cex=0.2, pch=19, col=5, bgl='transparent', lwl=2, gg=T, box.col=gray(1))
-
-
-
 
 #========================================================
 # VECM
 #========================================================
 
-str.main <- selectedVbles_6
+str.main <- c("VIX", "VVIX", "Tempo", "NewsTone", "Gold", "IAI")
+outcomesList <- c("VIX", "Gold")
 lev <- df_planetMood_train[,str.main]
 nr_lev <- nrow(lev)
 
@@ -265,22 +172,17 @@ pred_vec2var_ca.jo <- predict(vec2var_ca.jo, n.ahead=nhor)
 par(mai=rep(0.4, 4)); plot(pred_vec2var_ca.jo)
 par(mai=rep(0.4, 4)); fanchart(pred_vec2var_ca.jo)
 
-# !! PARAMETRIZAR ESTAS VARIABLES...! (Y/O QUITAR ^ DE VIX Y VVIX)
+# Outcomes: VIX, Gold
 m.pred_vec2var_ca.jo <- cbind(
   pred_vec2var_ca.jo$fcst$VIX[,1], 
-  pred_vec2var_ca.jo$fcst$VVIX[,1],
-  pred_vec2var_ca.jo$fcst$Tempo[,1], 
-  pred_vec2var_ca.jo$fcst$NewsTone[,1], 
-  pred_vec2var_ca.jo$fcst$Gold[,1], 
-  pred_vec2var_ca.jo$fcst$IAI[,1])
+  pred_vec2var_ca.jo$fcst$Gold[,1])
 
-colnames(m.pred_vec2var_ca.jo) <- colnames(lev)
+colnames(m.pred_vec2var_ca.jo) <- outcomesList
 
-m.pred_vec2var_ca.jo
 
 #———————————————-
 # Comparison of two sets of forecast
 #———————————————-
 
-VECM_pred_tsDyn - m.pred_vec2var_ca.jo
+VECM_pred_tsDyn[,outcomesList] - m.pred_vec2var_ca.jo
 
