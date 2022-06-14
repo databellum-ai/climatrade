@@ -57,6 +57,7 @@ print("Stocks values extraction process FINISHED")
 
 
 # ------------------------
+# ------------------------
 
 library(tidyquant)
 library(tidyverse)

@@ -10,6 +10,9 @@ source("10_initialize.R")
 # install.packages("fpp3")
 # install.packages("GGally")
 library(fpp3)
+library(GGally)
+
+library(tidyverse)
 
 #========================================================
 # Data
@@ -145,18 +148,13 @@ df_planetMood_ts %>% gg_lag(VIX, geom = "point")
 
 
 # decomposition
-dcmp <- df_planetMood_ts %>%
-  model(stl = STL(VIX))
-
+dcmp <- df_planetMood_ts %>% model(stl = STL(VIX))
 components(dcmp)
-
 components(dcmp) %>%
   as_tsibble() %>%
   autoplot(VIX, colour="gray") +
   geom_line(aes(y=trend), colour = "#D55E00")
-
 components(dcmp) %>% autoplot()
-
 components(dcmp) %>%
   as_tsibble() %>%
   autoplot(VIX, colour="gray") +

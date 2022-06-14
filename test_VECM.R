@@ -8,6 +8,8 @@
 
 source("10_initialize.R")
 
+library(tidyverse)
+
 #========================================================#
 # Quantitative ALM, Financial Econometrics & Derivatives 
 # https://www.r-bloggers.com/2021/12/vector-error-correction-model-vecm-using-r/
