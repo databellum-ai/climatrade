@@ -56,8 +56,10 @@ print("Stocks values extraction process FINISHED")
 
 
 
-# ------------------------
-# ------------------------
+# ------------------------------------------------
+# ------------------------------------------------
+# ------------------------------------------------
+# ------------------------------------------------
 
 library(tidyquant)
 library(tidyverse)
@@ -65,26 +67,9 @@ library(zoo)
 
 chosenTickers <- c("^VIX", "^VVIX", "GC=F")
 
-# https://www.investopedia.com/5-volatility-indicators-are-warnings-sign-to-the-markets-4584057
-# INDICATORS WE NEED:
-#   "^GSPC" -> S&P 500
-#   "ZN=F" -> 10-Year Treasury Note Futures
-#   "^KS200" -> KOSPI
-#   VIX FUTURES -> ??
-# MEASURES WE NEED:
-#   Volatility
-#     VOLATILITY FUNCTION IN R: 
-#     TTR USED WITHIN tq_get():
-#       https://www.rdocumentation.org/packages/TTR/versions/0.24.3/topics/volatility
-#       https://cran.r-project.org/web/packages/tidyquant/vignettes/TQ02-quant-integrations-in-tidyquant.html
-#   50 days EMA
-#     TTR WITHIN tq_get(): https://www.rdocumentation.org/packages/TTR/versions/0.24.3/topics/volatility
-#   Intraday High-Low variation:
-#     high-close direntamente?
-#     TTR WITHIN tq_get()?
-# ABOUT VKOSPI:
-# https://www.investing.com/indices/kospi-volatility
-# https://www.jstor.org/stable/41739216
+# Related to IMPLIED VOLATILITY (^VVIX, ^VIX3M, ^VIX6M, ^VXN, ^GVZ)
+# Related to HISTORIC VOLATILITY (S&P500_SMA, S&P500_EMA, S&P500_HighLow_SMA, S&P500_HighLow_EMA) (https://rpubs.com/antonioh8/finModelingQuiz4_a)
+
 tq_transmute_fun_options()
 
 
