@@ -27,6 +27,9 @@ stocksData <- tq_get(chosenTickers,
 
 
 
+
+
+
 # "^VIX"   "^VVIX"  "^VIX3M" "^VXN" (Nasdaq Vol)  "^GVZ" (Gold Vol)   "GC=F" (Gold)
 test <- stocksData %>% filter(symbol == "GC=F") %>% mutate(difer = high -low, percentDifer = difer/close, n=50) %>% filter(date>="2017-01-01")
 # Draw Graph 2x2
@@ -40,6 +43,8 @@ for(i in 1:4) {
   axis(1, at=seq_along(1:nrow(test)),
        labels=test$date, las=2)
 }
+
+
 
 
 
