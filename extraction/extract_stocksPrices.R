@@ -17,11 +17,35 @@ print("Extracting stocks")
 endDateTicker <- today()
 startingDateTicker <- "1900-01-01"
 
-
 stocksData <- tq_get(chosenTickers,
                  from = startingDateTicker,
                  to = endDateTicker,
                  get = "stock.prices")
+
+
+
+
+
+
+# "^VIX"   "^VVIX"  "^VIX3M" "^VXN" (Nasdaq Vol)  "^GVZ" (Gold Vol)   "GC=F" (Gold)
+test <- stocksData %>% filter(symbol == "GC=F") %>% mutate(difer = high -low, percentDifer = difer/close, n=50) %>% filter(date>="2017-01-01")
+# Draw Graph 2x2
+selectedVbles <- c("close", "difer", "percentDifer", "low")
+par(mfrow=c(2,2), mar=c(5,3,3,3))
+for(i in 1:4) {
+  matplot(test[,selectedVbles][,i], axes=FALSE,
+          type=c('l'), col = c('blue'), 
+          main = names(test[,selectedVbles])[i])
+  axis(2) # show y axis
+  axis(1, at=seq_along(1:nrow(test)),
+       labels=test$date, las=2)
+}
+
+
+
+
+
+
 # we extract close price
 stocksData <- stocksData %>%
   select(date, symbol, value = close) %>%
