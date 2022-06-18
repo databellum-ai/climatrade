@@ -18,42 +18,21 @@ endDateTicker <- today()
 startingDateTicker <- "1900-01-01"
 
 stocksData <- tq_get(chosenTickers,
-                 from = startingDateTicker,
-                 to = endDateTicker,
-                 get = "stock.prices")
+                     from = startingDateTicker,
+                     to = endDateTicker,
+                     get = "stock.prices")
 
+# we extract close price and "day volatility" for all securities.
+# This requires to calculate new measure and the gather to create new variables named "*hlVOL" to distinguish from general close price
+# Day volatility considers drift and is based in Rogers and Satchell (1991) and Rogers, Satchell and Yoon (1994) (*)
+# (*): see paper: https://core.ac.uk/download/pdf/52391988.pdf
 
-
-
-
-
-
-
-
-# "^VIX"   "^VVIX"  "^VIX3M" "^VXN" (Nasdaq Vol)  "^GVZ" (Gold Vol)   "GC=F" (Gold)
-test <- stocksData %>% filter(symbol == "GC=F") %>% mutate(difer = high -low, percentDifer = difer/close, n=50) %>% filter(date>="2017-01-01")
-# Draw Graph 2x2
-selectedVbles <- c("close", "difer", "percentDifer", "low")
-par(mfrow=c(2,2), mar=c(5,3,3,3))
-for(i in 1:4) {
-  matplot(test[,selectedVbles][,i], axes=FALSE,
-          type=c('l'), col = c('blue'), 
-          main = names(test[,selectedVbles])[i])
-  axis(2) # show y axis
-  axis(1, at=seq_along(1:nrow(test)),
-       labels=test$date, las=2)
-}
-
-
-
-
-
-
-
-
-# we extract close price
-stocksData <- stocksData %>%
-  select(date, symbol, value = close) %>%
+stocksData <- stocksData %>% 
+  mutate (dayVolatility = (log(high) - log(open)) * (log(close) - log(low)) + (log(low) - log(open)) * (log(low) - log(close))) %>% 
+  select(date, symbol, close, dayVolatility) %>% 
+  gather(key="measure", value="value", -date, -symbol) %>% 
+  mutate(symbol = if_else(measure == "dayVolatility", paste0(symbol,"hlVOL"), symbol)) %>% 
+  select(-measure) %>%
   group_by(date, symbol) %>%
   summarise(value = mean(value)) %>%
   arrange(desc(date))
@@ -69,42 +48,5 @@ head(stocksData_ts)
 saveRDS(stocksData_ts, "data/data_stocks_ts.rds")
 
 print("Stocks values extraction process FINISHED")
-
-
-
-# ------------------------------------------------
-# ------------------------------------------------
-# ------------------------------------------------
-# ------------------------------------------------
-
-# library(tidyquant)
-# library(tidyverse)
-# library(zoo)
-# 
-# chosenTickers <- c("^VIX", "^VVIX", "GC=F")
-# 
-# # Related to HISTORIC VOLATILITY (S&P500_SMA, S&P500_EMA, S&P500_HighLow_SMA, S&P500_HighLow_EMA) (https://rpubs.com/antonioh8/finModelingQuiz4_a)
-# 
-# tq_transmute_fun_options()
-# 
-# 
-# endDateTicker <- today()
-# startingDateTicker <- "1900-01-01"
-# stocksData <- 
-#   tq_get(chosenTickers, from = startingDateTicker, to = endDateTicker, get = "stock.prices") %>% 
-#   mutate(close = na_locf(stocksData$close)) %>% 
-#   tq_mutate(select = close, mutate_fun = EMA, n = 50, col_rename = "MA") %>% 
-#   tq_mutate(select = close, mutate_fun = volatility, calc="close", col_rename = "V") %>% 
-#   mutate(HL = (high - low))
-# stocksData %>% arrange(desc(date))
-# 
-# 
-# 
-# # Draw Graph 2x2
-# matplot(stocksData$V, axes=FALSE, type=c('l'), col = c('blue'), main = names(stocksData$value))
-# axis(2) # show y axis
-# axis(1, at=seq_along(1:nrow(stocksData)),
-#      labels=stocksData$date, las=2)
-
 
 

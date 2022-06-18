@@ -44,23 +44,15 @@ df_planetMood_ts_lagged
 # EDA - Charts
 #========================================================
 
-# Draw Graph 2x2
-selectedVbles <- c("VIX", "VVIX", "Tempo", "NewsTone")
-par(mfrow=c(2,2), mar=c(5,3,3,3))
-for(i in 1:4) {
-  matplot(df_planetMood[,selectedVbles][,i], axes=FALSE,
-          type=c('l'), col = c('blue'), 
-          main = names(df_planetMood[,selectedVbles])[i])
-  axis(2) # show y axis
-  axis(1, at=seq_along(1:nrow(df_planetMood)),
-       labels=df_planetMood$date, las=2)
-}
-
-
-# Draw Graph 4x4
-selectedVbles <- c("VIX", "Gold", "VVIX", "Flights", "Tempo", "Energy", "Danceability", "BCI", "CCI", "CLI", "IAI", "NewsTone", "Goldstein", "DAI1", "DAI2", "DAI3")
-par(mfrow=c(4,4), mar=c(5,3,3,3))
-for(i in 1:16) {
+# Draw Graph n x m
+selectedVbles <- names(df_planetMood[c(-1)])
+n <- length(selectedVbles)
+# we calculate how many rows and column are needed to represent all variables as squeared as possible
+r <- c <- round(sqrt(n),0)  # try to use squared matrix for representation of all variables
+if (r*c < n) {c <- c+1}  # if not enough, we try one more column
+if (r*c < n) {r <- r+1}  # if still not enough, we add one row
+par(mfrow=c(r,c), mar=c(5,3,3,3))
+for(i in 1:n) {
   matplot(df_planetMood[,selectedVbles][,i], axes=FALSE,
           type=c('l'), col = c('blue'), 
           main = names(df_planetMood[,selectedVbles])[i])
@@ -167,6 +159,9 @@ df_planetMood_ts %>%
         robust = TRUE)) %>%
   components() %>%
   autoplot()
+
+
+
 
 
 
