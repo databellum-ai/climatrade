@@ -22,6 +22,7 @@ df_planetMood <- readRDS("data/df_planetMood.rds")  # Dataset ready for analysis
 
 # PlanetMood dataset
 df_planetMood <- readRDS("data/df_planetMood.rds")  # Dataset ready for analysis 
+df_planetMood <- df_planetMood %>% arrange(date)
 names(df_planetMood)
 # convert to tsibble (time serie)
 df_planetMood_ts <- df_planetMood %>% as_tsibble(index = date)  
