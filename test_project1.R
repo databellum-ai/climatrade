@@ -12,8 +12,6 @@ source("10_initialize.R")
 library(tidyverse)
 
 
-
-
 # install.packages("sentometrics")
 # install.packages("quanteda")
 # install.packages("stm")
@@ -28,6 +26,8 @@ library("lexicon")
 # Convert the built-in corpus into a sento_corpus object
 # First, transform the built-in corpus of 4145 U.S. news articles between 1995 and 2014 into a sento_corpus object. This corpus object is the best basis for the later addition of new metadata features, and the aggregation into textual sentiment time series.
 uscorpus <- sento_corpus(sentometrics::usnews)
+
+
 
 # Fit a topic model
 # To enrich the corpus, we fit a topic model to uncover a set of different latent items discussed across the news. To do the preprocessing into a document-term matrix, we use the quanteda package. The stm package is used to extract 8 topics.
