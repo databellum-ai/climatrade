@@ -131,42 +131,18 @@ vectorToSubtractRefZero <- sapply(colnames(seedDataset2), valueToSubtractRefZero
 vectorToSubtractRefZero[is.na(vectorToSubtractRefZero)] <- 0
 vectorToSubtractRefZero
 seedDataset2 <- sweep(seedDataset2, 2, vectorToSubtractRefZero)
-# ===============
-# NORMALIZATION TO A RANGE
-# ---------------
-# Load dataset to prepare changes
-seedDataset3 <- seedDataset2
-# Function to normalize to a -1000 to 1000 range (using only one of the interval extremes)
-normalizeTo1000 <- function(tsValues) {
-  start <- which.min(is.na(tsValues))
-  end <- length(tsValues) - which.min(is.na(tsValues[length(tsValues):1])) + 1
-  normalizedWithinExistingInterval <- round(
-    (1000-0)/(max(abs(tsValues[start:end]))-min(abs(tsValues[start:end])))*(abs(tsValues[start:end])-max(abs(tsValues[start:end])))+1000, 
-    digits = 0)
-  tsValues[start:end] <- normalizedWithinExistingInterval * sign(tsValues[start:end])
-  tsValues
-}
-# Temporarily remove "date" column to call function that makes massive normalization
-tmp_df_noDate <- seedDataset3[,!(colnames(seedDataset3) == "date")]
-# Perform data normalization to range 1:100
-tmp_df_noDate <- as_tibble(apply(tmp_df_noDate, MARGIN=2, FUN=normalizeTo1000))
-seedDataset3 <- cbind(date = seedDataset3$date, as.data.frame(tmp_df_noDate)) # Add again "date" to processed file
 
 # ===============
 # SAVE TRANSFORMED DATASETS
 # ---------------
 saveRDS(seedDataset,"data/dataset_seed1_p1.rds")  # Dataset with original values customized to the existing seed and spread to final columns format
 saveRDS(seedDataset2,"data/dataset_seed1_p2.rds")  # Dataset including imputation of missing values and removing empty columns
-saveRDS(seedDataset3,"data/dataset_seed1_p3.rds")  # Dataset adding conversion to 1:1000 range
 # view(seedDataset[1:2000,1:45])
 # view(seedDataset2[1:2000,1:45])
-# view(seedDataset3[1:2000,1:45])
 # view(seedDataset[1:2000,46:80])
 # view(seedDataset2[1:2000,46:80])
-# view(seedDataset3[1:2000,46:80])
 write.xlsx(seedDataset, "data/dataset_seed1_p1.xlsx")
 write.xlsx(seedDataset2, "data/dataset_seed1_p2.xlsx")
-write.xlsx(seedDataset3, "data/dataset_seed1_p3.xlsx")
 
 print("FINISHED transformation process")
 

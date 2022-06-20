@@ -63,7 +63,7 @@ print(paste("DATES RANGE FOR ANALYSIS:", paste(shQuote(range(df_planetMood$date)
 print(paste("FEATURES FOR ANALYSIS:", paste(shQuote(names(df_planetMood), type="sh"), collapse=", ")))
 
 # Save to .XLSX
-saveRDS(df_planetMood,"data/df_planetMood.rds")  # Dataset (1000-normalized version) reduced in features and dates scope
+saveRDS(df_planetMood,"data/df_planetMood.rds")  # Dataset (imputated version) reduced in features and dates scope
 write.xlsx(df_planetMood, "data/df_planetMood.xlsx")
 
 
