@@ -70,6 +70,7 @@ lexiconsIn <- c(
 )
 lex <- sento_lexicons(lexiconsIn = lexiconsIn,
                       valenceIn = sentometrics::list_valence_shifters[["en"]])
+
 # Define the sentiment index aggregation specifications
 # All the sentiment computation and aggregation parameters are specified in the ctr_agg() function. We go for daily textual sentiment time series as 270-day moving averages using Beta weighting schemes. On a given day, all documents are weighted equally. The individual news sentiment scores are normalized by the number of detected lexicon words (these words are referred to as polarized).
 
@@ -122,6 +123,7 @@ ctrIter <- ctr_model(model = "gaussian",
                      nSample = 60,
                      nCore = 1,
                      do.progress = FALSE)
+
 # Fit and assess the elastic net model iteratively over time
 # The sento_model() function runs the model estimations iteratively and keeps track of the out-of-sample performance. Through the x argument, we slide the VIX index as autoregressive component into the regression equation. Omit this argument if you only want to use the sentiment variables as explanatory variables.
 
