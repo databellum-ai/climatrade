@@ -1,6 +1,27 @@
 # ===============================================
 # Extract search trends from Google Trends
 # ===============================================
+# 
+# GOOGLE TRENDS. USED TOPICS CODIFICATION
+# ---------------------------------------
+# Macroeconomic_Anxiety:
+# Inflation (/m/09jx2)
+# Deflation (/m/0d126)
+# +Economic anxiety (/g/11fy2vtpp2)
+# +Unemployment (/m/07s_c)
+# 
+# Market_Anxiety:
+# Short selling (/m/0sxyn)
+# Volatility (/m/0ht7l)
+# +VIX (/m/09fld6)
+# +Bitcoin (/m/05p0rrx)
+# 
+# Debt&Credit_Anxiety:
+# Default on debt (/m/0g1xs)
+# Solvency (/g/122dlh9k)
+# Bankrupcy (/m/01hhz)
+# Quiebra financiera (/m/0gz_4)
+# +Liquidez (/g/1q6j8vbd8)
 # NOTES ON IMPLEMENTATION:
 # -See README.rd for topics correspondence
 # -Test responses quality depending on grpop="web" or gprop="quality"
