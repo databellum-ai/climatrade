@@ -22,12 +22,9 @@ library("quanteda")
 library("stm")
 library("lexicon")
 
-
 # Convert the built-in corpus into a sento_corpus object
 # First, transform the built-in corpus of 4145 U.S. news articles between 1995 and 2014 into a sento_corpus object. This corpus object is the best basis for the later addition of new metadata features, and the aggregation into textual sentiment time series.
 uscorpus <- sento_corpus(sentometrics::usnews)
-
-
 
 # Fit a topic model
 # To enrich the corpus, we fit a topic model to uncover a set of different latent items discussed across the news. To do the preprocessing into a document-term matrix, we use the quanteda package. The stm package is used to extract 8 topics.
@@ -41,7 +38,7 @@ dfm <- tokens(uscorpus, what = "word", remove_punct = TRUE, remove_numbers = TRU
 topicModel <- stm(dfm, K = 8, verbose = FALSE)
 topTerms <- t(labelTopics(topicModel, n = 5)[["prob"]])
 
-topTerms[, 1:4] # first 4 (out of 8) topics
+topTerms[, 1:8] # first 4 (out of 8) topics
 
 # Use the topic model output to enrich the corpus with features
 # A list of keywords that defines the new features is based on the 5 top terms associated to each of the 8 topics. We insert this list of keywords into the add_features() function. A feature value per news article, normalized between 0 and 1, is generated for each topic, depending on how often the 5 relevant words appear in the news.
@@ -56,7 +53,6 @@ colSums(docvars(uscorpus)[, -1] != 0)
 
 # Prepare the sentiment lexicons
 # In total, we will compute the textual sentiment using 9 lexicons, here prepared (mainly cleaned and made coherent) into a sento_lexicons object.
-
 lexiconsIn <- c(
   sentometrics::list_lexicons[c("LM_en", "HENRY_en", "GI_en")],
   list(
@@ -73,7 +69,6 @@ lex <- sento_lexicons(lexiconsIn = lexiconsIn,
 
 # Define the sentiment index aggregation specifications
 # All the sentiment computation and aggregation parameters are specified in the ctr_agg() function. We go for daily textual sentiment time series as 270-day moving averages using Beta weighting schemes. On a given day, all documents are weighted equally. The individual news sentiment scores are normalized by the number of detected lexicon words (these words are referred to as polarized).
-
 ctrAggPred <- ctr_agg(
   howWithin = "proportionalPol",
   howDocs = "equal_weight",
@@ -83,7 +78,6 @@ ctrAggPred <- ctr_agg(
 
 # Aggregate the corpus into textual sentiment time series
 # Calling the sento_measures() function with the corpus, lexicons and aggregation specifications defined before creates the many sentiment time series.
-
 sentMeasPred <- sento_measures(uscorpus, lexicons = lex, ctr = ctrAggPred)
 
 nmeasures(sentMeasPred)
