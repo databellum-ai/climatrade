@@ -14,3 +14,8 @@ library(ggplot2)
 df_planetMood <- readRDS("data/df_planetMood.rds")  # Load dataset for analysis
 names(df_planetMood)
 
+# https://rpubs.com/riazakhan94/arima_with_example
+# https://www.educba.com/arima-model-in-r/
+
+
+testData <- df_planetMood[,1:2] %>% arrange(date)
