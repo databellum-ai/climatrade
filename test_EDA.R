@@ -1,21 +1,14 @@
 
 source("10_initialize.R")
 
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-#       EXPLORATORY DATA ANALYSIS - GRAPHICAL ANALYSIS
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
 library(tidyverse)
-library(ggplot2) 
 
 df_planetMood <- readRDS("data/df_planetMood.rds")  # Load dataset for analysis
 names(df_planetMood)
 
-# https://rpubs.com/riazakhan94/arima_with_example
 # https://www.educba.com/arima-model-in-r/
+# https://rpubs.com/riazakhan94/arima_with_example
 
-
-testData <- df_planetMood[,1:2] %>% arrange(date)
+data <- df_planetMood[,c("date","VIX")] %>% arrange(date)
+data = ts(data[,2],start = c(2017,1),frequency = 7)
+plot(data, xlab='Year on sale', ylab = 'Number of Textile sold')
