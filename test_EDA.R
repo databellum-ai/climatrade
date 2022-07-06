@@ -156,4 +156,53 @@ result_future <- result[(n_train+1):(n_train+intervals),]
 rmse(result_future$VIX,result_future$VIX_predicted)
 
 
+# ============================
+# 8.3
+dataTest <- as_tsibble(df_planetMood[,c("date","VIX")], index = "date") %>% arrange(date) %>% mutate(VIX = VIX+30) %>% 
+  filter(date >= "2022-02-01")
+
+fit <- dataTest %>%
+  model(
+    additive = ETS(VIX ~ error("A") + trend("A") +
+                     season("A")),
+    multiplicative = ETS(VIX ~ error("M") + trend("A") +
+                           season("M"))
+  )
+fc <- fit %>% forecast(h = "2 weeks")
+fc %>%
+  autoplot(dataTest, level = NULL) +
+  labs(title="Australian domestic tourism",
+       y="Overnight trips (millions)") +
+  guides(colour = guide_legend(title = "Forecast"))
+
+# 8.6 COMPONENTS
+components(fit) %>%
+  autoplot() +
+  labs(title = "ETS(M,N,A) components")
+
+# ----------
+
+
+sth_cross_ped <- pedestrian %>%
+  filter(Date >= "2016-07-01",
+         Sensor == "Southern Cross Station") %>%
+  index_by(Date) %>%
+  summarise(Count = sum(Count)/1000)
+sth_cross_ped %>%
+  filter(Date <= "2016-07-31") %>%
+  model(
+    hw = ETS(Count ~ error("M") + trend("Ad") + season("M"))
+  ) %>%
+  forecast(h = "2 weeks") %>%
+  autoplot(sth_cross_ped %>% filter(Date <= "2016-08-14")) +
+  labs(title = "Daily traffic: Southern Cross",
+       y="Pedestrians ('000)")
+
+sth_cross_ped <- dataTest
+sth_cross_ped %>%
+  model(hw = ETS(VIX ~ error("M") + trend("Ad") + season("M"))) %>%
+  forecast(h = "2 weeks") %>%
+  autoplot(sth_cross_ped) +
+  labs(title = "Daily traffic: Southern Cross",
+       y="Pedestrians ('000)")
 
