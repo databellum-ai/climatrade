@@ -123,9 +123,7 @@ library(Metrics)
 
 data <- 
   df_planetMood[,c("date","VIX")] %>% 
-  mutate(
-    VIX = VIX+30, 
-    diffVIX = difference(VIX)) %>% 
+  mutate(VIX = VIX+30) %>% 
   arrange(date)
 
 n_train <- round(nrow(data) * 0.8, 0)
@@ -135,18 +133,27 @@ train_series <- train$VIX
 test_series <- test$VIX
 
 ## make arima models
-arimaModel=arima(train_series, order=c(1,0,1))
-forecast=predict(arimaModel, length(test_series))
+intervals <- nrow(data) - n_train
+# intervals <- 30
 
-acf(train_series)
-pacf(train_series)
+# acf(train_series)
+# pacf(train_series)
+# acf(diff(train_series))
+# pacf(diff(train_series))
+# auto.arima(train_series)
+
+arimaModel=arima(train_series, order=c(2,1,4))
+forecast=predict(arimaModel, intervals)
 
 VIX_predicted <- NA
 VIX_predicted[1:n_train] <- data[1:n_train,2]
-VIX_predicted[(n_train+1):nrow(data)] <- forecast$pred
+VIX_predicted[(n_train+1):(n_train+intervals)] <- forecast$pred
+result <- cbind(data[1:(n_train+intervals),], VIX_predicted)
 
-result <- cbind(data, VIX_predicted)
-result_future <- result[(n_train+1):nrow(data),]
+plot(ts(result[(n_train+1):(n_train+intervals),]))
+
+result_future <- result[(n_train+1):(n_train+intervals),]
 rmse(result_future$VIX,result_future$VIX_predicted)
 
-plot(ts(result))
+
+
