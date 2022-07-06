@@ -159,7 +159,7 @@ rmse(result_future$VIX,result_future$VIX_predicted)
 # ============================
 # 8.3
 dataTest <- as_tsibble(df_planetMood[,c("date","VIX")], index = "date") %>% arrange(date) %>% mutate(VIX = VIX+30) %>% 
-  filter(date >= "2022-02-01")
+  filter(date >= "2017-01-01")
 
 fit <- dataTest %>%
   model(
