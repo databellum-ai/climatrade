@@ -10,17 +10,17 @@ names(df_planetMood)
 # https://rpubs.com/riazakhan94/arima_with_example
 
 data <- df_planetMood[,c("date","VIX")] %>% arrange(date)
-data <- ts(data[,2]+30, start = c(2017,1,1),frequency = 365.25)
-plot(data, xlab='Date', ylab = 'VIX')
+dataTS <- ts(data[,2]+30, start = c(2017,1,1),frequency = 365.25)
+plot(dataTS, xlab='Date', ylab = 'VIX')
 # Step-2
-plot(diff(data),ylab='Differenced VIX')
+plot(diff(dataTS),ylab='Differenced VIX')
 # Step-3: Carrying Log Transform Data
-plot(log10(data),ylab='Log (VIX)')
+plot(log10(dataTS),ylab='Log (VIX)')
 # Step-4: Difference value
-plot(diff(log10(data)),ylab='Differenced Log (VIX)')
+plot(diff(log10(dataTS)),ylab='Differenced Log (VIX)')
 # Step-5: Evaluate and iterate
 require(forecast)
-ARIMAfit = auto.arima(log10(data), approximation=FALSE,trace=FALSE)
+ARIMAfit = auto.arima(log10(dataTS), approximation=FALSE,trace=FALSE)
 summary(ARIMAfit)
 # Series: log10(data)
 # ARIMA(0,1,1)(1,1,0)[12] Coefficients:
@@ -35,3 +35,61 @@ summary(ARIMAfit)
 # MAPE MASE ACF1
 # Training set 0.5716986 0.2422678 0.0325363
 # Step-6 : To examine P and Q values we need to execute acf() and pacf() which is an autocorrelation function.
+
+
+
+# ------------------------------------
+global_economy %>%
+  filter(Code == "EGY") %>%
+  autoplot(Exports) +
+  labs(y = "% of GDP", title = "Egyptian exports")
+fit <- global_economy %>%
+  filter(Code == "EGY") %>%
+  model(ARIMA(Exports))
+report(fit)
+fit %>% forecast(h=10) %>%
+  autoplot(global_economy) +
+  labs(y = "% of GDP", title = "Egyptian exports")
+global_economy %>%
+  filter(Code == "EGY") %>%
+  ACF(Exports) %>%
+  autoplot()
+
+df_planetMood_ts %>%
+  autoplot(difference(VIX)) +
+  labs(y = "VIX", title = "VIX (volatility)")
+fit <- df_planetMood_ts %>%
+  model(ARIMA(VIX))
+report(fit)
+fit %>% forecast(h=180) %>%
+  autoplot(df_planetMood_ts) +
+  labs(y = "VIX", title = "VIX (volatility)")
+
+df_planetMood_ts %>%
+  ACF(difference(VIX)) %>%
+  autoplot()
+# --------------------------------------------------
+
+library(forecast)
+library(Metrics)
+# data = read.csv('https://raw.githubusercontent.com/jbrownlee/Datasets/master/monthly-car-sales.csv')
+# names(data) <- c("date","VIX")
+data <- df_planetMood[,c("date","VIX")] %>% mutate(VIX = VIX+30) %>% arrange(date)
+n_train <- round(nrow(data) * 0.8, 0)
+train <- data[1:n_train,]
+test <- data[(n_train+1):nrow(data),] 
+
+model = auto.arima(train[,2])
+summary(model)
+forecast = predict(model,(nrow(data)-(n_train)))
+
+VIX_predicted[1:n_train] <- data[1:n_train,2]
+VIX_predicted[(n_train+1):nrow(data)] <- forecast$pred
+
+result <- cbind(data, VIX_predicted)
+result_future <- result[(n_train+1):nrow(data),]
+rmse(result_future$VIX,result_future$VIX_predicted[10:20])
+
+plot(ts(result))
+
+
