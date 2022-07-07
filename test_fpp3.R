@@ -9,6 +9,7 @@ source("10_initialize.R")
 
 # install.packages("fpp3")
 # install.packages("GGally")
+# install.packages("fable.prophet")
 library(fpp3)
 library(GGally)
 
@@ -18,16 +19,18 @@ library(tidyverse)
 # Data
 #========================================================
 
-df_planetMood <- readRDS("data/df_planetMood.rds")  # Dataset ready for analysis 
-
 # PlanetMood dataset
-df_planetMood <- readRDS("data/df_planetMood.rds")  # Dataset ready for analysis 
-df_planetMood <- df_planetMood %>% arrange(date)
+df_planetMood <- readRDS("data/df_planetMood.rds") %>% arrange(date) %>% mutate(VIX = VIX+30) # Dataset ready for analysis 
 names(df_planetMood)
-# convert to tsibble (time serie)
-df_planetMood_ts <- df_planetMood %>% as_tsibble(index = date)  
+df_planetMood_train <- df_planetMood %>% filter(date <= "2022-05-15")
+df_planetMood_ts <- df_planetMood %>% as_tsibble(index = date)  # convert to tsibble (time serie)
+df_planetMood_ts_train <- df_planetMood_train %>% as_tsibble(index = date)
+futureData_ts <- as_tsibble(df_planetMood %>% filter(date >= "2022-01-01"))
+
+
 # create a tidy (long) version
 df_planetMood_tidy_ts <- df_planetMood %>% gather(key = "variable", value="value", c(-date)) %>% as_tsibble(index = date, key = variable)
+
 # create a lagged dataset
 lagsToGenerate <- 3
 df_planetMood_ts_lagged <- NULL
@@ -37,13 +40,18 @@ for (i in c(0:lagsToGenerate)) {
   # %>% mutate(lag = i) 
   df_planetMood_ts_lagged <- cbind(df_planetMood_ts$date, lagged_all) %>% rename("date" = 1) %>% arrange(date)
 }
+
+# Available datasets
+df_planetMood
+df_planetMood_train
+df_planetMood_ts_train
+df_planetMood_ts
+df_planetMood_tidy_ts
 df_planetMood_ts_lagged
 
 
-
-#========================================================
-# EDA - Charts
-#========================================================
+# ------------------------------------
+# EDA
 
 # Draw Graph n x m
 selectedVbles <- names(df_planetMood[c(-1)])
@@ -121,16 +129,6 @@ lag2.plot(VVIX, VIX,
           cex=0.2, pch=19, col=5, bgl='transparent', lwl=2, gg=T, box.col=gray(1))
 
 
-
-
-
-
-
-
-#========================================================
-# FPP3 examples
-#========================================================
-
 # cross-correlation and distribution
 df_planetMood_ts %>%
   GGally::ggpairs(columns = (2:4))
@@ -138,7 +136,6 @@ df_planetMood_ts %>%
 
 # lag-plot by season
 df_planetMood_ts %>% gg_lag(VIX, geom = "point")
-
 
 # decomposition
 dcmp <- df_planetMood_ts %>% model(stl = STL(VIX))
@@ -162,9 +159,199 @@ df_planetMood_ts %>%
   autoplot()
 
 
+# ------------------------------------
+# 9.7 ARIMA
+# Other ARIMA links:
+# https://www.educba.com/arima-model-in-r/
+# https://rpubs.com/riazakhan94/arima_with_example
+global_economy %>%
+  filter(Code == "EGY") %>%
+  autoplot(Exports) +
+  labs(y = "% of GDP", title = "Egyptian exports")
+fit <- global_economy %>%
+  filter(Code == "EGY") %>%
+  model(ARIMA(Exports))
+report(fit)
+fit %>% forecast(h=10) %>%
+  autoplot(global_economy) +
+  labs(y = "% of GDP", title = "Egyptian exports")
+global_economy %>%
+  filter(Code == "EGY") %>%
+  ACF(Exports) %>%
+  autoplot()
+
+df_planetMood_ts %>%
+  autoplot(difference(VIX)) +
+  labs(y = "VIX", title = "VIX (volatility)")
+fit <- df_planetMood_ts %>%
+  model(ARIMA(VIX))
+report(fit)
+fit %>% forecast(h=180) %>%
+  autoplot(df_planetMood_ts) +
+  labs(y = "VIX", title = "VIX (volatility)")
+
+df_planetMood_ts %>%
+  ACF(difference(VIX)) %>%
+  autoplot()
+
+
+# ------------------------------------
+# 12.1 STL
+bank_calls %>%
+  fill_gaps() %>%
+  autoplot(Calls) +
+  labs(y = "Calls",
+       title = "Five-minute call volume to bank")
+
+
+calls <- bank_calls %>%
+  mutate(t = row_number()) %>%
+  update_tsibble(index = t, regular = TRUE)
+calls %>%
+  model(
+    STL(sqrt(Calls) ~ season(period = 169) +
+          season(period = 5*169),
+        robust = TRUE)
+  ) %>%
+  components() %>%
+  autoplot() + labs(x = "Observation")
+
+
+# ------------------------------------
+# 12.2 ARIMA vs STL vs prophet
+library(fable.prophet)
+# cement <- aus_production %>%
+#   filter(year(Quarter) >= 1988)
+# train <- cement %>%
+#   filter(year(Quarter) <= 2007)
+# fit <- train %>%
+#   model(
+#     arima = ARIMA(Cement),
+#     ets = ETS(Cement),
+#     prophet = prophet(Cement ~ season(period = 4, order = 2, type = "multiplicative"))
+#   )
+# fc <- fit %>% forecast(h = "2 years 6 months")
+# fc %>% autoplot(cement)
+train <- df_planetMood_ts_train
+fit <- train %>%
+  model(
+    arima = ARIMA(VIX),
+    ets = ETS(VIX),
+    prophet = prophet(VIX ~ season(period = "day", order = 6, type = "multiplicative"))
+  )
+fc <- fit %>% forecast(h = "14 days")
+fc %>% autoplot(df_planetMood_ts[(nrow(df_planetMood_ts)-90):(nrow(df_planetMood_ts)),])
+fc %>% accuracy(df_planetMood_ts[(nrow(df_planetMood_ts)-90):(nrow(df_planetMood_ts)),])
+
+# =========
+# With ARIMA+Fourier:
+fit <- df_planetMood_ts_train %>%
+  model(
+    ARIMA(VIX ~ PDQ(0, 0, 0) + pdq(d = 0) +
+            VVIX + MoonPhase + WkDay + YrWeek +
+            fourier(period = "week", K = 3) +
+            fourier(period = "month", K = 5) +
+            fourier(period = "year", K = 3))
+  )
+fit %>% gg_tsresiduals()
+fit %>% accuracy
+fc <- fit %>% forecast(new_data = futureData_ts)
+fc %>%
+  autoplot(df_planetMood_ts_train %>% tail(10 * 48)) +
+  labs(x = "Date", y = "VIX")
+# =========
+# With prophet:
+fit <- df_planetMood_ts_train %>%
+  model(prophet(VIX ~ VVIX + MoonPhase + WkDay + YrWeek +
+                                   season(period = "week", order = 5) +
+                                   season(period = "month", order = 4) +
+                                   season(period = "year", order = 3))
+  )
+fit %>% components() %>% autoplot()
+fit %>% gg_tsresiduals()
+fit %>% accuracy
+fc <- fit %>% forecast(new_data = futureData_ts)
+fc %>%
+  autoplot(df_planetMood_ts_train %>% tail(10 * 48)) +
+  labs(x = "Date", y = "VIX")
+# =========
+# With both:
+fit <- dataTrain %>%
+  model(
+    modelo_DHR_ARIMA = ARIMA(VIX ~ PDQ(0, 0, 0) + pdq(d = 0) +
+                               VVIX + MoonPhase + WkDay + YrWeek +
+                               fourier(period = "week", K = 3) +
+                               fourier(period = "month", K = 5) +
+                               fourier(period = "year", K = 3)),
+    modelo_DHR_prophet = prophet(VIX ~ VVIX + MoonPhase + WkDay + YrWeek +
+                                   season(period = "week", order = 5) +
+                                   season(period = "month", order = 4) +
+                                   season(period = "year", order = 3))
+  )
+fit %>% gg_tsresiduals()
+fit %>% accuracy
+fc <- fit %>% forecast(new_data = futureData_ts)
+fc %>%
+  autoplot(df_planetMood_ts_train %>% tail(10 * 48)) +
+  labs(x = "Date", y = "VIX")
+
+
+# ------------------------------
+# 12.3 VAR
+fit <- us_change %>%
+  model(
+    aicc = VAR(vars(Consumption, Income)),
+    bic = VAR(vars(Consumption, Income), ic = "bic")
+  )
+fit
+glance(fit)
+fit %>%
+  augment() %>%
+  ACF(.innov) %>%
+  autoplot()
+fit %>%
+  select(aicc) %>%
+  forecast() %>%
+  autoplot(us_change %>% filter(year(Quarter) > 2010))
+
+
+fit <- (dataTrain %>% filter(date <= "2022-02-01")) %>%
+  model(
+    aicc = VAR(vars(VIX, VVIX)),
+    bic = VAR(vars(VIX, VVIX), ic = "bic")
+  )
+fit
+glance(fit)
+fit %>%
+  augment() %>%
+  ACF(.innov) %>%
+  autoplot()
+fit %>%
+  select(aicc) %>%
+  forecast(h = 90) %>%
+  autoplot(dataTrain %>% filter(date > "2017-01-01"))
+
+
+# ------------------------------
+# 12.4 NEURAL NETWORKS
+sunspots <- sunspot.year %>% as_tsibble()
+fit <- sunspots %>%
+  model(NNETAR(sqrt(value)))
+fit %>%
+  generate(times = 9, h = 30) %>%
+  autoplot(.sim) +
+  autolayer(sunspots, value) +
+  theme(legend.position = "none")
 
 
 
+fit <- dataTrain %>%
+  model(NNETAR(VIX))
+fit %>%
+  generate(times = 9, h = 30) %>%
+  autoplot(.sim) +
+  autolayer(dataTrain, VIX) +
+  theme(legend.position = "bottom")
 
 
 

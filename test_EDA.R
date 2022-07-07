@@ -329,3 +329,58 @@ fc %>%
 
 
 
+# ------------------------------
+# 12.3 (VAR)
+fit <- us_change %>%
+  model(
+    aicc = VAR(vars(Consumption, Income)),
+    bic = VAR(vars(Consumption, Income), ic = "bic")
+  )
+fit
+glance(fit)
+fit %>%
+  augment() %>%
+  ACF(.innov) %>%
+  autoplot()
+fit %>%
+  select(aicc) %>%
+  forecast() %>%
+  autoplot(us_change %>% filter(year(Quarter) > 2010))
+
+
+fit <- (dataTrain %>% filter(date <= "2022-02-01")) %>%
+  model(
+    aicc = VAR(vars(VIX, VVIX)),
+    bic = VAR(vars(VIX, VVIX), ic = "bic")
+  )
+fit
+glance(fit)
+fit %>%
+  augment() %>%
+  ACF(.innov) %>%
+  autoplot()
+fit %>%
+  select(aicc) %>%
+  forecast(h = 90) %>%
+  autoplot(dataTrain %>% filter(date > "2017-01-01"))
+
+
+# ------------------------------
+# 12.4 NEURAL NETWORKS
+sunspots <- sunspot.year %>% as_tsibble()
+fit <- sunspots %>%
+  model(NNETAR(sqrt(value)))
+fit %>%
+  forecast(h = 30) %>%
+  autoplot(sunspots) +
+  labs(x = "Year", y = "Counts", title = "Yearly sunspots")
+
+fit %>%
+  generate(times = 9, h = 30) %>%
+  autoplot(.sim) +
+  autolayer(sunspots, value) +
+  theme(legend.position = "none")
+
+
+
+
