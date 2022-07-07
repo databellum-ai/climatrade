@@ -10,6 +10,8 @@ library(tidyverse)
 
 df_planetMood <- readRDS("data/df_planetMood.rds")  # Load dataset for analysis
 names(df_planetMood)
+dataTest <- as_tsibble(df_planetMood[,c("date","VIX")], index = "date") %>% arrange(date) %>% mutate(VIX = VIX+30) %>% 
+  filter(date >= "2017-01-01")
 
 # https://www.educba.com/arima-model-in-r/
 # https://rpubs.com/riazakhan94/arima_with_example
@@ -163,8 +165,6 @@ rmse(result_future$VIX,result_future$VIX_predicted)
 
 # ============================
 # 8.3
-dataTest <- as_tsibble(df_planetMood[,c("date","VIX")], index = "date") %>% arrange(date) %>% mutate(VIX = VIX+30) %>% 
-  filter(date >= "2017-01-01")
 
 fit <- dataTest %>%
   model(
@@ -213,10 +213,119 @@ sth_cross_ped %>%
 
 
 # ===========================================
+# 12.1
+
+
+bank_calls %>%
+  fill_gaps() %>%
+  autoplot(Calls) +
+  labs(y = "Calls",
+       title = "Five-minute call volume to bank")
+
+
+calls <- bank_calls %>%
+  mutate(t = row_number()) %>%
+  update_tsibble(index = t, regular = TRUE)
+calls %>%
+  model(
+    STL(sqrt(Calls) ~ season(period = 169) +
+          season(period = 5*169),
+        robust = TRUE)
+  ) %>%
+  components() %>%
+  autoplot() + labs(x = "Observation")
+
+
+# ------------------------------------
+# 12.2
+
+library(fable.prophet)
+cement <- aus_production %>%
+  filter(year(Quarter) >= 1988)
+train <- cement %>%
+  filter(year(Quarter) <= 2007)
+fit <- train %>%
+  model(
+    arima = ARIMA(Cement),
+    ets = ETS(Cement),
+    prophet = prophet(Cement ~ season(period = 4, order = 2,
+                                      type = "multiplicative"))
+  )
+
+fc <- fit %>% forecast(h = "2 years 6 months")
+fc %>% autoplot(cement)
 
 
 
 
+
+cement <- dataTest %>% filter(date >= "2022-01-01")
+train <- cement %>% filter(date <= "2022-06-01")
+fit <- train %>%
+  model(
+    arima = ARIMA(VIX),
+    ets = ETS(VIX),
+    prophet = prophet(VIX ~ season(period = "day", order = 6,
+                                      type = "multiplicative"))
+  )
+fc <- fit %>% forecast(h = "14 days")
+fc %>% autoplot(cement)
+fc %>% accuracy(cement)
+
+
+# ------------------------------------------------------------------
+# 12.2
+# DHR (dynamic harmonic regression) model
+dataTrain <- as_tsibble(df_planetMood[,c("date","VIX","VVIX", "MoonPhase", "WkDay", "YrWeek")], index = "date") %>% arrange(date) %>% mutate(VIX = VIX+30) %>% filter(date >= "2017-01-01")
+# create a lagged dataset
+# lagsToGenerate <- 3
+# df_planetMood_ts_lagged <- NULL
+# lagged_all <- NULL
+# for (i in c(0:lagsToGenerate)) {
+#   lagged_all <- rbind(lagged_all, df_planetMood_ts[,-1] %>% lag(n = i) %>% mutate(lag = i))
+#   # %>% mutate(lag = i) 
+#   df_planetMood_ts_lagged <- cbind(df_planetMood_ts$date, lagged_all) %>% rename("date" = 1) %>% arrange(date)
+# }
+# df_planetMood_ts_lagged
+# new data for prediction
+futureData <- as_tsibble(dataTrain %>% filter(date >= "2022-01-01"))
+
+# =========
+# =========
+# With ARIMA+Fourier:
+fit <- dataTrain %>%
+  model(
+    ARIMA(VIX ~ PDQ(0, 0, 0) + pdq(d = 0) +
+            VVIX + MoonPhase + WkDay + YrWeek +
+            fourier(period = "week", K = 3) +
+            fourier(period = "month", K = 5) +
+            fourier(period = "year", K = 3))
+  )
+# =========
+# =========
+# With Prophet:
+fit <- dataTrain %>%
+  model(
+    modelo_DHR_ARIMA = ARIMA(VIX ~ PDQ(0, 0, 0) + pdq(d = 0) +
+                               VVIX + MoonPhase + WkDay + YrWeek +
+                               fourier(period = "week", K = 3) +
+                               fourier(period = "month", K = 5) +
+                               fourier(period = "year", K = 3)),
+    modelo_DHR_prophet = prophet(VIX ~ VVIX + MoonPhase + WkDay + YrWeek +
+                                   season(period = "week", order = 5) +
+                                   season(period = "month", order = 4) +
+                                   season(period = "year", order = 3))
+  )
+# =========
+# =========
+fit %>% components() %>% autoplot()
+fit %>% gg_tsresiduals()
+fit %>% accuracy
+
+fc <- fit %>% forecast(new_data = futureData)
+fc %>%
+  autoplot(dataTrain %>% tail(10 * 48)) +
+  labs(x = "Date", y = "VIX")
 
 
 
