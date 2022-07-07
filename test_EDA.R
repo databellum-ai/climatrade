@@ -1,6 +1,11 @@
 
 source("10_initialize.R")
 
+# install.packages("fpp3")
+# install.packages("GGally")
+library(fpp3)
+library(GGally)
+
 library(tidyverse)
 
 df_planetMood <- readRDS("data/df_planetMood.rds")  # Load dataset for analysis
@@ -8,7 +13,7 @@ names(df_planetMood)
 
 # https://www.educba.com/arima-model-in-r/
 # https://rpubs.com/riazakhan94/arima_with_example
-
+# https://otexts.com/fpp3
 
 # ------------------------------------
 global_economy %>%
@@ -205,4 +210,13 @@ sth_cross_ped %>%
   autoplot(sth_cross_ped) +
   labs(title = "Daily traffic: Southern Cross",
        y="Pedestrians ('000)")
+
+
+# ===========================================
+
+
+
+
+
+
 
