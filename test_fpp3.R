@@ -9,49 +9,21 @@ source("10_initialize.R")
 
 # install.packages("fpp3")
 # install.packages("GGally")
+# install.packages("tseries")
+# install.packages("astsa")
 # install.packages("fable.prophet")
 library(fpp3)
 library(GGally)
 
 library(tidyverse)
 
-#========================================================
-# Data
-#========================================================
-
 # PlanetMood dataset
 df_planetMood <- readRDS("data/df_planetMood.rds") %>% arrange(date) %>% mutate(VIX = VIX+30) # Dataset ready for analysis 
 names(df_planetMood)
-df_planetMood_train <- df_planetMood %>% filter(date <= "2022-05-15")
-df_planetMood_ts <- df_planetMood %>% as_tsibble(index = date)  # convert to tsibble (time serie)
-df_planetMood_train_ts <- df_planetMood_train %>% as_tsibble(index = date)
-futureData_ts <- as_tsibble(df_planetMood %>% filter(date >= "2022-01-01"))
-# create a tidy (long) version:
-df_planetMood_tidy_ts <- df_planetMood %>% 
-  gather(key = "variable", value="value", c(-date)) %>% 
-  as_tsibble(index = date, key = variable) 
-# create a lagged dataset:
-lagsToGenerate <- 3
-df_planetMood_lagged_ts <- NULL
-lagged_all <- NULL
-for (i in c(0:lagsToGenerate)) {
-  lagged_all <- rbind(lagged_all, df_planetMood_ts[,-1] %>% lag(n = i) %>% mutate(lag = i))
-  # %>% mutate(lag = i) 
-  df_planetMood_lagged_ts <- cbind(df_planetMood_ts$date, lagged_all) %>% rename("date" = 1) %>% arrange(date)
-}
 
-# Available datasets
-df_planetMood
-df_planetMood_train
-df_planetMood_train_ts
-df_planetMood_ts
-df_planetMood_tidy_ts
-df_planetMood_lagged_ts
-futureData_ts
-
-
-# ------------------------------------
+#========================================================
 # EDA
+#========================================================
 
 # Draw mosaic all variables n x m
 selectedVbles <- names(df_planetMood[c(-1)])
@@ -93,71 +65,73 @@ chartTwoAxis(df_planetMood$date, df_planetMood$VIX, df_planetMood$VVIX, "VIX", "
 
 # Draw pairs of correlations in date groups
 library(xts)    
-selectedVbles <- c("VIX", "Gold", "SP500", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "VIX_HLvol", "VVIX_HLvol", "VIX3M_HLvol", "VIXNsdq_HLvol", "GoldVlty_HLvol", "Gold_HLvol", "SP500_HLvol", "NewsTone", "Goldstein", "IAI", "DAI1", "DAI2", "DAI3", "BCI", "CCI", "CLI", "Flights", "Tempo", "Energy", "Danceability", "MoonPhase", "WkDay", "YrWeek")
-selectedVbles <- c("VIX", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "DAI3", "CCI", "Danceability")
+# selectedVbles <- c("VIX", "Gold", "SP500", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "VIX_HLvol", "VVIX_HLvol", "VIX3M_HLvol", "VIXNsdq_HLvol", "GoldVlty_HLvol", "Gold_HLvol", "SP500_HLvol", "NewsTone", "Goldstein", "IAI", "DAI1", "DAI2", "DAI3", "BCI", "CCI", "CLI", "Flights", "Tempo", "Energy", "Danceability", "MoonPhase", "WkDay", "YrWeek")
+selectedVbles <- c("VIX", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "DAI3", "CCI")
 tmpData <- df_planetMood[,c("date", selectedVbles)]
 tmpData <- as.xts(tmpData[, -1], order.by = tmpData$date)
-group <- NA
+dateQuartile <- NA
 firstQuartileDates <- as.Date(as.integer(summary(df_planetMood$date)[2]))
+secondQuartileDates <- as.Date(as.integer(summary(df_planetMood$date)[3]))
 thirdQuartileDates <- as.Date(as.integer(summary(df_planetMood$date)[5]))
-group[df_planetMood$date < firstQuartileDates] <- 1
-group[df_planetMood$date >= firstQuartileDates & df_planetMood$date <= thirdQuartileDates] <- 2
-group[df_planetMood$date > thirdQuartileDates] <- 3
+dateQuartile[df_planetMood$date < firstQuartileDates] <- 1
+dateQuartile[df_planetMood$date >= firstQuartileDates & df_planetMood$date < secondQuartileDates] <- 2
+dateQuartile[df_planetMood$date >= secondQuartileDates & df_planetMood$date < thirdQuartileDates] <- 3
+dateQuartile[df_planetMood$date >= thirdQuartileDates] <- 4
 pairs(coredata(tmpData), 
       lower.panel = NULL,
-      col = c("red", "blue", "green")[group],
+      col = c("red", "orange", "green", "blue")[dateQuartile],
       pch = 18,
       main = "Pairs correlations colorred by dates quartile")
+# Draw pairs of correlations shown correlation and distribution
+as_tsibble(df_planetMood, index = date) %>%
+  GGally::ggpairs(columns = selectedVbles)
 
-
-# Pairs correlations in date groups
-# install.packages("tseries")
+# variable:variable lagged correlations
 library(tseries)
-yt <- df_planetMood$VIX
-xt <- df_planetMood$VVIX 
-ccf(yt, xt, lag=90, plot=TRUE, xlim=range(-90,-1))
-ccf(yt, xt, lag=90, plot=FALSE, xlim=range(-90,-1))
-
-
-# Pairs correlations in date groups
-# install.packages("astsa")
+# see correlation of past values (represented by lag "-n") of variable x respect to variable y :
+ccf(x = df_planetMood$VIXNsdq, y = df_planetMood$VIX, lag=90, plot=FALSE, xlim=range(-90,-1))
+ccf(x = df_planetMood$VIXNsdq, y = df_planetMood$VIX, lag=90, plot=TRUE, xlim=range(-90,-1))
+# Draw variable correlation with its lagged values
 library(astsa)
-VIX <- df_planetMood$VIX
-VVIX <- df_planetMood$VVIX
-lag2.plot(VVIX, VIX, 
+lag2.plot(df_planetMood$VIXNsdq, df_planetMood$VIX, 
           max.lag = 15, 
           smooth = TRUE, 
           cex=0.2, pch=19, col=5, bgl='transparent', lwl=2, gg=T, box.col=gray(1))
 
+#========================================================
+# Prepare data for modelling
+#========================================================
 
-# cross-correlation and distribution
-df_planetMood_ts %>%
-  GGally::ggpairs(columns = (2:4))
+# Refine dataset with only relevant prescriptors and adding calendar variables
+df_planetMood <- df_planetMood %>% 
+  cbind(dateQuartile) %>% 
+  select(date, selectedVbles, MoonPhase, WkDay, YrWeek, dateQuartile)
 
-
-# lag-plot by season
-df_planetMood_ts %>% gg_lag(VIX, geom = "point")
-
-# decomposition
-dcmp <- df_planetMood_ts %>% model(stl = STL(VIX))
-components(dcmp)
-components(dcmp) %>%
-  as_tsibble() %>%
-  autoplot(VIX, colour="gray") +
-  geom_line(aes(y=trend), colour = "#D55E00")
-components(dcmp) %>% autoplot()
-components(dcmp) %>%
-  as_tsibble() %>%
-  autoplot(VIX, colour="gray") +
-  geom_line(aes(y=season_adjust), colour = "#D55E00")
-
-df_planetMood_ts %>%
-  model(
-    STL(VIX ~ trend(window = 7) +
-          season(window = "periodic"),
-        robust = TRUE)) %>%
-  components() %>%
-  autoplot()
+df_planetMood_train <- df_planetMood %>% filter(date <= "2022-05-15")
+df_planetMood_ts <- df_planetMood %>% as_tsibble(index = date)  # convert to tsibble (time serie)
+df_planetMood_train_ts <- df_planetMood_train %>% as_tsibble(index = date)
+futureData_ts <- as_tsibble(df_planetMood %>% filter(date >= "2022-01-01"))
+# create a tidy (long) version:
+df_planetMood_tidy_ts <- df_planetMood %>% 
+  gather(key = "variable", value="value", c(-date)) %>% 
+  as_tsibble(index = date, key = variable) 
+# create a lagged dataset:
+lagsToGenerate <- 3
+df_planetMood_lagged_ts <- NULL
+lagged_all <- NULL
+for (i in c(0:lagsToGenerate)) {
+  lagged_all <- rbind(lagged_all, df_planetMood_ts[,-1] %>% lag(n = i) %>% mutate(lag = i))
+  # %>% mutate(lag = i) 
+  df_planetMood_lagged_ts <- cbind(df_planetMood_ts$date, lagged_all) %>% rename("date" = 1) %>% arrange(date)
+}
+# Available datasets
+head(df_planetMood)
+head(df_planetMood_train)
+head(df_planetMood_train_ts)
+head(df_planetMood_ts)
+head(df_planetMood_tidy_ts)
+head(df_planetMood_lagged_ts)
+head(futureData_ts)
 
 
 # ------------------------------------
@@ -217,6 +191,13 @@ calls %>%
   components() %>%
   autoplot() + labs(x = "Observation")
 
+df_planetMood_ts %>%
+  model(
+    STL(VIX ~ trend(window = 7) +
+          season(window = "periodic"),
+        robust = TRUE)) %>%
+  components() %>%
+  autoplot()
 
 # ------------------------------------
 # 12.2 ARIMA vs STL vs prophet
