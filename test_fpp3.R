@@ -24,36 +24,36 @@ df_planetMood <- readRDS("data/df_planetMood.rds") %>% arrange(date) %>% mutate(
 names(df_planetMood)
 df_planetMood_train <- df_planetMood %>% filter(date <= "2022-05-15")
 df_planetMood_ts <- df_planetMood %>% as_tsibble(index = date)  # convert to tsibble (time serie)
-df_planetMood_ts_train <- df_planetMood_train %>% as_tsibble(index = date)
+df_planetMood_train_ts <- df_planetMood_train %>% as_tsibble(index = date)
 futureData_ts <- as_tsibble(df_planetMood %>% filter(date >= "2022-01-01"))
-
-
-# create a tidy (long) version
-df_planetMood_tidy_ts <- df_planetMood %>% gather(key = "variable", value="value", c(-date)) %>% as_tsibble(index = date, key = variable)
-
-# create a lagged dataset
+# create a tidy (long) version:
+df_planetMood_tidy_ts <- df_planetMood %>% 
+  gather(key = "variable", value="value", c(-date)) %>% 
+  as_tsibble(index = date, key = variable) 
+# create a lagged dataset:
 lagsToGenerate <- 3
-df_planetMood_ts_lagged <- NULL
+df_planetMood_lagged_ts <- NULL
 lagged_all <- NULL
 for (i in c(0:lagsToGenerate)) {
   lagged_all <- rbind(lagged_all, df_planetMood_ts[,-1] %>% lag(n = i) %>% mutate(lag = i))
   # %>% mutate(lag = i) 
-  df_planetMood_ts_lagged <- cbind(df_planetMood_ts$date, lagged_all) %>% rename("date" = 1) %>% arrange(date)
+  df_planetMood_lagged_ts <- cbind(df_planetMood_ts$date, lagged_all) %>% rename("date" = 1) %>% arrange(date)
 }
 
 # Available datasets
 df_planetMood
 df_planetMood_train
-df_planetMood_ts_train
+df_planetMood_train_ts
 df_planetMood_ts
 df_planetMood_tidy_ts
-df_planetMood_ts_lagged
+df_planetMood_lagged_ts
+futureData_ts
 
 
 # ------------------------------------
 # EDA
 
-# Draw Graph n x m
+# Draw mosaic all variables n x m
 selectedVbles <- names(df_planetMood[c(-1)])
 n <- length(selectedVbles)
 # we calculate how many rows and column are needed to represent all variables as squeared as possible
@@ -70,8 +70,8 @@ for(i in 1:n) {
        labels=df_planetMood$date, las=2)
 }
 
-
-# Function to draw 1:1 comparison in two different axis
+# Draw 1:1 comparison in two different axis
+# Function to draw
 chartTwoAxis <- function(x, y1, y2, y1_name, y2_name) {
   par(mfrow=c(1,1))
   par(mar=c(5,5,5,5)+0.1, las=1)
@@ -87,13 +87,14 @@ chartTwoAxis <- function(x, y1, y2, y1_name, y2_name) {
   title(paste("1:1 compared history", y1_name, "vs", y2_name), adj=0)
   mtext(y2_name, side = 4, las=3, line=3, col="limegreen")
   mtext(y1_name, side = 2, las=3, line=3, col="red") }
-# Call the function to draw 1:1 comparison in two different axis
+# Call the function to draw
 chartTwoAxis(df_planetMood$date, df_planetMood$VIX, df_planetMood$VVIX, "VIX", "VVIX")
 
 
-# Pairs correlations in date groups
+# Draw pairs of correlations in date groups
 library(xts)    
-selectedVbles <- c("VIX", "VVIX", "Tempo", "NewsTone")
+selectedVbles <- c("VIX", "Gold", "SP500", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "VIX_HLvol", "VVIX_HLvol", "VIX3M_HLvol", "VIXNsdq_HLvol", "GoldVlty_HLvol", "Gold_HLvol", "SP500_HLvol", "NewsTone", "Goldstein", "IAI", "DAI1", "DAI2", "DAI3", "BCI", "CCI", "CLI", "Flights", "Tempo", "Energy", "Danceability", "MoonPhase", "WkDay", "YrWeek")
+selectedVbles <- c("VIX", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "DAI3", "CCI", "Danceability")
 tmpData <- df_planetMood[,c("date", selectedVbles)]
 tmpData <- as.xts(tmpData[, -1], order.by = tmpData$date)
 group <- NA
@@ -106,7 +107,7 @@ pairs(coredata(tmpData),
       lower.panel = NULL,
       col = c("red", "blue", "green")[group],
       pch = 18,
-      main = "Pairs correlationscolorred by dates")
+      main = "Pairs correlations colorred by dates quartile")
 
 
 # Pairs correlations in date groups
@@ -232,7 +233,7 @@ library(fable.prophet)
 #   )
 # fc <- fit %>% forecast(h = "2 years 6 months")
 # fc %>% autoplot(cement)
-train <- df_planetMood_ts_train
+train <- df_planetMood_train_ts
 fit <- train %>%
   model(
     arima = ARIMA(VIX),
@@ -245,7 +246,7 @@ fc %>% accuracy(df_planetMood_ts[(nrow(df_planetMood_ts)-90):(nrow(df_planetMood
 
 # =========
 # With ARIMA+Fourier:
-fit <- df_planetMood_ts_train %>%
+fit <- df_planetMood_train_ts %>%
   model(
     ARIMA(VIX ~ PDQ(0, 0, 0) + pdq(d = 0) +
             VVIX + MoonPhase + WkDay + YrWeek +
@@ -257,11 +258,11 @@ fit %>% gg_tsresiduals()
 fit %>% accuracy
 fc <- fit %>% forecast(new_data = futureData_ts)
 fc %>%
-  autoplot(df_planetMood_ts_train %>% tail(10 * 48)) +
+  autoplot(df_planetMood_train_ts %>% tail(10 * 48)) +
   labs(x = "Date", y = "VIX")
 # =========
 # With prophet:
-fit <- df_planetMood_ts_train %>%
+fit <- df_planetMood_train_ts %>%
   model(prophet(VIX ~ VVIX + MoonPhase + WkDay + YrWeek +
                                    season(period = "week", order = 5) +
                                    season(period = "month", order = 4) +
@@ -272,7 +273,7 @@ fit %>% gg_tsresiduals()
 fit %>% accuracy
 fc <- fit %>% forecast(new_data = futureData_ts)
 fc %>%
-  autoplot(df_planetMood_ts_train %>% tail(10 * 48)) +
+  autoplot(df_planetMood_train_ts %>% tail(10 * 48)) +
   labs(x = "Date", y = "VIX")
 # =========
 # With both:
@@ -292,7 +293,7 @@ fit %>% gg_tsresiduals()
 fit %>% accuracy
 fc <- fit %>% forecast(new_data = futureData_ts)
 fc %>%
-  autoplot(df_planetMood_ts_train %>% tail(10 * 48)) +
+  autoplot(df_planetMood_train_ts %>% tail(10 * 48)) +
   labs(x = "Date", y = "VIX")
 
 
