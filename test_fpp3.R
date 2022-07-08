@@ -139,25 +139,6 @@ head(futureData_ts)
 # Other ARIMA links:
 # https://www.educba.com/arima-model-in-r/
 # https://rpubs.com/riazakhan94/arima_with_example
-global_economy %>%
-  filter(Code == "EGY") %>%
-  autoplot(Exports) +
-  labs(y = "% of GDP", title = "Egyptian exports")
-fit <- global_economy %>%
-  filter(Code == "EGY") %>%
-  model(ARIMA(Exports))
-report(fit)
-fit %>% forecast(h=10) %>%
-  autoplot(global_economy) +
-  labs(y = "% of GDP", title = "Egyptian exports")
-global_economy %>%
-  filter(Code == "EGY") %>%
-  ACF(Exports) %>%
-  autoplot()
-
-df_planetMood_ts %>%
-  autoplot(difference(VIX)) +
-  labs(y = "VIX", title = "VIX (volatility)")
 fit <- df_planetMood_ts %>%
   model(ARIMA(VIX))
 report(fit)
@@ -165,67 +146,25 @@ fit %>% forecast(h=180) %>%
   autoplot(df_planetMood_ts) +
   labs(y = "VIX", title = "VIX (volatility)")
 
-df_planetMood_ts %>%
-  ACF(difference(VIX)) %>%
-  autoplot()
-
-
 # ------------------------------------
-# 12.1 STL
-bank_calls %>%
-  fill_gaps() %>%
-  autoplot(Calls) +
-  labs(y = "Calls",
-       title = "Five-minute call volume to bank")
+# 12.2 ARIMA vs ETL vs prophet
 
-
-calls <- bank_calls %>%
-  mutate(t = row_number()) %>%
-  update_tsibble(index = t, regular = TRUE)
-calls %>%
-  model(
-    STL(sqrt(Calls) ~ season(period = 169) +
-          season(period = 5*169),
-        robust = TRUE)
-  ) %>%
-  components() %>%
-  autoplot() + labs(x = "Observation")
-
-df_planetMood_ts %>%
-  model(
-    STL(VIX ~ trend(window = 7) +
-          season(window = "periodic"),
-        robust = TRUE)) %>%
-  components() %>%
-  autoplot()
-
-# ------------------------------------
-# 12.2 ARIMA vs STL vs prophet
+# =========
+# With ARIMA:
 library(fable.prophet)
-# cement <- aus_production %>%
-#   filter(year(Quarter) >= 1988)
-# train <- cement %>%
-#   filter(year(Quarter) <= 2007)
-# fit <- train %>%
-#   model(
-#     arima = ARIMA(Cement),
-#     ets = ETS(Cement),
-#     prophet = prophet(Cement ~ season(period = 4, order = 2, type = "multiplicative"))
-#   )
-# fc <- fit %>% forecast(h = "2 years 6 months")
-# fc %>% autoplot(cement)
-train <- df_planetMood_train_ts
-fit <- train %>%
+
+fit <- df_planetMood_train_ts %>%
   model(
     arima = ARIMA(VIX),
     ets = ETS(VIX),
     prophet = prophet(VIX ~ season(period = "day", order = 6, type = "multiplicative"))
   )
-fc <- fit %>% forecast(h = "14 days")
-fc %>% autoplot(df_planetMood_ts[(nrow(df_planetMood_ts)-90):(nrow(df_planetMood_ts)),])
-fc %>% accuracy(df_planetMood_ts[(nrow(df_planetMood_ts)-90):(nrow(df_planetMood_ts)),])
+fc <- fit %>% forecast(h = "28 days")
+fc %>% autoplot(df_planetMood_ts[(nrow(df_planetMood_ts)-900):(nrow(df_planetMood_ts)),])
+fc %>% accuracy(df_planetMood_ts[(nrow(df_planetMood_ts)-900):(nrow(df_planetMood_ts)),])
 
 # =========
+# REGRESSION
 # With ARIMA+Fourier:
 fit <- df_planetMood_train_ts %>%
   model(
@@ -244,7 +183,8 @@ fc %>%
 # =========
 # With prophet:
 fit <- df_planetMood_train_ts %>%
-  model(prophet(VIX ~ VVIX + MoonPhase + WkDay + YrWeek +
+  model(prophet(VIX ~ VVIX + VIXNsdq + VIX3M + GoldVlty + GoldVlty + 
+                  DAI3 + CCI + dateQuartile + MoonPhase + WkDay + YrWeek +
                                    season(period = "week", order = 5) +
                                    season(period = "month", order = 4) +
                                    season(period = "year", order = 3))
@@ -257,7 +197,7 @@ fc %>%
   autoplot(df_planetMood_train_ts %>% tail(10 * 48)) +
   labs(x = "Date", y = "VIX")
 # =========
-# With both:
+# With ARIMA + prophet (comparison):
 fit <- dataTrain %>%
   model(
     modelo_DHR_ARIMA = ARIMA(VIX ~ PDQ(0, 0, 0) + pdq(d = 0) +
