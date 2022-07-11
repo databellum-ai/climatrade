@@ -173,6 +173,27 @@ fc %>%
   autoplot(df_planetMood_ts %>% tail(100)) +
   labs(x = "Date", y = "VIX")
 
+# =========
+# REGRESSION + prophet:
+library(fable.prophet)
+fit2 <- df_planetMood_train_ts %>%
+  model(prophet(VIX ~ VIX_n +
+                  VVIX_n + VIX3M_n + VIXNsdq_n + GoldVlty_n + DAI3_n + CCI_n + 
+                  MoonPhase + WkDay + YrWeek + Year +
+                                   season(period = "week", order = 5) +
+                                   season(period = "month", order = 4) +
+                                   season(period = "year", order = 3))
+  )
+fit2 %>% components() %>% autoplot()
+fit2 %>% gg_tsresiduals()
+fit2 %>% accuracy
+fc2 <- fit2 %>% forecast(new_data = futureData_ts)
+fc2 %>% autoplot(df_planetMood_ts %>% tail(100)) + labs(x = "Date", y = "VIX")
+
+
+
+
+
 
 
 
@@ -191,28 +212,14 @@ accuracy_pm <-
     txnLength = date - date_txn, 
     earningsPercent = ifelse(success, abs(realChangePercent), -1*abs(realChangePercent))
   )
-# accuracy_pm
+accuracy_pm
 sum(accuracy_pm$earnings)  
 
 
 
 
-# =========
-# REGRESSION + prophet:
-library(fable.prophet)
-fit <- df_planetMood_train_ts %>%
-  model(prophet(VIX ~ VIX_n +
-                  VVIX_n + VIX3M_n + VIXNsdq_n + GoldVlty_n + DAI3_n + CCI_n + 
-                  MoonPhase + WkDay + YrWeek + Year +
-                                   season(period = "week", order = 5) +
-                                   season(period = "month", order = 4) +
-                                   season(period = "year", order = 3))
-  )
-fit %>% components() %>% autoplot()
-fit %>% gg_tsresiduals()
-fit %>% accuracy
-fc <- fit %>% forecast(new_data = futureData_ts)
-fc %>% autoplot(df_planetMood_ts %>% tail(100)) + labs(x = "Date", y = "VIX")
+
+
 
 # ------------------------------
 # 12.3 VAR
