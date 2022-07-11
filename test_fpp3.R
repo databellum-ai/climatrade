@@ -175,10 +175,11 @@ fc %>%
 
 
 
-# calculate accuracy for our prediction
-overnightFee <- 0.002
-closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
+
 VIX_forecasted <- fc$.mean
+# calculate accuracy for our prediction
+closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
+# VIX_forecasted <- fc$.mean
 real <- df_planetMood_1 %>% filter(between(date,firstDateToForecast,lastDateToForecast)) %>% select(date,VIX_real=VIX)
 accuracy_pm <- 
   cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, VIX_forecasted) %>% 
@@ -188,11 +189,11 @@ accuracy_pm <-
     predChangePercent = 100*(VIX_forecasted - VIX_txn)/VIX_txn, 
     success = (realChangePercent * predChangePercent) > 0,
     txnLength = date - date_txn, 
-    earningsPercent = ifelse(success, abs(realChangePercent), -1*abs(realChangePercent)), 
-    overnightCost = overnightFee*(as.integer(txnLength))*abs(earningsPercent)
-    )
-accuracy_pm
-sum(accuracy_pm$earnings)
+    earningsPercent = ifelse(success, abs(realChangePercent), -1*abs(realChangePercent))
+  )
+# accuracy_pm
+sum(accuracy_pm$earnings)  
+
 
 
 
