@@ -160,8 +160,8 @@ lag2.plot(df_planetMood$VIXNsdq, df_planetMood$VIX,
 fit <- df_planetMood_train_ts %>%
   model(
     ARIMA(VIX ~ PDQ(0, 0, 0) + pdq(d = 0) +
-            VIX_n + VVIX_n + VIX3M_n + VIXNsdq_n + GoldVlty_n + 
-            DAI3_n + CCI_n + MoonPhase + WkDay + YrWeek + Year + 
+            VIX_n + VVIX_n + VIX3M_n + VIXNsdq_n + GoldVlty_n + DAI3_n + CCI_n + 
+            MoonPhase + WkDay + YrWeek + Year + 
             fourier(period = "week", K = 3) +
             fourier(period = "month", K = 5) +
             fourier(period = "year", K = 3))
@@ -172,13 +172,42 @@ fc <- fit %>% forecast(new_data = futureData_ts)
 fc %>%
   autoplot(df_planetMood_ts %>% tail(100)) +
   labs(x = "Date", y = "VIX")
+
+
+
+# calculate accuracy for out prediction
+closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
+VIX_forecasted <- fc$.mean
+real <- df_planetMood_1 %>% filter(between(date,firstDateToForecast,lastDateToForecast)) %>% select(date,VIX_real=VIX)
+accuracy_pm <- 
+  cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, VIX_forecasted) %>% 
+  mutate(
+    realChange = 100*(VIX_real - VIX_txn)/VIX_txn, 
+    predChange = 100*(VIX_forecasted - VIX_txn)/VIX_txn, 
+    hitFail = "1/0",
+    txnLength = date - date_txn, 
+ 
+    action = ifelse(VIX_forecasted > VIX_txn, "BUY", "SELL"), 
+    earnings = 
+      ifelse(action == "BUY", VIX_real - VIX_txn, VIX_txn - VIX_real), 
+    annualRate = ifelse(action == "BUY", 
+                        paste0(abs(round(365/(as.integer(txnLength))*predChange,0)),"%"), 
+                        paste0(-1*abs(round(365/(as.integer(txnLength))*predChange,0)),"%")),    
+    overnightCost = 0.002*(as.integer(txnLength))*earnings
+    )
+accuracy_pm
+sum(accuracy_pm$earnings)
+
+
+
+
 # =========
 # REGRESSION + prophet:
 library(fable.prophet)
 fit <- df_planetMood_train_ts %>%
   model(prophet(VIX ~ VIX_n +
-                  VVIX_n + VIX3M_n + VIXNsdq_n + GoldVlty_n + 
-                  DAI3_n + CCI_n + MoonPhase + WkDay + YrWeek + Year +
+                  VVIX_n + VIX3M_n + VIXNsdq_n + GoldVlty_n + DAI3_n + CCI_n + 
+                  MoonPhase + WkDay + YrWeek + Year +
                                    season(period = "week", order = 5) +
                                    season(period = "month", order = 4) +
                                    season(period = "year", order = 3))
