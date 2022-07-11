@@ -37,9 +37,9 @@ df_planetMood_1 <- df_planetMood %>%
 # dates and intervals:
 lastDateAvailable <- as_date("2022-06-01")
 firstDateToForecast <- lastDateAvailable + 1
-lastDateToForecast <- firstDateToForecast + daysToForecast - 1
 lagToApply <- 5
 daysToForecast <- lagToApply
+lastDateToForecast <- firstDateToForecast + daysToForecast - 1
 
 # create a lagged dataset with added lagged columns:
 df_planetMood_1 <- df_planetMood %>% mutate(
@@ -175,29 +175,24 @@ fc %>%
 
 
 
-# calculate accuracy for out prediction
+# calculate accuracy for our prediction
+overnightFee <- 0.002
 closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
 VIX_forecasted <- fc$.mean
 real <- df_planetMood_1 %>% filter(between(date,firstDateToForecast,lastDateToForecast)) %>% select(date,VIX_real=VIX)
 accuracy_pm <- 
   cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, VIX_forecasted) %>% 
   mutate(
-    realChange = 100*(VIX_real - VIX_txn)/VIX_txn, 
-    predChange = 100*(VIX_forecasted - VIX_txn)/VIX_txn, 
-    hitFail = "1/0",
-    txnLength = date - date_txn, 
- 
     action = ifelse(VIX_forecasted > VIX_txn, "BUY", "SELL"), 
-    earnings = 
-      ifelse(action == "BUY", VIX_real - VIX_txn, VIX_txn - VIX_real), 
-    annualRate = ifelse(action == "BUY", 
-                        paste0(abs(round(365/(as.integer(txnLength))*predChange,0)),"%"), 
-                        paste0(-1*abs(round(365/(as.integer(txnLength))*predChange,0)),"%")),    
-    overnightCost = 0.002*(as.integer(txnLength))*earnings
+    realChangePercent = 100*(VIX_real - VIX_txn)/VIX_txn, 
+    predChangePercent = 100*(VIX_forecasted - VIX_txn)/VIX_txn, 
+    success = (realChangePercent * predChangePercent) > 0,
+    txnLength = date - date_txn, 
+    earningsPercent = ifelse(success, abs(realChangePercent), -1*abs(realChangePercent)), 
+    overnightCost = overnightFee*(as.integer(txnLength))*abs(earningsPercent)
     )
 accuracy_pm
 sum(accuracy_pm$earnings)
-
 
 
 
