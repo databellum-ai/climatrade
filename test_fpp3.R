@@ -70,8 +70,9 @@ df_planetMood_train_ts <- as_tsibble(df_planetMood_train, index = date)
 futureData_ts <- as_tsibble(futureData, index = date)
 
 # Available datasets
-head(df_planetMood_train_ts)
 head(df_planetMood_ts)
+head(df_planetMood_train_ts)
+head(df_planetMoodActual_train_ts)
 head(futureData_ts)
 
 
@@ -235,18 +236,20 @@ accuracy_pm_VAR
 
 # ------------------------------
 # 12.4 NEURAL NETWORKS
+df_planetMood_ts
 fit4 <- df_planetMoodActual_train_ts %>%
   model(NNETAR(VIX))
 fc4 <- fit4 %>%
-  generate(times = 3, h = daysToForecast)
+  generate(times = 4, h = daysToForecast)
 fc4 %>%
   autoplot(.sim) +
   autolayer((df_planetMood_ts %>% tail(100)), VIX) +
   theme(legend.position = "bottom")
 # https://robjhyndman.com/hyndsight/nnetar-prediction-intervals/
-VIX_forecasted <- as_data_frame(fc4) %>% group_by(date) %>% summarise(pred_VIX = mean(.sim)) %>% pull(pred_VIX)
+VIX_forecasted <- as_tibble(fc4) %>% group_by(date) %>% summarise(pred_VIX = mean(.sim)) %>% pull(pred_VIX)
 accuracy_pm_NNETAR <- calculateAccuracyDataframe_pm(VIX_forecasted)
 accuracy_pm_NNETAR
+sum(accuracy_pm_NNETAR$earningsPercent)
 
 # ------------
 # ------------
