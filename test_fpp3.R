@@ -37,8 +37,8 @@ df_planetMood_1 <- df_planetMood %>%
 # dates and intervals:
 lastDateAvailable <- as_date("2022-06-01")
 firstDateToForecast <- lastDateAvailable + 1
-lagToApply <- 5
-daysToForecast <- lagToApply
+daysToForecast <- 14
+lagToApply <- daysToForecast
 lastDateToForecast <- firstDateToForecast + daysToForecast - 1
 
 # create a lagged dataset with added lagged columns:
@@ -73,6 +73,29 @@ futureData_ts <- as_tsibble(futureData, index = date)
 head(df_planetMood_train_ts)
 head(df_planetMood_ts)
 head(futureData_ts)
+
+
+#========================================================
+#========================================================
+# FUNCTIONS
+#========================================================
+#========================================================
+# function calculate "PlanetMood" Accuracy for our prediction
+calculateAccuracyDataframe_pm <- function(VIX_forecasted) {
+  closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
+  real <- df_planetMood_1 %>% filter(between(date,firstDateToForecast,lastDateToForecast)) %>% select(date,VIX_real=VIX)
+  accuracy_pm <- 
+    cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, VIX_forecasted) %>% 
+    mutate(
+      action = ifelse(VIX_forecasted > VIX_txn, "BUY", "SELL"), 
+      realChangePercent = 100*(VIX_real - VIX_txn)/VIX_txn, 
+      predChangePercent = 100*(VIX_forecasted - VIX_txn)/VIX_txn, 
+      success = (realChangePercent * predChangePercent) > 0,
+      txnLength = date - date_txn, 
+      earningsPercent = ifelse(success, abs(realChangePercent), -1*abs(realChangePercent))
+    )
+  return(accuracy_pm)
+}
 
 
 #========================================================
@@ -169,9 +192,9 @@ fit <- df_planetMood_train_ts %>%
 fit %>% gg_tsresiduals()
 fit %>% accuracy
 fc <- fit %>% forecast(new_data = futureData_ts)
-fc %>%
-  autoplot(df_planetMood_ts %>% tail(100)) +
-  labs(x = "Date", y = "VIX")
+fc %>% autoplot(df_planetMood_ts %>% tail(100)) + labs(x = "Date", y = "VIX")
+accuracy_pm_ARIMA_regrss <- calculateAccuracyDataframe_pm(fc$.mean)
+accuracy_pm_ARIMA_regrss
 
 # =========
 # REGRESSION + prophet:
@@ -189,76 +212,50 @@ fit2 %>% gg_tsresiduals()
 fit2 %>% accuracy
 fc2 <- fit2 %>% forecast(new_data = futureData_ts)
 fc2 %>% autoplot(df_planetMood_ts %>% tail(100)) + labs(x = "Date", y = "VIX")
-
-
-
-
-
-
-
-
-VIX_forecasted <- fc$.mean
-# calculate accuracy for our prediction
-closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
-# VIX_forecasted <- fc$.mean
-real <- df_planetMood_1 %>% filter(between(date,firstDateToForecast,lastDateToForecast)) %>% select(date,VIX_real=VIX)
-accuracy_pm <- 
-  cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, VIX_forecasted) %>% 
-  mutate(
-    action = ifelse(VIX_forecasted > VIX_txn, "BUY", "SELL"), 
-    realChangePercent = 100*(VIX_real - VIX_txn)/VIX_txn, 
-    predChangePercent = 100*(VIX_forecasted - VIX_txn)/VIX_txn, 
-    success = (realChangePercent * predChangePercent) > 0,
-    txnLength = date - date_txn, 
-    earningsPercent = ifelse(success, abs(realChangePercent), -1*abs(realChangePercent))
-  )
-accuracy_pm
-sum(accuracy_pm$earnings)  
-
-
-
-
-
-
+accuracy_pm_Prophet_regrss <- calculateAccuracyDataframe_pm(fc2$.mean)
+accuracy_pm_Prophet_regrss
 
 # ------------------------------
 # 12.3 VAR
-fit <- (df_planetMoodActual_train_ts) %>%
+fit3 <- (df_planetMoodActual_train_ts) %>%
   model(
     aicc = VAR(vars(VIX, VVIX, VIX3M, VIXNsdq, GoldVlty, DAI3, CCI, MoonPhase, WkDay, YrWeek)),
     bic = VAR(vars(VIX, VVIX, VIX3M, VIXNsdq, GoldVlty, DAI3, CCI, MoonPhase, WkDay, YrWeek), ic = "bic")
   )
-fit
-glance(fit)
-fit %>%
+fit3
+glance(fit3)
+fit3 %>%
   augment() %>%
   ACF(.innov) %>%
   autoplot()
-forecasted <- fit %>% select(aicc) %>% forecast(h = 14) 
-forecasted %>% autoplot(df_planetMood_ts %>% filter(date > "2022-01-01"))
-results <- df_planetMood_ts[(nrow(df_planetMood_train_ts)+1):(nrow(df_planetMood_train_ts)+14),c("date", "VIX")] %>% 
-  as_tibble() %>% 
-  cbind(pred_VIX = forecasted$.mean[,"VIX"])
-results
+fc3 <- fit3 %>% select(aicc) %>% forecast(h = daysToForecast) 
+fc3 %>% autoplot(df_planetMood_ts %>% tail(100))
+accuracy_pm_VAR <- calculateAccuracyDataframe_pm(fc3$.mean[,1])
+accuracy_pm_VAR
 
 # ------------------------------
 # 12.4 NEURAL NETWORKS
-sunspots <- sunspot.year %>% as_tsibble()
-fit <- sunspots %>%
-  model(NNETAR(sqrt(value)))
-fit %>%
-  generate(times = 9, h = 30) %>%
-  autoplot(.sim) +
-  autolayer(sunspots, value) +
-  theme(legend.position = "none")
-
-
-fit <- df_planetMoodActual_train_ts %>%
+fit4 <- df_planetMoodActual_train_ts %>%
   model(NNETAR(VIX))
-fit %>%
-  generate(times = 3, h = 30) %>%
+fc4 <- fit4 %>%
+  generate(times = 3, h = daysToForecast)
+fc4 %>%
   autoplot(.sim) +
   autolayer((df_planetMood_ts %>% tail(100)), VIX) +
   theme(legend.position = "bottom")
 # https://robjhyndman.com/hyndsight/nnetar-prediction-intervals/
+VIX_forecasted <- as_data_frame(fc4) %>% group_by(date) %>% summarise(pred_VIX = mean(.sim)) %>% pull(pred_VIX)
+accuracy_pm_NNETAR <- calculateAccuracyDataframe_pm(VIX_forecasted)
+accuracy_pm_NNETAR
+
+# ------------
+# ------------
+all_accuracies <- rbind(
+  cbind(accuracy_pm_ARIMA_regrss, method="ARIMA_regrss"), 
+  cbind(accuracy_pm_Prophet_regrss, method="Prophet_regrss"), 
+  cbind(accuracy_pm_VAR, method="VAR"), 
+  cbind(accuracy_pm_NNETAR, method="ARIMA_NNETAR")  
+)
+all_accuracies %>% arrange(date)
+
 
