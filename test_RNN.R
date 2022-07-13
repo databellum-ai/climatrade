@@ -140,7 +140,7 @@ celsius_mae
 
 
 # A basic machine-learning approach
-install.packages("tensorflow")
+# install.packages("tensorflow")
 library(keras)
 
 model <- keras_model_sequential() %>% 
