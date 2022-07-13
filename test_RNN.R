@@ -162,6 +162,137 @@ history <- model %>% fit_generator(
 )
 
 
+# ===============================================
+# ===============================================
+# Time Series Forecasting with GRNN in R: the tsfgrnn Package
+# https://cran.r-project.org/web/packages/tsfgrnn/vignettes/tsfgrnn.html
+
+# install.packages("tsfgrnn")
+library(tsfgrnn)
+pred <- grnn_forecasting(UKgas, h = 4)
+pred$prediction
+plot(pred)
+library(ggplot2)
+autoplot(pred)
+
+pred <- grnn_forecasting(timeS = 1:10, h = 2, lags = c(1, 3), msas = "MIMO", transform = "none")
+grnn_examples(pred)
+grnn_weights(pred)
+summary(pred)
+library(ggplot2)
+plot_example(pred, 1)
+plot_example(pred, 4)
+predr <- grnn_forecasting(1:10, h = 2, lags = c(1, 3), msas = "recursive", transform = "none")
+predr$prediction
+grnn_examples(predr)
+plot_example(predr, position = 1, h = 1)
+grnn_weights(predr)[[1]]
+plot_example(predr, position = 1, h = 2)
+grnn_weights(predr)[[2]]
+
+pred <- grnn_forecasting(ts(1:20), h = 4, lags = 1:2)
+ro <- rolling_origin(pred, h = 4)
+print(ro$test_sets)
+print(ro$predictions)
+print(ro$errors)
+ro$global_accu
+ro$h_accu
+plot(ro, h = 4)
+ro <- rolling_origin(pred, h = 4, rolling = FALSE)
+print(ro$test_sets)
+
+pred <- grnn_forecasting(USAccDeaths, h = 12, lags = 1:12, sigma = 100)
+plot(pred)
+pred <- grnn_forecasting(USAccDeaths, h = 12, lags = 1:12, sigma = 0.05)
+plot(pred)
+
+set.seed(5)
+timeS <- ts(1:10 + rnorm(10, 0, .2))
+pred <- grnn_forecasting(timeS, h = 3, transform = "none")
+plot(pred)
+pred2 <- grnn_forecasting(timeS, h = 3, transform = "additive")
+plot(pred2)
 
 
+# ===============================================
+# ===============================================
+# Multivariate Time Series Forecasting with Deep Learning
+# https://towardsdatascience.com/multivariate-time-series-forecasting-with-deep-learning-3e7b3e2d2bcf
+
+
+
+# ===============================================
+# ===============================================
+# https://www.r-bloggers.com/2020/12/bayesian-forecasting-for-uni-multivariate-time-series/
+
+# 1 – univariate time serieslibrary(datasets)
+plot(Nile)
+Nile
+head(Nile)
+
+X <- matrix(Nile, ncol=1)
+index_train <- 1:floor(nrow(X)*0.8)
+X_train <- matrix(X[index_train, ], ncol=1)
+X_test <- matrix(X[-index_train, ], ncol=1)
+
+obj <- nnetsauce::sklearn$linear_model$BayesianRidge()
+print(obj$get_params())
+
+fit_obj <- nnetsauce::MTS(obj = obj) 
+fit_obj$fit(X_train)
+preds <- fit_obj$predict(h = nrow(X_test), level=95L, return_std=TRUE)
+
+n_test <- nrow(X_test)
+xx <- c(1:n_test, n_test:1)
+yy <- c(preds$lower, rev(preds$upper))
+plot(1:n_test, drop(X_test), type='l', main="Nile",
+     ylim = c(500, 1200))
+polygon(xx, yy, col = "gray", border = "gray")
+points(1:n_test, drop(X_test), pch=19)
+lines(1:n_test, drop(X_test))
+lines(1:n_test, drop(preds$mean), col="blue", lwd=2)
+
+
+# -----------
+# 2 - multivariate time series
+# library(devtools)
+# devtools::install_github("Techtonique/nnetsauce/R-package")
+
+library(fpp)
+plot(fpp::usconsumption)                         
+
+X <- as.matrix(fpp::usconsumption)
+index_train <- 1:floor(nrow(X)*0.8)
+X_train <- X[index_train, ]
+X_test <- X[-index_train, ]
+
+obj <- nnetsauce::sklearn$linear_model$BayesianRidge()
+fit_obj2 <- nnetsauce::MTS(obj = obj)
+
+fit_obj2$fit(X_train)
+preds <- fit_obj2$predict(h = nrow(X_test), level=95L,
+                          return_std=TRUE) # standardize output+#plot against X_test
+
+
+n_test <- nrow(X_test)
+
+xx <- c(1:n_test, n_test:1)
+yy <- c(preds$lower[,1], rev(preds$upper[,1]))
+yy2 <- c(preds$lower[,2], rev(preds$upper[,2]))
+
+par(mfrow=c(1, 2))
+# 95% credible intervals
+plot(1:n_test, X_test[,1], type='l', ylim=c(-2.5, 3),
+     main="consumption")
+polygon(xx, yy, col = "gray", border = "gray")
+points(1:n_test, X_test[,1], pch=19)
+lines(1:n_test, X_test[,1])
+lines(1:n_test, preds$mean[,1], col="blue", lwd=2)
+
+plot(1:n_test, X_test[,2], type='l', ylim=c(-2.5, 3),
+     main="income")
+polygon(xx, yy2, col = "gray", border = "gray")
+points(1:n_test, X_test[,2], pch=19)
+lines(1:n_test, X_test[,2])
+lines(1:n_test, preds$mean[,2], col="blue", lwd=2)
 
