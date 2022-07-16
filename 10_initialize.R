@@ -46,6 +46,11 @@ if(!require(wdman)) install.packages("wdman", repos = "http://cran.us.r-project.
 # ===============
 # ENVIRONMENT CONSTANTS
 # ---------------
+select <- dplyr::select# conflict between select() in MASS and in dplyr (we'll use by default)
+filter <- dplyr::filter# conflict between select() in stats and in dplyr (we'll use by default)
+# ===============
+# ENVIRONMENT CONSTANTS
+# ---------------
 absoluteInitialDate <- "1960-01-01"
 
 # ===============

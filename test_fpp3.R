@@ -12,6 +12,7 @@ source("10_initialize.R")
 # install.packages("tseries")
 # install.packages("astsa")
 # install.packages("fable.prophet")
+
 library(fpp3)
 library(GGally)
 
@@ -37,7 +38,7 @@ df_planetMood_1 <- df_planetMood %>%
 # dates and intervals:
 lastDateAvailable <- as_date("2022-06-01")
 firstDateToForecast <- lastDateAvailable + 1
-daysToForecast <- 14
+daysToForecast <- 7
 lagToApply <- daysToForecast
 lastDateToForecast <- firstDateToForecast + daysToForecast - 1
 
@@ -70,10 +71,10 @@ df_planetMood_train_ts <- as_tsibble(df_planetMood_train, index = date)
 futureData_ts <- as_tsibble(futureData, index = date)
 
 # Available datasets
-head(df_planetMood_ts)
-head(df_planetMood_train_ts)
-head(df_planetMoodActual_train_ts)
-head(futureData_ts)
+head(df_planetMood)
+head(df_planetMood_train)
+head(df_planetMoodActual_train)
+head(futureData)
 
 
 #========================================================
@@ -152,6 +153,7 @@ pairs(coredata(tmpData),
       col = df_planetMood$Year,
       pch = 18,
       main = "Pairs correlations colorred by years")
+
 # Draw pairs of correlations shown correlation and distribution
 as_tsibble(df_planetMood, index = date) %>% GGally::ggpairs(columns = selectedVbles)
 
@@ -179,6 +181,7 @@ lag2.plot(df_planetMood$VIXNsdq, df_planetMood$VIX,
 # Other ARIMA links:
 # https://www.educba.com/arima-model-in-r/
 # https://rpubs.com/riazakhan94/arima_with_example
+
 # =========
 # REGRESSION + ARIMA&Fourier:
 fit <- df_planetMood_train_ts %>%
@@ -260,5 +263,70 @@ all_accuracies <- rbind(
   cbind(accuracy_pm_NNETAR, method="ARIMA_NNETAR")  
 )
 all_accuracies %>% arrange(date)
+# ------------
+# ------------
 
+# ==========================================================================================
+# ==========================================================================================
+# Tejendra: NN
+# ==========================================================================================
+# ==========================================================================================
+# Chapter 8 Neural Networks in Time Series Analysis
+# https://bookdown.org/singh_pratap_tejendra/intro_time_series_r/neural-networks-in-time-series-analysis.html
 
+# install.packages("tidymodels")
+# install.packages("tidyposterior")
+# install.packages("ggfortify")
+# install.packages("chron")
+# install.packages("directlabels")
+# install.packages("MTS")
+# install.packages("vars")
+# install.packages("fUnitRoots")
+
+require(tidyverse)
+require(tidymodels)
+require(data.table)
+require(tidyposterior)
+require(tsibble)  #tsibble for time series based on tidy principles
+require(fable)  #for forecasting based on tidy principles
+require(ggfortify)  #for plotting timeseries
+require(forecast)  #for forecast function
+require(tseries)
+require(chron)
+require(lubridate)
+require(directlabels)
+require(zoo)
+require(lmtest)
+require(TTR)  #for smoothing the time series
+require(MTS)
+require(vars)
+require(fUnitRoots)
+require(lattice)
+require(grid)
+
+# ------------------------------
+# NEURAL NETWORKS WITHOUT REGRESSORS
+myts <- ts(df_planetMoodActual_train$VIX, frequency = 7)
+fit5 = nnetar(myts)
+fc5 <- forecast(fit5, h = daysToForecast, PI = F)  #Prediction intervals do not come by default in neural net forecasts, in contrast to ARIMA or exponential smoothing model
+# ! autoplot(nnetforecast) + theme(plot.title = element_text(hjust = 0.5))
+plot(fc5)
+VIX_forecasted <- fc5$mean
+accuracy_pm_NNETAR_noXreg <- calculateAccuracyDataframe_pm(VIX_forecasted)
+accuracy_pm_NNETAR_noXreg
+sum(accuracy_pm_NNETAR_noXreg$earningsPercent)
+# Call the function to draw
+chartTwoAxis(accuracy_pm_NNETAR_noXreg$date, accuracy_pm_NNETAR_noXreg$VIX_real, accuracy_pm_NNETAR_noXreg$VIX_forecasted, "VIX_real", "VIX_forecasted")
+
+# ------------------------------
+# NEURAL NETWORKS WITH REGRESSORS
+myts <- ts(df_planetMoodActual_train$VIX, frequency = 7)
+fit6 = nnetar(myts, xreg = df_planetMood_train[,4:6])
+fc6 <- forecast(fit6, h = daysToForecast, xreg = futureData[,3:5], PI = F)
+# ! autoplot(nnetforecast) + theme(plot.title = element_text(hjust = 0.5))
+plot(fc6)
+VIX_forecasted <- fc6$mean
+accuracy_pm_NNETAR_xreg <- calculateAccuracyDataframe_pm(VIX_forecasted)
+accuracy_pm_NNETAR_xreg
+sum(accuracy_pm_NNETAR_xreg$earningsPercent)
+chartTwoAxis(accuracy_pm_NNETAR_xreg$date, accuracy_pm_NNETAR_xreg$VIX_real, accuracy_pm_NNETAR_xreg$VIX_forecasted, "VIX_real", "VIX_forecasted")

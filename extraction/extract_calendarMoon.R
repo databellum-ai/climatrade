@@ -35,14 +35,11 @@ moonData
 # Although sun data is per city and moon phase is at world level, we join it all in a single "denormalized" list for simplification
 
 # We add Weekday and reorder columns
-
-moonData <- moonData %>% 
-  mutate(weekday = wday(date), 
-         yearWeek = week(ymd(date)), 
-         countryCode = NA) %>% 
-  select(date, moonPhase, weekday, yearWeek, countryCode)
+moonData <- moonData %>%
+  mutate(weekday = wday(date),
+         yearWeek = week(ymd(date)),
+         countryCode = NA) %>% select(date, moonPhase, weekday, yearWeek, countryCode)
 head(moonData)
-
 # ================================
 # SAVE
 # ================================
