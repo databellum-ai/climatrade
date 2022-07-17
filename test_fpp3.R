@@ -1,3 +1,9 @@
+# JES: entender por qué "CCI_n" perjudica
+# JES: probar con intervalos distintos
+# JES: probar con transformación log()
+# JES: ¿usa "fit4" el resto de covariates?... parece que no
+
+
 #========================================================#
 # Forecasting: Principles and Practice (3rd ed)
 # Rob J Hyndman and George Athanasopoulos
@@ -71,9 +77,9 @@ df_planetMood_train_ts <- as_tsibble(df_planetMood_train, index = date)
 futureData_ts <- as_tsibble(futureData, index = date)
 
 # Available datasets
-head(df_planetMood)
-head(df_planetMood_train)
-head(df_planetMoodActual_train)
+head(df_planetMood_ts)
+head(df_planetMood_train_ts)
+head(df_planetMoodActual_train_ts)
 head(futureData)
 
 
@@ -175,20 +181,17 @@ lag2.plot(df_planetMood$VIXNsdq, df_planetMood$VIX,
 # Modelling
 #========================================================
 #========================================================
-
 # ------------------------------------
 # 12.2 ARIMA vs ETL vs prophet
 # Other ARIMA links:
 # https://www.educba.com/arima-model-in-r/
 # https://rpubs.com/riazakhan94/arima_with_example
-
 # =========
 # REGRESSION + ARIMA&Fourier:
 fit <- df_planetMood_train_ts %>%
   model(
     ARIMA(VIX ~ PDQ(0, 0, 0) + pdq(d = 0) +
-            VIX_n + VVIX_n + VIX3M_n + VIXNsdq_n + GoldVlty_n + DAI3_n + CCI_n + 
-            MoonPhase + WkDay + YrWeek + Year + 
+            VIX_n + VVIX_n + VIX3M_n + VIXNsdq_n + GoldVlty_n + DAI3_n + MoonPhase + WkDay + YrWeek + Year + 
             fourier(period = "week", K = 3) +
             fourier(period = "month", K = 5) +
             fourier(period = "year", K = 3))
@@ -199,6 +202,26 @@ fc <- fit %>% forecast(new_data = futureData_ts)
 fc %>% autoplot(df_planetMood_ts %>% tail(100)) + labs(x = "Date", y = "VIX")
 accuracy_pm_ARIMA_regrss <- calculateAccuracyDataframe_pm(fc$.mean)
 accuracy_pm_ARIMA_regrss
+sum(accuracy_pm_ARIMA_regrss$earningsPercent)
+matplot(accuracy_pm_ARIMA_regrss[,c(2, 4:5)], type = "b", pch=1, col = c(1, 3,2))
+legend("bottomleft", legend = c("VIX_txn", "VIX_real", "VIX_forecasted"), col= c(1, 3,2), pch=1)
+# =========
+# ARIMA with covariates
+# https://stackoverflow.com/questions/51873358/forecasting-from-regression-with-auto-arima-and-defining-xreg
+covariates <- c("VVIX_n", "VIX3M_n", "VIXNsdq_n", "VIX_n", "GoldVlty_n", "DAI3_n", "MoonPhase", "WkDay", "Year") 
+# covariates <- c("VVIX_n", "VIX3M_n", "VIXNsdq_n", "VIX_n", "GoldVlty_n", "DAI3_n", "CCI_n", "MoonPhase", "WkDay", "YrWeek")
+# exp((log(df_planetMood_train[,covariates])))
+fit1 <- auto.arima(df_planetMood_train[,"VIX"], xreg = as.matrix(df_planetMood_train[,covariates]))
+summary(fit1)
+fit1$aic
+fc1 <- forecast(fit1, xreg = as.matrix(futureData[, covariates]))
+autoplot(fc1)
+VIX_forecasted <- fc1$mean
+accuracy_pm_ARIMA_xreg <- calculateAccuracyDataframe_pm(VIX_forecasted)
+accuracy_pm_ARIMA_xreg
+sum(accuracy_pm_ARIMA_xreg$earningsPercent)
+matplot(accuracy_pm_ARIMA_xreg[,c(2, 4:5)], type = "b", pch=1, col = c(1, 3,2))
+legend("bottomleft", legend = c("VIX_txn", "VIX_real", "VIX_forecasted"), col= c(1, 3,2), pch=1)
 
 # =========
 # REGRESSION + prophet:
@@ -218,6 +241,9 @@ fc2 <- fit2 %>% forecast(new_data = futureData_ts)
 fc2 %>% autoplot(df_planetMood_ts %>% tail(100)) + labs(x = "Date", y = "VIX")
 accuracy_pm_Prophet_regrss <- calculateAccuracyDataframe_pm(fc2$.mean)
 accuracy_pm_Prophet_regrss
+sum(accuracy_pm_Prophet_regrss$earningsPercent)
+matplot(accuracy_pm_Prophet_regrss[,c(2, 4:5)], type = "b", pch=1, col = c(1, 3,2))
+legend("bottomleft", legend = c("VIX_txn", "VIX_real", "VIX_forecasted"), col= c(1, 3,2), pch=1)
 
 # ------------------------------
 # 12.3 VAR
@@ -236,10 +262,12 @@ fc3 <- fit3 %>% select(aicc) %>% forecast(h = daysToForecast)
 fc3 %>% autoplot(df_planetMood_ts %>% tail(100))
 accuracy_pm_VAR <- calculateAccuracyDataframe_pm(fc3$.mean[,1])
 accuracy_pm_VAR
+sum(accuracy_pm_VAR$earningsPercent)
+matplot(accuracy_pm_VAR[,c(2, 4:5)], type = "b", pch=1, col = c(1, 3,2))
+legend("bottomleft", legend = c("VIX_txn", "VIX_real", "VIX_forecasted"), col= c(1, 3,2), pch=1)
 
 # ------------------------------
 # 12.4 NEURAL NETWORKS
-df_planetMood_ts
 fit4 <- df_planetMoodActual_train_ts %>%
   model(NNETAR(VIX))
 fc4 <- fit4 %>%
@@ -253,80 +281,20 @@ VIX_forecasted <- as_tibble(fc4) %>% group_by(date) %>% summarise(pred_VIX = mea
 accuracy_pm_NNETAR <- calculateAccuracyDataframe_pm(VIX_forecasted)
 accuracy_pm_NNETAR
 sum(accuracy_pm_NNETAR$earningsPercent)
-
-# ------------
-# ------------
-all_accuracies <- rbind(
-  cbind(accuracy_pm_ARIMA_regrss, method="ARIMA_regrss"), 
-  cbind(accuracy_pm_Prophet_regrss, method="Prophet_regrss"), 
-  cbind(accuracy_pm_VAR, method="VAR"), 
-  cbind(accuracy_pm_NNETAR, method="ARIMA_NNETAR")  
-)
-all_accuracies %>% arrange(date)
-# ------------
-# ------------
-
-# ==========================================================================================
-# ==========================================================================================
-# Tejendra: NN
-# ==========================================================================================
-# ==========================================================================================
-# Chapter 8 Neural Networks in Time Series Analysis
-# https://bookdown.org/singh_pratap_tejendra/intro_time_series_r/neural-networks-in-time-series-analysis.html
-
-# install.packages("tidymodels")
-# install.packages("tidyposterior")
-# install.packages("ggfortify")
-# install.packages("chron")
-# install.packages("directlabels")
-# install.packages("MTS")
-# install.packages("vars")
-# install.packages("fUnitRoots")
-
-require(tidyverse)
-require(tidymodels)
-require(data.table)
-require(tidyposterior)
-require(tsibble)  #tsibble for time series based on tidy principles
-require(fable)  #for forecasting based on tidy principles
-require(ggfortify)  #for plotting timeseries
-require(forecast)  #for forecast function
-require(tseries)
-require(chron)
-require(lubridate)
-require(directlabels)
-require(zoo)
-require(lmtest)
-require(TTR)  #for smoothing the time series
-require(MTS)
-require(vars)
-require(fUnitRoots)
-require(lattice)
-require(grid)
-
-# ------------------------------
-# NEURAL NETWORKS WITHOUT REGRESSORS
-myts <- ts(df_planetMoodActual_train$VIX, frequency = 7)
-fit5 = nnetar(myts)
-fc5 <- forecast(fit5, h = daysToForecast, PI = F)  #Prediction intervals do not come by default in neural net forecasts, in contrast to ARIMA or exponential smoothing model
-# ! autoplot(nnetforecast) + theme(plot.title = element_text(hjust = 0.5))
-plot(fc5)
-VIX_forecasted <- fc5$mean
-accuracy_pm_NNETAR_noXreg <- calculateAccuracyDataframe_pm(VIX_forecasted)
-accuracy_pm_NNETAR_noXreg
-sum(accuracy_pm_NNETAR_noXreg$earningsPercent)
-# Call the function to draw
-chartTwoAxis(accuracy_pm_NNETAR_noXreg$date, accuracy_pm_NNETAR_noXreg$VIX_real, accuracy_pm_NNETAR_noXreg$VIX_forecasted, "VIX_real", "VIX_forecasted")
+matplot(accuracy_pm_NNETAR[,c(2, 4:5)], type = "b", pch=1, col = c(1, 3,2))
+legend("bottomleft", legend = c("VIX_txn", "VIX_real", "VIX_forecasted"), col= c(1, 3,2), pch=1)
 
 # ------------------------------
 # NEURAL NETWORKS WITH REGRESSORS
-myts <- ts(df_planetMoodActual_train$VIX, frequency = 7)
-fit6 = nnetar(myts, xreg = df_planetMood_train[,4:6])
-fc6 <- forecast(fit6, h = daysToForecast, xreg = futureData[,3:5], PI = F)
-# ! autoplot(nnetforecast) + theme(plot.title = element_text(hjust = 0.5))
-plot(fc6)
+# Chapter 8 Neural Networks in Time Series Analysis
+# https://bookdown.org/singh_pratap_tejendra/intro_time_series_r/neural-networks-in-time-series-analysis.html
+# JES: meter más regressors (refinándolos previamente) | probar "frequency" | probar daysToForecast | probar más parámetros de nnetar y de forecast
+fit6 = nnetar(ts(df_planetMoodActual_train$VIX, frequency = 7), xreg = df_planetMood_train[,3:13])
+fc6 <- forecast(fit6, h = daysToForecast, xreg = futureData[,2:12], PI = F)
+autoplot(fc6) + theme(plot.title = element_text(hjust = 0.5))
 VIX_forecasted <- fc6$mean
 accuracy_pm_NNETAR_xreg <- calculateAccuracyDataframe_pm(VIX_forecasted)
 accuracy_pm_NNETAR_xreg
 sum(accuracy_pm_NNETAR_xreg$earningsPercent)
-chartTwoAxis(accuracy_pm_NNETAR_xreg$date, accuracy_pm_NNETAR_xreg$VIX_real, accuracy_pm_NNETAR_xreg$VIX_forecasted, "VIX_real", "VIX_forecasted")
+matplot(accuracy_pm_NNETAR_xreg[,c(2, 4:5)], type = "b", pch=1, col = c(1, 3,2))
+legend("bottomleft", legend = c("VIX_txn", "VIX_real", "VIX_forecasted"), col= c(1, 3,2), pch=1)
