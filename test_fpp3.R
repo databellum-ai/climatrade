@@ -346,4 +346,5 @@ for (i in sampleDates) {
 print("Process finished")
 accuracies_all
 sum(accuracies_all$earningsPercent)
+mean(accuracies_all$success)
 saveRDS(accuracies_all,"data/test_accuracies.rds")
