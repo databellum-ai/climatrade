@@ -30,12 +30,16 @@ graphics.off()  # clear all graphs
 # PACKAGES REQUIRED
 # ---------------
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.org")
+if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
+if(!require(forecast)) install.packages("forecast", repos = "http://cran.us.r-project.org")
 
 library(fpp3)
 library(GGally)
 library(tidyverse)
 library(forecast)
-
+install.packages("GGally")
+install.packages("tidyverse")
 #========================================================
 #========================================================
 # FUNCTIONS
@@ -143,3 +147,9 @@ accuracies_all
 sum(accuracies_all$earningsPercent)
 mean(accuracies_all$success)
 saveRDS(accuracies_all,"data/test_accuracies.rds")
+
+# store accumulated
+data_7d <- readRDS("data/test_accuracies_7d.rds")
+data_7d %>% rbind(accuracies_all)
+saveRDS(data_7d,"data/test_accuracies_7d.rds")
+
