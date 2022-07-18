@@ -165,3 +165,12 @@ gr %>%
   ggplot(aes(txnLength, SuccessPerc, color = calcHorizon, size = EarningsPerc)) +
   geom_point()
 
+
+# https://plotly.com/r/3d-scatter-plots/
+library(plotly)
+fig <- plot_ly(gr, x = ~calcHorizon, y = ~txnLength, z = ~SuccessPerc, color = ~EarningsPerc, colors = c('yellow', 'red'))
+fig <- fig %>% add_markers()
+fig <- fig %>% layout(scene = list(xaxis = list(title = 'calcHorizon'),
+                                   yaxis = list(title = 'txnLength'),
+                                   zaxis = list(title = 'SuccessPerc')))
+fig
