@@ -1,13 +1,10 @@
-# JES: !en NN+xReg: probar "daysToForecast" = 3 | = 10
-# JES: !en NN+xReg: probar "frequency" <> 7
+# JES: !usar regresión para optimizar criterio BUY/SELL en "accuracies_all" (previamente hacer cálculo masivo >= 100 fechas)
 # JES: !en NN+xReg: usar log() y scale() para refinar
-# JES: !descartar ARIMA, prophet, VAR
-# JES: !refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
-# JES: !en NN+xReg:probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
+# JES: refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
+# JES: en NN+xReg:probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
 # JES: en NN+xReg: jugar con más parámetros de nnetar y de forecast
-# JES: usar regresión para optimizar criterio BUY/SELL en "accuracies_all" (previamente hacer cálculo masivo >= 100 fechas)
+# JES: hyperparameters: ¿"frequency" <> 7?; ¿StrongThrshold = 1%?
 # JES: crear shinnyApp
-
 
 
 # ---------------------------------------------------------------------
@@ -47,7 +44,7 @@ calculateAccuracyDataframe_pm <- function(VIX_forecasted) {
   closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
   real <- df_planetMood_1 %>% filter(between(date,firstDateToForecast,lastDateToForecast)) %>% select(date,VIX_real=VIX)
   accuracy_pm <- 
-    cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, as.numeric(VIX_forecasted)) %>% 
+    cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, VIX_forecasted = as.numeric(VIX_forecasted)) %>% 
     mutate(
       action = as.character(ifelse(VIX_forecasted > VIX_txn, "BUY", "SELL")), 
       realChangePercent = 100*(VIX_real - VIX_txn)/VIX_txn, 
@@ -147,29 +144,3 @@ saveRDS(accuracies_all,"data/test_accuracies.rds")
 
 
 
-# EDA of generated forecasts:
-# manage accumulated
-# data_7d <- cbind(readRDS("data/test_accuracies_7d.rds"), calcHorizon = 7)
-# data_14d <- cbind(readRDS("data/test_accuracies_14d.rds"), calcHorizon = 14)
-# data_21d <- cbind(readRDS("data/test_accuracies_21d.rds"), calcHorizon = 21)
-# data_all_d <- rbind(data_7d, data_14d, data_21d)
-# saveRDS(data_all_d,"data/test_accuracies_all_d.rds")
-data_all_d <- readRDS("data/test_accuracies_all_d.rds")
-summary(data_all_d)
-head(data_all_d)
-df <- data_all_d 
-gr <- df %>% 
-  group_by(calcHorizon, txnLength) %>% 
-  summarise(EarningsPerc = sum(earningsPercent), SuccessPerc = mean(success)) %>% arrange(desc(SuccessPerc))
-gr %>% 
-  ggplot(aes(txnLength, SuccessPerc, color = calcHorizon, size = EarningsPerc)) +
-  geom_point()
-# 3D chart:
-# https://plotly.com/r/3d-scatter-plots/
-library(plotly)
-fig <- plot_ly(gr, x = ~calcHorizon, y = ~txnLength, z = ~SuccessPerc, color = ~EarningsPerc, colors = c('yellow', 'red'))
-fig <- fig %>% add_markers()
-fig <- fig %>% layout(scene = list(xaxis = list(title = 'calcHorizon'),
-                                   yaxis = list(title = 'txnLength'),
-                                   zaxis = list(title = 'SuccessPerc')))
-fig
