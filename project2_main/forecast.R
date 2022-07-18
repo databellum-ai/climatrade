@@ -146,6 +146,8 @@ mean(accuracies_all$success)
 saveRDS(accuracies_all,"data/test_accuracies.rds")
 
 
+
+# EDA of generated forecasts:
 # manage accumulated
 # data_7d <- cbind(readRDS("data/test_accuracies_7d.rds"), calcHorizon = 7)
 # data_14d <- cbind(readRDS("data/test_accuracies_14d.rds"), calcHorizon = 14)
@@ -155,5 +157,11 @@ saveRDS(accuracies_all,"data/test_accuracies.rds")
 data_all_d <- readRDS("data/test_accuracies_all_d.rds")
 summary(data_all_d)
 head(data_all_d)
-
+df <- data_all_d 
+gr <- df %>% 
+  group_by(calcHorizon, txnLength) %>% 
+  summarise(EarningsPerc = sum(earningsPercent), SuccessPerc = mean(success)) %>% arrange(desc(SuccessPerc))
+gr %>% 
+  ggplot(aes(txnLength, SuccessPerc, color = calcHorizon, size = EarningsPerc)) +
+  geom_point()
 
