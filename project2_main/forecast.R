@@ -91,7 +91,7 @@ df_planetMood_1 <- df_planetMood %>%
 
 accuracies_all <- data.frame()
 examplesToGenerate <- 10
-daysToForecast <- 14
+daysToForecast <- 21
 lagToApply <- daysToForecast
 sampleDates <- sort(sample(as_date(c(as_date("2021-01-01"):(max(df_planetMood$date)-lagToApply))), examplesToGenerate, replace=TRUE))
 
@@ -145,8 +145,15 @@ sum(accuracies_all$earningsPercent)
 mean(accuracies_all$success)
 saveRDS(accuracies_all,"data/test_accuracies.rds")
 
-# store accumulated
-data_7d <- readRDS("data/test_accuracies_7d.rds")
-data_7d %>% rbind(accuracies_all)
-saveRDS(data_7d,"data/test_accuracies_7d.rds")
+
+# manage accumulated
+# data_7d <- cbind(readRDS("data/test_accuracies_7d.rds"), calcHorizon = 7)
+# data_14d <- cbind(readRDS("data/test_accuracies_14d.rds"), calcHorizon = 14)
+# data_21d <- cbind(readRDS("data/test_accuracies_21d.rds"), calcHorizon = 21)
+# data_all_d <- rbind(data_7d, data_14d, data_21d)
+# saveRDS(data_all_d,"data/test_accuracies_all_d.rds")
+data_all_d <- readRDS("data/test_accuracies_all_d.rds")
+summary(data_all_d)
+head(data_all_d)
+
 
