@@ -34,16 +34,13 @@ if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.or
 if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
 if(!require(forecast)) install.packages("forecast", repos = "http://cran.us.r-project.org")
 
+library(tidyverse)
 library(fpp3)
 library(GGally)
-library(tidyverse)
 library(forecast)
-install.packages("GGally")
-install.packages("tidyverse")
-#========================================================
+
 #========================================================
 # FUNCTIONS
-#========================================================
 #========================================================
 # function calculate "PlanetMood" Accuracy for our prediction
 calculateAccuracyDataframe_pm <- function(VIX_forecasted) {
@@ -94,7 +91,7 @@ df_planetMood_1 <- df_planetMood %>%
 
 accuracies_all <- data.frame()
 examplesToGenerate <- 10
-daysToForecast <- 7
+daysToForecast <- 14
 lagToApply <- daysToForecast
 sampleDates <- sort(sample(as_date(c(as_date("2021-01-01"):(max(df_planetMood$date)-lagToApply))), examplesToGenerate, replace=TRUE))
 
