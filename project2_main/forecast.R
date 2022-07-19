@@ -14,23 +14,23 @@
 # ---------------------------------------------------------------------
 
 # ===============
-# CLEAN ENVIRONMENT
+# ENVIRONMENT
 # ---------------
 rm(list = ls())  # clear all environment variables
 graphics.off()  # clear all graphs
-
-# ===============
-# PACKAGES REQUIRED
-# ---------------
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.org")
 if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
 if(!require(forecast)) install.packages("forecast", repos = "http://cran.us.r-project.org")
-
 library(tidyverse)
 library(fpp3)
 library(GGally)
 library(forecast)
+
+#========================================================
+# INCLUDED FUNCTIONS
+# ---------------
+source("generateRecommendations.R")  # function to generate recommendations using NN forecast
 
 
 #========================================================
@@ -39,56 +39,10 @@ library(forecast)
 daysToForecast <- 21  # horizon for forecast
 frequencyNN <- 7  # seasonality a priori for NNETAR model
 
-#========================================================
-# FUNCTIONS
-# ---------------
-# function calculate "PlanetMood" Accuracy for our prediction
-# calculateAccuracyDataframe_pm <- function(VIX_forecasted) {
-#   closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
-#   real <- df_planetMood_1 %>% filter(between(date,firstDateToForecast,lastDateToForecast)) %>% select(date,VIX_real=VIX)
-#   accuracy_pm <- 
-#     cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, VIX_forecasted = as.numeric(VIX_forecasted)) %>% 
-#     mutate(
-#       action = as.character(ifelse(VIX_forecasted > VIX_txn, "BUY", "SELL")), 
-#       realChangePercent = 100*(VIX_real - VIX_txn)/VIX_txn, 
-#       predChangePercent = as.numeric(100*(VIX_forecasted - VIX_txn)/VIX_txn), 
-#       txnLength = date - date_txn, 
-#       horizon = daysToForecast, 
-#       earningsPercent = as.numeric(ifelse((realChangePercent * predChangePercent) > 0), (abs(realChangePercent)), (-1*abs(realChangePercent))), 
-#       success = as.logical(abs(earningsPercent) >= successThreshold)
-#     )
-#   return(accuracy_pm)
-# }
-calculateAccuracyDataframe_pm <- function(VIX_forecasted) {
-  closingRef <- df_planetMood_1 %>% filter(date == lastDateAvailable) %>% select(date, VIX)
-  real <- df_planetMood_1 %>% filter(between(date,firstDateToForecast,lastDateToForecast)) %>% select(date,VIX_real=VIX)
-  accuracy_pm <- 
-    cbind(date_txn=closingRef$date, VIX_txn=closingRef$VIX, real, VIX_forecasted = as.numeric(VIX_forecasted)) %>% 
-    mutate(
-      realChangePercent = 100*(VIX_real - VIX_txn)/VIX_txn, 
-      predChangePercent = as.numeric(100*(VIX_forecasted - VIX_txn)/VIX_txn), 
-      txnLength = date - date_txn, 
-      horizon = daysToForecast, 
-      action = as.character(ifelse(VIX_forecasted > VIX_txn, "BUY", "SELL")), 
-      earningsPercent = as.numeric(
-        ifelse
-        (
-          (realChangePercent * predChangePercent) > 0, 
-          abs(realChangePercent), 
-          -1*abs(realChangePercent)
-          )
-        ),       
-      success = as.logical(earningsPercent >= 0)
-    )
-  return(accuracy_pm)
-}
 
-#       
 #========================================================
 # PREPARE DATA FOR TRAINING AND VALIDATION
 #========================================================
-
-# PlanetMood dataset
 df_planetMood <- readRDS("data/df_planetMood.rds") %>% arrange(date) %>% 
   mutate(VIX = VIX+30, Year = year(date)) # Dataset ready for analysis 
 allVbles <- names(df_planetMood)
@@ -100,86 +54,36 @@ df_planetMood_1 <- df_planetMood %>%
   select(date, 
          selectedVbles, 
          calendarVbles)
+df_planetMood_1  # start building a dataset for forecasting
 
-
 #========================================================
 #========================================================
-# GENERATOR OF BUY/SELL/NO REOCMMENTDATIONS
-#
-# CREATE RECOMMENDATIONS USING FORECAST MODEL (NNETAR):
-# https://bookdown.org/singh_pratap_tejendra/intro_time_series_r/neural-networks-in-time-series-analysis.html
+# GENERATOR OF BUY/SELL RECOMMENDATIONS USING FORECAST MODEL (NNETAR):
 #========================================================
 #========================================================
-
-accuracies_all <- data.frame()
-examplesToGenerate <- 10
+examplesToGenerate <- 1
 lagToApply <- daysToForecast
-sampleDates <- sort(sample(as_date(c(as_date("2021-01-01"):(max(df_planetMood$date)-lagToApply))), examplesToGenerate, replace=TRUE))
-
-for (i in sampleDates) {
-  # ----
-  lastDateAvailable <- as_date("2022-06-01") # last date available for training observations
-  print(paste0("Processing date: ", as_date(i)))
-  lastDateAvailable <- as_date(i) # last date available for training observations
-  firstDateToForecast <- lastDateAvailable + 1
-  lastDateToForecast <- firstDateToForecast + daysToForecast - 1
-  # add a lagged columns to dataset:
-  df_planetMood_1 <- df_planetMood %>% mutate(
-    VIX_n = lag(VIX, n=lagToApply), 
-    VVIX_n = lag(VVIX, n=lagToApply), 
-    VIX3M_n = lag(VIX3M, n=lagToApply), 
-    VIXNsdq_n = lag(VIXNsdq, n=lagToApply), 
-    GoldVlty_n = lag(GoldVlty, n=lagToApply), 
-    DAI3_n = lag(DAI3, n=lagToApply), 
-    CCI_n = lag(CCI, n=lagToApply)
-  ) %>% 
-    filter(!is.na(VIX_n)) # we remove lines with NAs generated by lagging
-  # prepare training dataset (past)
-  df_planetMood_train <- df_planetMood_1 %>% 
-    select(date, VIX, laggedVbles, calendarVbles) %>% 
-    filter(date >= "2017-01-01" & date <= lastDateAvailable)
-  # calculate regressors (future)
-  futureData <- df_planetMood_1 %>% 
-    select(date, laggedVbles, calendarVbles) %>% 
-    filter(date >= firstDateToForecast & date <= lastDateToForecast)
-  # ----
-  # train
-  yTrain <- df_planetMood_train$VIX
-  xTrain <- df_planetMood_train[,3:13]  # remove date and VIX
-  fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain)
-  # forecast
-  xFuture <- futureData[,2:12] # remove date
-  fc6 <- forecast(fit6, h = daysToForecast, xreg = xFuture, PI = F)
-  # store
-  VIX_forecasted <- fc6$mean
-  accuracy_pm_NNETAR_xreg <- calculateAccuracyDataframe_pm(VIX_forecasted)
-  matplot(accuracy_pm_NNETAR_xreg[,c(2, 4:5)], type = "b", pch=1, col = c(1, 3,2))
-  legend("bottomleft", legend = c("VIX_txn", "VIX_real", "VIX_forecasted"), col= c(1, 3,2), pch=1)
-  accuracies_all <- rbind(accuracies_all, accuracy_pm_NNETAR_xreg)
-  class(accuracy_pm_NNETAR_xreg)
-  # show
-  accuracy_pm_NNETAR_xreg
-}
-print("Process finished")
-accuracies_all
-sum(accuracies_all$earningsPercent)
-mean(accuracies_all$success)
-
-
+datesRecommendations <- sort(sample(as_date(c(as_date("2021-01-01"):(max(df_planetMood$date)-lagToApply))), examplesToGenerate, replace=TRUE))
+# recommendationsConsolidated <- 
+#   generateRecommendations(as_date("2022-06-01"), examplesToGenerate, lagToApply, datesRecommendations)
+recommendationsNN <- 
+  generateRecommendations(datesRecommendations, examplesToGenerate, lagToApply, datesRecommendations)
+recommendationsNN
+sum(recommendationsNN$earningsPercent)
+mean(recommendationsNN$success)
 
 
 #========================================================
 #========================================================
 # LINEAR MODEL TO OPTIMIZE RECOMMENDATIONS
-#
 #========================================================
 #========================================================
 # training data
-dataset_21d <- 
-  readRDS("data/recommendationsNN_sample_allHorizons.rds") %>% 
-  filter(horizon == 21) %>% 
-  select("VIX_txn", "VIX_forecasted", "predChangePercent", "txnLength", "earningsPercent")
-head(dataset_21d)
+dataset_glm <- 
+  readRDS("data/recommendationsNN_all.rds") %>% 
+  filter(horizon == daysToForecast) %>% 
+  select("VIX_txn", "VIX_forecasted", "predChangePercent", "txnLength", "success")
+head(dataset_glm)
 # entender/dibujar la mejora
 # flujo de preparación de los datos (newdata, freshRecommendations, etc.)
 # Probar LogisticRegression con "success"
@@ -188,24 +92,32 @@ head(dataset_21d)
 # Meter weekdays de "date_txn", "date"
 # Probar RegressionTrees, etc.
 # guardar el modelo
+# https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
+splitRec <- round(0.8 * nrow(dataset_glm),0)
+train_glm <- dataset_glm[1:splitRec,]
+test_glm <- dataset_glm[(splitRec+1):nrow(dataset_glm),]
+# train model
+glmSuccess = 
+  glm(
+    success ~ VIX_txn + VIX_forecasted + predChangePercent + txnLength, 
+    family=binomial(link='logit'), 
+    data = train_glm)  # create the linear regression
+summary(glmSuccess)#Review the results
+plot(cooks.distance(glmSuccess), pch = 16, col = "blue")
+# predict on test data splitted
+predict.glm(glmSuccess, newdata = test_glm)
 
-# Linear regression to choose recommendations generated by the NN
-# datacamp.com/tutorial/linear-regression-R
-lmEarnings = lm(earningsPercent~VIX_txn + VIX_forecasted + predChangePercent + txnLength, data = dataset_21d)  #Create the linear regression
-summary(lmEarnings)#Review the results
-plot(cooks.distance(lmEarnings), pch = 16, col = "blue")
 
+# predict on real data
 # prepare newdata (recommendations just obtained)
-freshRecommendations <- 
-  readRDS("data/freshRecommendationsNN.rds") %>% 
-  select("VIX_txn", "VIX_forecasted", "predChangePercent", "txnLength")
+freshRecommendations <-
+  readRDS("data/freshRecommendationsNN.rds") %>%
+  select("VIX_txn", "VIX_forecasted", "predChangePercent", "txnLength", "success")
 
-# predict
-predictedEarnings <- predict.lm(lmEarnings, newdata = freshRecommendations)
 testREV <- cbind(
   freshRecommendations, 
-  revisedEarnings = predict.lm(lmEarnings, newdata = freshRecommendations)) %>% 
-  arrange(desc(revisedEarnings))
+  revisedSuccess = predict.glm(lmSuccess, newdata = freshRecommendations)) %>% 
+  arrange(txnLength )
 testREV
 
 # saveRDS(dataset_21d,"data/recomendationsNN_21d.rds")
