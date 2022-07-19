@@ -1,8 +1,8 @@
 # EDA of generated forecasts:
-data_all_d <- readRDS("data/recommendationsNN_sample_allHorizons.rds")
+data_all_d <- readRDS("project2_main/recommendationsNN_all.rds")
 
 # -------------------------------------------
-# Hyperparameter: calendarHorizon (= 21 days)
+# Hyperparameter: calendarHorizon (= 14 days)
 # -------------------------------------------
 # we have generated forecast examples with horizons (days to schudule in the future) of 7, 14 and 21 days
 # looking at the scattered charts it seems there are good high number of Success cases, as well as high Earnings using 21 days

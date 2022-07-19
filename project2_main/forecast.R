@@ -1,3 +1,4 @@
+# JES: !comprobar calidad resultados en "proyecto1_main/"
 # JES: !usar regresión para optimizar criterio BUY/SELL en "accuracies_all" (previamente hacer cálculo masivo >= 100 fechas)
 # JES: !en NN+xReg: usar log() y scale() para refinar
 # JES: refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
@@ -6,16 +7,6 @@
 # JES: review/challente hyperparameters
 # JES: crear shinnyApp
 
-
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# INITIALIZATION
-# ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-
-# ===============
-# ENVIRONMENT
-# ---------------
 rm(list = ls())  # clear all environment variables
 graphics.off()  # clear all graphs
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
@@ -27,72 +18,51 @@ library(fpp3)
 library(GGally)
 library(forecast)
 
-#========================================================
-# INCLUDED FUNCTIONS
-# ---------------
-source("generateRecommendations.R")  # function to generate recommendations using NN forecast
 
-
-#========================================================
+# ------------------------------------------------------
 # HYPERPARAMETERS
-# ---------------
-daysToForecast <- 21  # horizon for forecast
+daysToForecast <- 14  # horizon for forecast
 frequencyNN <- 7  # seasonality a priori for NNETAR model
 
 
-#========================================================
-# PREPARE DATA FOR TRAINING AND VALIDATION
-#========================================================
-df_planetMood <- readRDS("data/df_planetMood.rds") %>% arrange(date) %>% 
-  mutate(VIX = VIX+30, Year = year(date)) # Dataset ready for analysis 
-allVbles <- names(df_planetMood)
-# allVbles <- c("VIX", "Gold", "SP500", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "VIX_HLvol", "VVIX_HLvol", "VIX3M_HLvol", "VIXNsdq_HLvol", "GoldVlty_HLvol", "Gold_HLvol", "SP500_HLvol", "NewsTone", "Goldstein", "IAI", "DAI1", "DAI2", "DAI3", "BCI", "CCI", "CLI", "Flights", "Tempo", "Energy", "Danceability", "MoonPhase", "WkDay", "YrWeek", "Year")
-selectedVbles <- c("VIX", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "DAI3", "CCI")
-laggedVbles <- paste0(selectedVbles,"_n")
-calendarVbles <- c("MoonPhase", "WkDay", "YrWeek", "Year")
-df_planetMood_1 <- df_planetMood %>% 
-  select(date, 
-         selectedVbles, 
-         calendarVbles)
-df_planetMood_1  # start building a dataset for forecasting
+# ------------------------------------------------------
+# INCLUDED FUNCTIONS
+source("extractDataUptodate.R")  # function to generate recommendations using NN forecast
+source("generateRecommendations.R")  # function to generate recommendations using NN forecast
 
-#========================================================
-#========================================================
-# GENERATOR OF BUY/SELL RECOMMENDATIONS USING FORECAST MODEL (NNETAR):
-#========================================================
-#========================================================
-examplesToGenerate <- 1
+
+# ------------------------------------------------------
+# extract daily data from live sources from history until last close
+dataUptodate <- extractDataUptodate()
+dataUptodate
+saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
+
+
+# ------------------------------------------------------
+# generate recommendations based in the forecast using NNETAR with regressors
+# all recommendations generated are consolidated in a RDS for further analysis
+dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
+examplesToGenerate <- 5
+testDateStart <- as_date("2021-01-01")
 lagToApply <- daysToForecast
-datesRecommendations <- sort(sample(as_date(c(as_date("2021-01-01"):(max(df_planetMood$date)-lagToApply))), examplesToGenerate, replace=TRUE))
-# recommendationsConsolidated <- 
-#   generateRecommendations(as_date("2022-06-01"), examplesToGenerate, lagToApply, datesRecommendations)
-recommendationsNN <- 
-  generateRecommendations(datesRecommendations, examplesToGenerate, lagToApply, datesRecommendations)
+datesRecommendations <- sort(sample(as_date(c(testDateStart:(max(dataUptodate$date)-lagToApply))), examplesToGenerate, replace=TRUE))
+# run the NN to generate recommendations based in a forecast:
+recommendationsNN <- generateRecommendations(dataUptodate, datesRecommendations, examplesToGenerate, lagToApply)
 recommendationsNN
-sum(recommendationsNN$earningsPercent)
-mean(recommendationsNN$success)
+print(paste0("Total balance recommendations generated: ", round(sum(recommendationsNN$earningsPercent),1),"%"))
+print(paste0("Success of recommendations generated: ", round(100*mean(recommendationsNN$success),2),"%"))
 
 
-#========================================================
-#========================================================
-# LINEAR MODEL TO OPTIMIZE RECOMMENDATIONS
-#========================================================
-#========================================================
+# ------------------------------------------------------
+# train a logistic regression model to optimize selection of recommendations to implement
+# https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
 # training data
 dataset_glm <- 
-  readRDS("data/recommendationsNN_all.rds") %>% 
+  readRDS("project2_main/recommendationsNN_all.rds") %>% 
   filter(horizon == daysToForecast) %>% 
   select("VIX_txn", "VIX_forecasted", "predChangePercent", "txnLength", "success")
 head(dataset_glm)
-# entender/dibujar la mejora
-# flujo de preparación de los datos (newdata, freshRecommendations, etc.)
-# Probar LogisticRegression con "success"
-# Mejorar parámetros de lm
-# training VS test
-# Meter weekdays de "date_txn", "date"
-# Probar RegressionTrees, etc.
-# guardar el modelo
-# https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
+# split dataset in training and test
 splitRec <- round(0.8 * nrow(dataset_glm),0)
 train_glm <- dataset_glm[1:splitRec,]
 test_glm <- dataset_glm[(splitRec+1):nrow(dataset_glm),]
@@ -108,6 +78,7 @@ plot(cooks.distance(glmSuccess), pch = 16, col = "blue")
 predict.glm(glmSuccess, newdata = test_glm)
 
 
+# ------------------------------------------------------
 # predict on real data
 # prepare newdata (recommendations just obtained)
 freshRecommendations <-
