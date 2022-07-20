@@ -44,7 +44,7 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # generate recommendations based in the forecast using NNETAR with regressors
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
-examplesToGenerate <- 5
+examplesToGenerate <- 1
 testDateStart <- as_date("2021-01-01")
 lagToApply <- daysToForecast
 datesRecommendations <- sort(sample(as_date(c(testDateStart:(max(dataUptodate$date)-lagToApply))), examplesToGenerate, replace=TRUE))
