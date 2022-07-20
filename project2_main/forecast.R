@@ -1,10 +1,12 @@
-# JES: !comprobar calidad resultados en "proyecto1_main/"
-# JES: !usar regresión para optimizar criterio BUY/SELL en "accuracies_all" (previamente hacer cálculo masivo >= 100 fechas)
+# JES: !!usar regresión logística para optimizar criterio BUY/SELL en "accuracies_all" (previamente hacer cálculo masivo >= 100 fechas)
+  # >> meter weekday(), month(), dayInMonth(), weekInYear()
 # JES: !en NN+xReg: usar log() y scale() para refinar
+# JES: !review/challenge hyperparameters: ¿frequencyNN <> 7? (STL)
+# JES: !en NN+xReg: jugar con más parámetros de nnetar y de forecast
 # JES: refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
 # JES: en NN+xReg:probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
-# JES: en NN+xReg: jugar con más parámetros de nnetar y de forecast
-# JES: review/challente hyperparameters
+
+
 # JES: crear shinnyApp
 
 rm(list = ls())  # clear all environment variables
