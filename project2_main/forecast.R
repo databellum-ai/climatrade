@@ -12,18 +12,18 @@
 rm(list = ls())  # clear all environment variables
 graphics.off()  # clear all graphs
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
+if(!require(forecast)) install.packages("forecast", repos = "http://cran.us.r-project.org")
 if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.org")
 if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
-if(!require(forecast)) install.packages("forecast", repos = "http://cran.us.r-project.org")
 library(tidyverse)
+library(forecast)
 library(fpp3)
 library(GGally)
-library(forecast)
-
 
 # ------------------------------------------------------
 # HYPERPARAMETERS
 daysToForecast <- 14  # horizon for forecast
+lagToApply <- daysToForecast
 frequencyNN <- 7  # seasonality a priori for NNETAR model
 
 
@@ -36,7 +36,7 @@ source("generateRecommendations.R")  # function to generate recommendations usin
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
 dataUptodate <- extractDataUptodate()
-dataUptodate
+head(dataUptodate)
 saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
 
 
@@ -44,12 +44,12 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # generate recommendations based in the forecast using NNETAR with regressors
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
-examplesToGenerate <- 1
-testDateStart <- as_date("2021-01-01")
-lagToApply <- daysToForecast
-datesRecommendations <- sort(sample(as_date(c(testDateStart:(max(dataUptodate$date)-lagToApply))), examplesToGenerate, replace=TRUE))
+examplesToGenerate <- 1  # 0 means: TODAY
 # run the NN to generate recommendations based in a forecast:
-recommendationsNN <- generateRecommendations(dataUptodate, datesRecommendations, examplesToGenerate, lagToApply)
+recommendationsNN <- generateRecommendations(
+    dataUptodate, 
+    examplesToGenerate, 
+    lagToApply)
 recommendationsNN
 print(paste0("Total balance recommendations generated: ", round(sum(recommendationsNN$earningsPercent),1),"%"))
 print(paste0("Success of recommendations generated: ", round(100*mean(recommendationsNN$success),2),"%"))
@@ -84,12 +84,12 @@ predict.glm(glmSuccess, newdata = test_glm)
 # predict on real data
 # prepare newdata (recommendations just obtained)
 freshRecommendations <-
-  readRDS("data/freshRecommendationsNN.rds") %>%
+  readRDS("project2_main/recommendationsNN_all.rds") %>%
   select("VIX_txn", "VIX_forecasted", "predChangePercent", "txnLength", "success")
 
 testREV <- cbind(
   freshRecommendations, 
-  revisedSuccess = predict.glm(lmSuccess, newdata = freshRecommendations)) %>% 
+  revisedSuccess = predict.glm(glmSuccess, newdata = freshRecommendations)) %>% 
   arrange(txnLength )
 testREV
 
