@@ -1,4 +1,5 @@
 # JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
+  # ¿daysToForecast = 3/7/10/14?
   # ¿"DAI3_n", "CCI_n"?
   # ¿frequencyNN=365 vs 7?
   # ¿weekday(), month()?
