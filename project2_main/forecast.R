@@ -30,7 +30,7 @@ library(fpp3)
 # HYPERPARAMETERS
 daysToForecast <- 14  # horizon for forecast
 lagToApply <- daysToForecast
-frequencyNN <- 7  # seasonality a priori for NNETAR model
+frequencyNN <- 365  # seasonality a priori for NNETAR model
 
 
 # ------------------------------------------------------
@@ -105,9 +105,10 @@ testREV
 
 
 
-
-
-
-
+# ============================
+# ============================
+# ============================
+# ============================
+# 3.6
 
 

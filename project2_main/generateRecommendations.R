@@ -65,6 +65,9 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
             -1*abs(realChangePercent)
           )
         ),       
+        freq = frequencyNN, 
+        regressors = xTrain,
+        transformation = "", 
         success = as.logical(earningsPercent >= 0)
       )
     # show  

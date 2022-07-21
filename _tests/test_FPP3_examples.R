@@ -1,5 +1,5 @@
 
-source("10_initialize.R")
+source("project1_main/10_initialize.R")
 
 # install.packages("fpp3")
 # install.packages("GGally")
@@ -186,8 +186,6 @@ components(fit) %>%
   labs(title = "ETS(M,N,A) components")
 
 # ----------
-
-
 sth_cross_ped <- pedestrian %>%
   filter(Date >= "2016-07-01",
          Sensor == "Southern Cross Station") %>%

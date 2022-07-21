@@ -26,4 +26,11 @@ head(data_all_d)
 
 
 
-
+# -------------------------------------------
+# Show VIX components (year and week seasonalities)
+# -------------------------------------------
+as_tsibble(dataUptodate, index = date) %>%
+  model(
+    STL(VIX ~ trend(window = 7) + season(window = "periodic"), robust = TRUE)) %>% 
+  components() %>% 
+  autoplot()
