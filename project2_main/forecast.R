@@ -1,18 +1,21 @@
-# JES!!!: modelo1... test frequencyNN=365 (anteriormente 7)
-# JES!!: modelo1... test añadiendo: {weekday(), month(), dayInMonth(), weekInYear()}
-# JES!!: modelo1... testtransformations log(), scale(), diff()
-# JES!: EDA para determinar hyperparameter "horizon"
-# JES!: probar sólo con regresores de YahooFinance e ir incorporándolos a modelo1 y modelo2 cuando el proceso esté montado
-# JES!: modelo2... crear modelo lm básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
-# JES!: montar proceso integral (ETL + forecast + prediction + publish)
-# JES!: probar AWS para programar diariamente y enviar mail
-# JES: crear shinnyApp
-# JES: modelo2... probar trees, etc.
-# JES: modelo1... jugar con más parámetros de nnetar y de forecast
-# JES: refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
-# JES: modelo1... probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
-# JES: probar ejemplos de NN contenidos en /testsNN/*.R
-
+# JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
+  # ¿"DAI3_n", "CCI_n"?
+  # ¿frequencyNN=365 vs 7?
+  # ¿weekday(), month()?
+  # dayInMonth(), weekInYear()}
+  # ¿transformations log(), scale(), diff()?
+# JES!: MODELO2...
+  # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
+# JES!: PLATAFORMA...
+  # montar proceso integral (ETL + forecast + prediction + publish)
+  # probar AWS para programar diariamente y enviar mail
+  # crear shinnyApp
+# JES: MODELO2... 
+  # refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
+# JES: MODELO1... 
+  # probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
+  # jugar con más parámetros de nnetar y de forecast
+  # probar NN con ejemplo de keras (carpeta tests)
 
 
 
@@ -31,7 +34,7 @@ library(fpp3)
 # HYPERPARAMETERS
 daysToForecast <- 14  # horizon for forecast
 lagToApply <- daysToForecast
-frequencyNN <- 7  # seasonality a priori for NNETAR model
+frequencyNN <- 365  # seasonality a priori for NNETAR model
 
 
 # ------------------------------------------------------
@@ -50,7 +53,7 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # generate recommendations based in the forecast using NNETAR with regressors
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
-examplesToGenerate <- 2  # 0 means: TODAY
+examplesToGenerate <- 300  # 0 means: TODAY
 # run the NN to generate recommendations based in a forecast:
 recommendationsNN <- generateRecommendations(
     dataUptodate, 
