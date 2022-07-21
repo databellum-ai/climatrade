@@ -3,7 +3,7 @@
 # JES!: probar sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
 # JES!: modelo2... crear modelo lm básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
 # JES!: montar proceso integral (ETL + forecast + prediction + publish)
-# JES!: probar RStudio Server para programar diariamente y enviar mail
+# JES!: probar AWS para programar diariamente y enviar mail
 # JES: crear shinnyApp
 # JES: modelo2... probar trees, etc.
 # JES: modelo1... probar log(), scale(), diff()
