@@ -7,7 +7,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
   if (nExamples == 0) {
     sampleDates <- as_date(Sys.time())
   } else {
-    sampleDates <- sort(sample(as_date(c(testDateStart:(max(dataDaily$date)-nLags))), nExamples, replace=TRUE))
+    sampleDates <- sort(sample(as_date(c(testDateStart:(max(dataDaily$date)-nLags))), nExamples, replace=FALSE))
   }
   recommendationsConsolidated <- data.frame()  # initialize
   for (i in sampleDates) {
