@@ -35,8 +35,12 @@ frequencyNN <- 7  # seasonality a priori for NNETAR model
 
 # ------------------------------------------------------
 # INCLUDED FUNCTIONS
-source("extractDataUptodate.R")  # function to generate recommendations using NN forecast
-source("generateRecommendations.R")  # function to generate recommendations using NN forecast
+
+datos <- readRDS("project2_main/dataUptodate.rds")
+datos
+
+source("project2_main/extractDataUptodate.R")  # function to generate recommendations using NN forecast
+source("project2_main/generateRecommendations.R")  # function to generate recommendations using NN forecast
 
 
 # ------------------------------------------------------
