@@ -1,13 +1,17 @@
-# JES: !!usar regresión logística para optimizar criterio BUY/SELL en "accuracies_all" (previamente hacer cálculo masivo >= 100 fechas)
-  # >> meter weekday(), month(), dayInMonth(), weekInYear()
-# JES: !en NN+xReg: usar log() y scale() para refinar
-# JES: !review/challenge hyperparameters: ¿frequencyNN <> 7? (STL)
-# JES: !en NN+xReg: jugar con más parámetros de nnetar y de forecast
-# JES: refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
-# JES: en NN+xReg:probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
-
-
+# JES!: modelo1... revisar frequency=7 con STL
+# JES!: EDA para determinar hyperparameter "horizon"
+# JES!: probar sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
+# JES!: modelo2... crear modelo lm básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
+# JES!: montar proceso integral (ETL + forecast + prediction + publish)
 # JES: crear shinnyApp
+# JES: modelo2... probar trees, etc.
+# JES: modelo1... probar log(), scale(), diff()
+# JES: modelo1... jugar con más parámetros de nnetar y de forecast
+# JES: refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
+# JES: modelo1... probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
+
+
+
 
 rm(list = ls())  # clear all environment variables
 graphics.off()  # clear all graphs
@@ -22,7 +26,7 @@ library(GGally)
 
 # ------------------------------------------------------
 # HYPERPARAMETERS
-daysToForecast <- 14  # horizon for forecast
+daysToForecast <- 2  # horizon for forecast
 lagToApply <- daysToForecast
 frequencyNN <- 7  # seasonality a priori for NNETAR model
 
