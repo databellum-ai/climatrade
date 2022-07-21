@@ -1,5 +1,5 @@
-# JES!: EDA para determinar hyperparameter "horizon"
 # JES!: modelo1... revisar frequency=7 con STL
+# JES!: EDA para determinar hyperparameter "horizon"
 # JES!: probar sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
 # JES!: modelo2... crear modelo lm básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
 # JES!: montar proceso integral (ETL + forecast + prediction + publish)
@@ -10,6 +10,7 @@
 # JES: modelo1... jugar con más parámetros de nnetar y de forecast
 # JES: refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
 # JES: modelo1... probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
+# JES: probar ejemplos de NN contenidos en /testsNN/*.R
 
 
 
