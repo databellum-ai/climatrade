@@ -50,7 +50,7 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # generate recommendations based in the forecast using NNETAR with regressors
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
-examplesToGenerate <- 100  # 0 means: TODAY
+examplesToGenerate <- 2  # 0 means: TODAY
 # run the NN to generate recommendations based in a forecast:
 recommendationsNN <- generateRecommendations(
     dataUptodate, 
@@ -62,7 +62,7 @@ print(paste0("Success of recommendations generated: ", round(100*mean(recommenda
 
 
 # ------------------------------------------------------
-# train a logistic regression model to optimize selection of recommendations to implement
+# train a regression model to optimize selection of recommendations to implement
 # https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
 # training data
 dataset_glm <- 
