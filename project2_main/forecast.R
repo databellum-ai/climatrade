@@ -19,29 +19,24 @@ rm(list = ls())  # clear all environment variables
 graphics.off()  # clear all graphs
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 if(!require(forecast)) install.packages("forecast", repos = "http://cran.us.r-project.org")
-# if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.org")
+if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.org")
 # if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
 library(tidyverse)
 library(forecast)
-# library(fpp3)
+library(fpp3)
 # library(GGally)
 
 # ------------------------------------------------------
 # HYPERPARAMETERS
-daysToForecast <- 2  # horizon for forecast
+daysToForecast <- 14  # horizon for forecast
 lagToApply <- daysToForecast
 frequencyNN <- 7  # seasonality a priori for NNETAR model
 
 
 # ------------------------------------------------------
 # INCLUDED FUNCTIONS
-
-datos <- readRDS("project2_main/dataUptodate.rds")
-datos
-
 source("project2_main/extractDataUptodate.R")  # function to generate recommendations using NN forecast
 source("project2_main/generateRecommendations.R")  # function to generate recommendations using NN forecast
-
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
@@ -54,7 +49,7 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # generate recommendations based in the forecast using NNETAR with regressors
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
-examplesToGenerate <- 100  # 0 means: TODAY
+examplesToGenerate <- 1  # 0 means: TODAY
 # run the NN to generate recommendations based in a forecast:
 recommendationsNN <- generateRecommendations(
     dataUptodate, 
