@@ -1,8 +1,9 @@
-# JES!: modelo1... revisar frequency=7 con STL
 # JES!: EDA para determinar hyperparameter "horizon"
+# JES!: modelo1... revisar frequency=7 con STL
 # JES!: probar sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
 # JES!: modelo2... crear modelo lm básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
 # JES!: montar proceso integral (ETL + forecast + prediction + publish)
+# JES!: probar RStudio Server para programar diariamente y enviar mail
 # JES: crear shinnyApp
 # JES: modelo2... probar trees, etc.
 # JES: modelo1... probar log(), scale(), diff()
@@ -17,12 +18,12 @@ rm(list = ls())  # clear all environment variables
 graphics.off()  # clear all graphs
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 if(!require(forecast)) install.packages("forecast", repos = "http://cran.us.r-project.org")
-if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.org")
-if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
+# if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.org")
+# if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
 library(tidyverse)
 library(forecast)
-library(fpp3)
-library(GGally)
+# library(fpp3)
+# library(GGally)
 
 # ------------------------------------------------------
 # HYPERPARAMETERS
