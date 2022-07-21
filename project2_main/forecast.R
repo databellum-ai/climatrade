@@ -1,4 +1,4 @@
-# JES!!: modelo1... test frequencyNN=365 (anteriormente 7)
+# JES!!!: modelo1... test frequencyNN=365 (anteriormente 7)
 # JES!!: modelo1... test añadiendo: {weekday(), month(), dayInMonth(), weekInYear()}
 # JES!!: modelo1... testtransformations log(), scale(), diff()
 # JES!: EDA para determinar hyperparameter "horizon"
@@ -31,7 +31,7 @@ library(fpp3)
 # HYPERPARAMETERS
 daysToForecast <- 14  # horizon for forecast
 lagToApply <- daysToForecast
-frequencyNN <- 365  # seasonality a priori for NNETAR model
+frequencyNN <- 7  # seasonality a priori for NNETAR model
 
 
 # ------------------------------------------------------
