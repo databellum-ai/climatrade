@@ -66,8 +66,8 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
           )
         ),       
         freq = frequencyNN, 
-        regressors = xTrain,
-        transformation = "", 
+        regressors = "",
+        transformations = "", 
         success = as.logical(earningsPercent >= 0)
       )
     # show  
@@ -80,3 +80,6 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
   saveRDS((rbind(readRDS("project2_main/recommendationsNN_all.RDS"), recommendationsConsolidated)), "project2_main/recommendationsNN_all.RDS")
   return(recommendationsConsolidated)
 }
+
+
+

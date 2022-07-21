@@ -1,12 +1,13 @@
-# JES!: modelo1... revisar frequency=7 con STL
+# JES!!: modelo1... test frequencyNN=365 (anteriormente 7)
+# JES!!: modelo1... test añadiendo: {weekday(), month(), dayInMonth(), weekInYear()}
+# JES!!: modelo1... testtransformations log(), scale(), diff()
 # JES!: EDA para determinar hyperparameter "horizon"
-# JES!: probar sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
+# JES!: probar sólo con regresores de YahooFinance e ir incorporándolos a modelo1 y modelo2 cuando el proceso esté montado
 # JES!: modelo2... crear modelo lm básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
 # JES!: montar proceso integral (ETL + forecast + prediction + publish)
 # JES!: probar AWS para programar diariamente y enviar mail
 # JES: crear shinnyApp
 # JES: modelo2... probar trees, etc.
-# JES: modelo1... probar log(), scale(), diff()
 # JES: modelo1... jugar con más parámetros de nnetar y de forecast
 # JES: refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
 # JES: modelo1... probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
@@ -49,7 +50,7 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # generate recommendations based in the forecast using NNETAR with regressors
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
-examplesToGenerate <- 1  # 0 means: TODAY
+examplesToGenerate <- 100  # 0 means: TODAY
 # run the NN to generate recommendations based in a forecast:
 recommendationsNN <- generateRecommendations(
     dataUptodate, 
@@ -100,15 +101,5 @@ testREV
 
 # saveRDS(dataset_21d,"data/recomendationsNN_21d.rds")
 
-
-
-
-
-
-# ============================
-# ============================
-# ============================
-# ============================
-# 3.6
 
 
