@@ -44,7 +44,7 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # generate recommendations based in the forecast using NNETAR with regressors
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
-examplesToGenerate <- 1  # 0 means: TODAY
+examplesToGenerate <- 100  # 0 means: TODAY
 # run the NN to generate recommendations based in a forecast:
 recommendationsNN <- generateRecommendations(
     dataUptodate, 
