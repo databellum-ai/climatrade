@@ -1,23 +1,21 @@
 # JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
-  # ¿daysToForecast = ¿1/2/3/4/7/9/10/12/14?
-  # ¿transformations log(), scale(), diff()?
+  # decidir daysToForecast = ¿2/!3/4/!5/7/9/10/14?
+  # probar transformations: log(), scale(), diff()
   # añadir month(), dayInMonth()
+# JES!: EXTRACT...
   # probar length desde "2015-01-01" ¿velocidad&accuracy?
 # JES!: MODELO2...
   # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
   # añadir algún indicador de "sensibilidad" (VVIX, ¿IAI?)
-# JES: PLATAFORMA...
+# JES!: PLATAFORMA...
   # montar proceso integral (ETL + forecast + prediction + publish)
   # probar AWS para programar diariamente y enviar mail
   # crear shinnyApp
 # JES: MODELO1... 
-  # probar ARIMA+prophet con week&year
+  # jugar con más parámetros de nnetar y de forecast
 # JES: MODELO2... 
   # refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
-# JES: MODELO1... 
-  # jugar con más parámetros de nnetar y de forecast
-  # probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
-  # probar NN con ejemplo de keras (carpeta tests)
+
 
 
 
@@ -61,15 +59,29 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
 
+
+
 # run the NN to generate recommendations based in a forecast:
-recommendationsNN <- generateRecommendations(
-    dataUptodate, 
-    examplesToGenerate, 
-    lagToApply)
+daysToForecast <- 1  # horizon for forecast
+recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+daysToForecast <- 3  # horizon for forecast
+recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+daysToForecast <- 5  # horizon for forecast
+recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+daysToForecast <- 8  # horizon for forecast
+recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+daysToForecast <- 11  # horizon for forecast
+recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+daysToForecast <- 12  # horizon for forecast
+recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+daysToForecast <- 13  # horizon for forecast
+recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+
+
 
 recommendationsNN
 # analyze results
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS")# %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
 grpRecs <- tmpRecs %>% 
   group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
