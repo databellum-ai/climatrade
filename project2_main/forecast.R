@@ -3,7 +3,9 @@
   # probar transformations: log(), scale(), diff()
   # añadir month(), dayInMonth()
 # JES!: EXTRACT...
+  # OJO!: comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
   # probar length desde "2015-01-01" ¿velocidad&accuracy?
+  # quitar warnings de Extract
 # JES!: MODELO2...
   # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
   # añadir algún indicador de "sensibilidad" (VVIX, ¿IAI?)
