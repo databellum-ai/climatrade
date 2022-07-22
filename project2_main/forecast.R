@@ -1,21 +1,20 @@
 # JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
-  # ¿daysToForecast = 3/7/10/14?
-  # ¿"DAI3_n", "CCI_n"?
-  # ¿frequencyNN=365 vs 7?
-  # ¿weekday(), month()?
-  # dayInMonth(), weekInYear()}
+  # ¿daysToForecast = 3/4/7/10/14?
   # ¿transformations log(), scale(), diff()?
+  # añadir month(), dayInMonth()
+  # ¿probar ARIMA con week&year?
+  # ¿efecto de la "length"? (ok desde "2017-01-01")
 # JES!: MODELO2...
   # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
-# JES!: PLATAFORMA...
+# JES: PLATAFORMA...
   # montar proceso integral (ETL + forecast + prediction + publish)
   # probar AWS para programar diariamente y enviar mail
   # crear shinnyApp
 # JES: MODELO2... 
   # refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
 # JES: MODELO1... 
-  # probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
   # jugar con más parámetros de nnetar y de forecast
+  # probar VAR (Haydn + Tajendra) para forecast de regressors (*_n) (actuales y vblesPlanetMood)
   # probar NN con ejemplo de keras (carpeta tests)
 
 
@@ -33,11 +32,14 @@ library(fpp3)
 
 # ------------------------------------------------------
 # HYPERPARAMETERS
-daysToForecast <- 14  # horizon for forecast
+daysToForecast <- 10  # horizon for forecast
 lagToApply <- daysToForecast
-frequencyNN <- 365  # seasonality a priori for NNETAR model
-examplesToGenerate <- 300  # 0 means: TODAY
+# regressors_set <- "VX+C1" # ("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
 
+# ------------------------------------------------------
+# CONSTANTS
+examplesToGenerate <- 300  # 0 means TODAY
+frequencyNN <- 365  # daily frequency for our data (time series use year as base unit)
 
 # ------------------------------------------------------
 # INCLUDED FUNCTIONS
@@ -65,10 +67,11 @@ recommendationsNN <- generateRecommendations(
 recommendationsNN[,-13]
 tmpRecs <- recommendationsNN
 tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS")
-tmpRecs %>% group_by(freq, horizon, regressors = str_sub(regressors,-30,-1), transformations, action, txnLength) %>% 
+grpRecs <- tmpRecs %>% group_by(horizon, regressors, transformations, txnLength) %>% 
   summarise(Mean_success = mean(success), Sum_Earnings = sum(earningsPercent), Avg_TxnEarning = mean(earningsPercent)/mean(horizon), Avg_Length = mean(length), n = n()) %>% 
   arrange(desc(Mean_success)) %>% 
   filter(n >=5)
+view(grpRecs)
 
 # print(paste0("Total balance recommendations generated: ", round(sum(recommendationsNN$earningsPercent),1),"%"))
 # print(paste0("Success of recommendations generated: ", round(100*mean(recommendationsNN$success),2),"%"))
