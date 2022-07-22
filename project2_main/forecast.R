@@ -1,9 +1,9 @@
 # JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
-  # ¿daysToForecast = 3/4/7/10/14?
+  # ¿daysToForecast = ¿3/4/7/10/14?
   # ¿transformations log(), scale(), diff()?
   # añadir month(), dayInMonth()
   # ¿probar ARIMA con week&year?
-  # ¿efecto de la "length"? (ok desde "2017-01-01")
+  # ¿efecto (verlocidad&accurcy) de la "length"? (ok desde "2017-01-01")
 # JES!: MODELO2...
   # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
 # JES: PLATAFORMA...
