@@ -65,8 +65,8 @@ recommendationsNN <- generateRecommendations(
 recommendationsNN[,-13]
 tmpRecs <- recommendationsNN
 tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS")
-tmpRecs %>% group_by(freq, horizon, xreg = str_sub(regressors,-30,-1), transformations, action, txnLength) %>% 
-  summarise(Mean_success = mean(success), Sum_Earnings = sum(earningsPercent), Avg_TxnEarning = mean(earningsPercent)/mean(horizon), n = n()) %>% 
+tmpRecs %>% group_by(freq, horizon, regressors = str_sub(regressors,-30,-1), transformations, action, txnLength) %>% 
+  summarise(Mean_success = mean(success), Sum_Earnings = sum(earningsPercent), Avg_TxnEarning = mean(earningsPercent)/mean(horizon), Avg_Length = mean(length), n = n()) %>% 
   arrange(desc(Mean_success)) %>% 
   filter(n >=5)
 

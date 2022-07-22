@@ -30,7 +30,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     #   DAI3_n = lag(DAI3, n=nLags),
     #   CCI_n = lag(CCI, n=nLags)
     # )
-    # text_regressors <- "VIX_n, VVIX_n, VIX3M_n, VIXNsdq_n, GoldVlty_n, + DAI3_n, CCI_n"
+    # text_regressors <- "VX+V1"
     # # prepare training dataset (past)
     # dataDailyPastRefDate <- dataDaily %>%
     #   select(date, VIX, all_of(laggedVbles)) %>%
@@ -53,7 +53,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     #   DAI3_n = lag(DAI3, n=nLags),
     #   CCI_n = lag(CCI, n=nLags)
     # ) 
-    # text_regressors <- "VIX_n, VVIX_n, VIX3M_n, VIXNsdq_n, GoldVlty_n, + DAI3_n, CCI_n + WkDay, YrWeek"
+    # text_regressors <- "VX+V1+C1"
     # # prepare training dataset (past)
     # dataDailyPastRefDate <- dataDaily %>%
     #   select(date, VIX, all_of(laggedVbles), all_of(calendarVbles)) %>%
@@ -74,7 +74,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
       VIXNsdq_n = lag(VIXNsdq, n=nLags),
       GoldVlty_n = lag(GoldVlty, n=nLags)
     )
-    text_regressors <- "VIX_n, VVIX_n, VIX3M_n, VIXNsdq_n, GoldVlty_n + WkDay, YrWeek"
+    text_regressors <- "VX+C1"
     # prepare training dataset (past)
     dataDailyPastRefDate <- dataDaily %>%
       select(date, VIX, all_of(laggedVbles), all_of(calendarVbles)) %>%
@@ -119,6 +119,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
         freq = frequencyNN, 
         regressors = text_regressors,
         transformations = "", 
+        length = length(yTrain), 
         success = as.logical(earningsPercent >= 0)
       )
     # show  
