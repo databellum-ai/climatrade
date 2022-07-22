@@ -60,11 +60,19 @@ recommendationsNN <- generateRecommendations(
     dataUptodate, 
     examplesToGenerate, 
     lagToApply)
-recommendationsNN
-print(paste0("Total balance recommendations generated: ", round(sum(recommendationsNN$earningsPercent),1),"%"))
-print(paste0("Success of recommendations generated: ", round(100*mean(recommendationsNN$success),2),"%"))
 
+recommendationsNN[,-13]
+tmpRecs <- recommendationsNN
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS")
+tmpRecs %>% group_by(freq, horizon, xreg = str_sub(regressors,-30,-1), transformations, action, txnLength) %>% 
+  summarise(Accum_success = mean(success), Sum_Earnings = sum(earningsPercent), Avg_TxnEarning = mean(earningsPercent)/mean(horizon), n = n()) %>% 
+  arrange(desc(Accum_success), desc(Sum_Earnings)) %>% 
+  filter(n >=5)
 
+# print(paste0("Total balance recommendations generated: ", round(sum(recommendationsNN$earningsPercent),1),"%"))
+# print(paste0("Success of recommendations generated: ", round(100*mean(recommendationsNN$success),2),"%"))
+
+str_sub("ff",-6,-1)
 # ------------------------------------------------------
 # train a regression model to optimize selection of recommendations to implement
 # https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
