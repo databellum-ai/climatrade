@@ -20,25 +20,25 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     
     # *****
     # ORIGINAL: add a lagged columns to dataset:
-    laggedVbles <- c("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n", "DAI3_n", "CCI_n")
-    dataDaily <- dataDaily %>% mutate(
-      VIX_n = lag(VIX, n=nLags),
-      VVIX_n = lag(VVIX, n=nLags),
-      VIX3M_n = lag(VIX3M, n=nLags),
-      VIXNsdq_n = lag(VIXNsdq, n=nLags),
-      GoldVlty_n = lag(GoldVlty, n=nLags),
-      DAI3_n = lag(DAI3, n=nLags),
-      CCI_n = lag(CCI, n=nLags)
-    )
-    text_regressors <- "VIX_n, VVIX_n, VIX3M_n, VIXNsdq_n, GoldVlty_n, + DAI3_n, CCI_n"
-    # prepare training dataset (past)
-    dataDailyPastRefDate <- dataDaily %>%
-      select(date, VIX, all_of(laggedVbles)) %>%
-      filter(date >= "2017-01-01" & date <= lastDateAvailable)
-    # calculate regressors (future)
-    futureData <- dataDaily %>%
-      select(date, all_of(laggedVbles)) %>%
-      filter(date >= firstDateToForecast & date <= lastDateToForecast)
+    # laggedVbles <- c("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n", "DAI3_n", "CCI_n")
+    # dataDaily <- dataDaily %>% mutate(
+    #   VIX_n = lag(VIX, n=nLags),
+    #   VVIX_n = lag(VVIX, n=nLags),
+    #   VIX3M_n = lag(VIX3M, n=nLags),
+    #   VIXNsdq_n = lag(VIXNsdq, n=nLags),
+    #   GoldVlty_n = lag(GoldVlty, n=nLags),
+    #   DAI3_n = lag(DAI3, n=nLags),
+    #   CCI_n = lag(CCI, n=nLags)
+    # )
+    # text_regressors <- "VIX_n, VVIX_n, VIX3M_n, VIXNsdq_n, GoldVlty_n, + DAI3_n, CCI_n"
+    # # prepare training dataset (past)
+    # dataDailyPastRefDate <- dataDaily %>%
+    #   select(date, VIX, all_of(laggedVbles)) %>%
+    #   filter(date >= "2017-01-01" & date <= lastDateAvailable)
+    # # calculate regressors (future)
+    # futureData <- dataDaily %>%
+    #   select(date, all_of(laggedVbles)) %>%
+    #   filter(date >= firstDateToForecast & date <= lastDateToForecast)
     # :ORIGINAL
     # **
     # CHG1: add a lagged columns to dataset:
