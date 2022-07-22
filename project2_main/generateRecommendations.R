@@ -117,7 +117,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
           )
         ),       
         regressors = text_regressors,
-        transformations = "", 
+        transformations = transformation, 
         length = length(yTrain), 
         success = as.logical(earningsPercent >= 0)
       )

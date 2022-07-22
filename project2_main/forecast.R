@@ -1,15 +1,17 @@
 # JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
-  # ¿daysToForecast = ¿3/4/7/10/14?
+  # ¿daysToForecast = ¿1/2/3/4/7/9/10/12/14?
   # ¿transformations log(), scale(), diff()?
   # añadir month(), dayInMonth()
-  # ¿probar ARIMA con week&year?
-  # ¿efecto (verlocidad&accurcy) de la "length"? (ok desde "2017-01-01")
+  # probar length desde "2015-01-01" ¿velocidad&accuracy?
 # JES!: MODELO2...
   # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
+  # añadir algún indicador de "sensibilidad" (VVIX, ¿IAI?)
 # JES: PLATAFORMA...
   # montar proceso integral (ETL + forecast + prediction + publish)
   # probar AWS para programar diariamente y enviar mail
   # crear shinnyApp
+# JES: MODELO1... 
+  # probar ARIMA+prophet con week&year
 # JES: MODELO2... 
   # refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
 # JES: MODELO1... 
@@ -32,14 +34,15 @@ library(fpp3)
 
 # ------------------------------------------------------
 # HYPERPARAMETERS
-daysToForecast <- 10  # horizon for forecast
-lagToApply <- daysToForecast
+daysToForecast <- 9  # horizon for forecast
+transformation <- ""
 # regressors_set <- "VX+C1" # ("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
 
 # ------------------------------------------------------
 # CONSTANTS
 examplesToGenerate <- 300  # 0 means TODAY
 frequencyNN <- 365  # daily frequency for our data (time series use year as base unit)
+lagToApply <- daysToForecast
 
 # ------------------------------------------------------
 # INCLUDED FUNCTIONS
@@ -64,17 +67,16 @@ recommendationsNN <- generateRecommendations(
     examplesToGenerate, 
     lagToApply)
 
-recommendationsNN[,-13]
-tmpRecs <- recommendationsNN
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS")
-grpRecs <- tmpRecs %>% group_by(horizon, regressors, transformations, txnLength) %>% 
-  summarise(Mean_success = mean(success), Sum_Earnings = sum(earningsPercent), Avg_TxnEarning = mean(earningsPercent)/mean(horizon), Avg_Length = mean(length), n = n()) %>% 
-  arrange(desc(Mean_success)) %>% 
-  filter(n >=5)
+recommendationsNN
+# analyze results
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS")# %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
+grpRecs <- tmpRecs %>% 
+  group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
+  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
+  filter()
+grpRecs%>% arrange(desc(Mean_success))
+grpRecs%>% arrange(desc(Mean_TxnEarning))
 view(grpRecs)
-
-# print(paste0("Total balance recommendations generated: ", round(sum(recommendationsNN$earningsPercent),1),"%"))
-# print(paste0("Success of recommendations generated: ", round(100*mean(recommendationsNN$success),2),"%"))
 
 # ------------------------------------------------------
 # train a regression model to optimize selection of recommendations to implement
