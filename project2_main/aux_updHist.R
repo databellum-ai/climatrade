@@ -11,5 +11,6 @@ transf <- transf %>% mutate(
 )
 
 
+
 head(transf)
 # saveRDS(transf, "project2_main/recommendationsNN_all.RDS")

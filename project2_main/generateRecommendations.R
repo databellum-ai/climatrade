@@ -16,7 +16,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     print(paste0("Processing date: ", as_date(i)))
     lastDateAvailable <- as_date(i) # last date available for training observations
     firstDateToForecast <- lastDateAvailable + 1
-    lastDateToForecast <- firstDateToForecast + daysToForecast - 1
+    lastDateToForecast <- firstDateToForecast + nLags - 1
 
     
     # *****
@@ -95,7 +95,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain)
     # forecast
     xFuture <- futureData[,-1] # remove date
-    fc6 <- forecast(fit6, h = daysToForecast, xreg = xFuture, PI = F)
+    fc6 <- forecast(fit6, h = nLags, xreg = xFuture, PI = F)
     # store
     VIX_forecasted <- fc6$mean
     # calculate accuracy details
@@ -107,7 +107,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
         realChangePercent = 100*(VIX_real - VIX_txn)/VIX_txn, 
         predChangePercent = as.numeric(100*(VIX_forecasted - VIX_txn)/VIX_txn), 
         txnLength = date - date_txn, 
-        horizon = daysToForecast, 
+        horizon = nLags, 
         action = as.character(ifelse(VIX_forecasted > VIX_txn, "BUY", "SELL")), 
         earningsPercent = as.numeric(
           ifelse

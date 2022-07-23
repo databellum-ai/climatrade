@@ -3,13 +3,12 @@
   # probar transformations: log(), scale(), diff()
   # añadir month(), dayInMonth()
   # probar length desde "2015-01-01" ¿velocidad&accuracy? (parámetro "startDateDataset")
-# JES!: EXTRACT...
-  # OJO!: comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
-  # quitar warnings de Extract
 # JES!: MODELO2...
   # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
   # añadir algún indicador de "sensibilidad" (VVIX, ¿IAI?)
 # JES!: PLATAFORMA...
+  # OJO!: comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
+  # quitar warnings de Extract
   # montar proceso integral (ETL + forecast + prediction + publish)
   # probar AWS para programar diariamente y enviar mail
   # crear shinnyApp
@@ -70,8 +69,9 @@ dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available
 #   recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
 # }
 for (j in c(3,13)) {
-  print (paste("Horizon:",j))
+  print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
+  lagToApply <- daysToForecast
   recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
 }
 
