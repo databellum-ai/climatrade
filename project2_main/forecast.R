@@ -1,11 +1,11 @@
 # JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
-  # decidir daysToForecast = ¿1/2/!3/4/!5/7/9/10/14?
+  # decidir multiHorizon? / daysToForecast = ¿1/2/!3/4/!5/7/9/10/14?
   # probar transformations: log(), scale(), diff()
   # añadir month(), dayInMonth()
   # probar length desde "2015-01-01" ¿velocidad&accuracy? (parámetro "startDateDataset")
 # JES!: MODELO2...
-  # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
-  # añadir algún indicador de "sensibilidad" (VVIX, ¿IAI?)
+  # crear modelo lm/tree básico añadiendo length, weekday(), month(), dayInMonth(), weekInYear()
+  # añadir algún indicador de "sensibilidad instantánea" (VVIX, ¿IAI?)
 # JES!: PLATAFORMA...
   # OJO!: comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
   # quitar warnings de Extract
@@ -63,12 +63,12 @@ dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available
 # run the NN to generate recommendations based in a forecast:
 # recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
 # 
-# for (j in c(3,13,5,8,11,12)) {
+# for (j in c(2,3,4,5,6,8,11,12,13,14)) {
 #   print (paste("Horizon:",j))
 #   daysToForecast <- j  # horizon for forecast
 #   recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
 # }
-for (j in c(3,13)) {
+for (j in c(5,6,8,11,12,2,3,4)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
   lagToApply <- daysToForecast
@@ -78,7 +78,8 @@ for (j in c(3,13)) {
 
 recommendationsNN
 # analyze results
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS")# %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
+# tmpRecs %>% filter(as.integer(txnLength) == horizon & horizon == 11) %>% pull(success) %>% mean()
 grpRecs <- tmpRecs %>% 
   group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
@@ -87,7 +88,7 @@ grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 view(grpRecs)
 
-
+tmpRecs %>% group_by(horizon) %>% summarise(n())
 # ------------------------------------------------------
 # train a regression model to optimize selection of recommendations to implement
 # https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/

@@ -13,7 +13,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
   recommendationsConsolidated <- data.frame()  # initialize
   for (i in sampleDates) {
     # build dataset of all past observations (time series) until given date
-    print(paste0("Processing date: ", as_date(i)))
+    print(paste0("Processing date: ", as_date(i), " | Horizon: ",nLags))
     lastDateAvailable <- as_date(i) # last date available for training observations
     firstDateToForecast <- lastDateAvailable + 1
     lastDateToForecast <- firstDateToForecast + nLags - 1
