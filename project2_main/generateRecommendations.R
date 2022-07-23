@@ -22,7 +22,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     # *****
     # >>SET "VX+C1"
     laggedVbles <- c("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
-    calendarVbles <- c("wkDay", "yrWeek")
+    calendarVbles <- c("month", "dayInMonth", "wkDay", "yrWeek")
     dataDaily <- dataDaily %>% mutate(
       VIX_n = lag(VIX, n=nLags),
       VVIX_n = lag(VVIX, n=nLags),
@@ -30,7 +30,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
       VIXNsdq_n = lag(VIXNsdq, n=nLags),
       GoldVlty_n = lag(GoldVlty, n=nLags)
     )
-    text_regressors <- "VX+C1"
+    text_regressors <- "VX+C2"
     # prepare training dataset (past)
     dataDailyPastRefDate <- dataDaily %>%
       select(date, VIX, all_of(laggedVbles), all_of(calendarVbles)) %>%

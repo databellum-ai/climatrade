@@ -1,52 +1,5 @@
-# JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
-  # decidir multiHorizon? / daysToForecast = ¿1/2/!3/4/!5/7/9/10/14?
-  # probar transformations: log(), scale(), diff()
-  # añadir month(), dayInMonth()
-  # probar length desde "2015-01-01" ¿velocidad&accuracy? (parámetro "startDateDataset")
-# JES!: MODELO2...
-  # crear modelo lm/tree básico añadiendo length, weekday(), month(), dayInMonth(), weekInYear()
-  # añadir algún indicador de "sensibilidad instantánea" (VVIX, ¿IAI?)
-# JES!: PLATAFORMA...
-  # OJO!: comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
-  # quitar warnings de Extract
-  # montar proceso integral (ETL + forecast + prediction + publish)
-  # probar AWS para programar diariamente y enviar mail
-  # crear shinnyApp
-# JES: MODELO1... 
-  # jugar con más parámetros de nnetar y de forecast
-# JES: MODELO2... 
-  # refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
+source("initialize.R")
 
-
-
-
-rm(list = ls())  # clear all environment variables
-graphics.off()  # clear all graphs
-if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
-if(!require(forecast)) install.packages("forecast", repos = "http://cran.us.r-project.org")
-if(!require(fpp3)) install.packages("fpp3", repos = "http://cran.us.r-project.org")
-# if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
-library(tidyverse)
-library(forecast)
-library(fpp3)
-# library(GGally)
-
-# ------------------------------------------------------
-# HYPERPARAMETERS
-daysToForecast <- 14  # horizon for forecast
-transformation <- "NuevoExtractMultihorizonte"
-# regressors_set <- "VX+C1" # ("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
-
-# ------------------------------------------------------
-# CONSTANTS
-examplesToGenerate <- 300  # 0 means TODAY
-frequencyNN <- 365  # daily frequency for our data (time series use year as base unit)
-lagToApply <- daysToForecast
-
-# ------------------------------------------------------
-# INCLUDED FUNCTIONS
-source("project2_main/extractDataUptodate.R")  # function to generate recommendations using NN forecast
-source("project2_main/generateRecommendations.R")  # function to generate recommendations using NN forecast
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
@@ -59,16 +12,23 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
 
+# ------------------------------------------------------
+# extract daily data from live sources from history until last close
+dataUptodate <- extractDataUptodate()
+head(dataUptodate)
+saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
+
+
+# ------------------------------------------------------
+# generate recommendations based in the forecast using NNETAR with regressors
+# all recommendations generated are consolidated in a RDS for further analysis
+dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
 
 # run the NN to generate recommendations based in a forecast:
 # recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
 # 
-# for (j in c(2,3,4,5,6,8,11,12,13,14)) {
-#   print (paste("Horizon:",j))
-#   daysToForecast <- j  # horizon for forecast
-#   recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-# }
-for (j in c(5,6,8,11,12,2,3,4)) {
+examplesToGenerate <- 3  # 0 means TODAY
+for (j in c(7)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
   lagToApply <- daysToForecast
@@ -83,12 +43,14 @@ tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") %>% filter(length>
 grpRecs <- tmpRecs %>% 
   group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
-  filter()
+  filter(horizon==7)
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 view(grpRecs)
 
 tmpRecs %>% group_by(horizon) %>% summarise(n())
+
+
 # ------------------------------------------------------
 # train a regression model to optimize selection of recommendations to implement
 # https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
