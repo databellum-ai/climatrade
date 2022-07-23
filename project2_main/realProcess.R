@@ -3,7 +3,8 @@
 # REAL PROCESS = FORECAST + PREDICTION
 # =====================================
 
-source("initialize.R")
+source("project2_main/initialize.R")
+transformation <- "NuevoExtractMultihorizonte + lambdaAuto+scale"
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close

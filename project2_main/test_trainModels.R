@@ -1,23 +1,12 @@
-source("initialize.R")
 
-
-# ------------------------------------------------------
-# extract daily data from live sources from history until last close
-dataUptodate <- extractDataUptodate()
-head(dataUptodate)
-saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
-
-# ------------------------------------------------------
-# generate recommendations based in the forecast using NNETAR with regressors
-# all recommendations generated are consolidated in a RDS for further analysis
-dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
+source("project2_main/initialize.R")
+transformation <- "NuevoExtractMultihorizonte + lambdaAuto+scale"
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
 dataUptodate <- extractDataUptodate()
 head(dataUptodate)
 saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
-
 
 # ------------------------------------------------------
 # generate recommendations based in the forecast using NNETAR with regressors
@@ -41,7 +30,7 @@ recommendationsNN
 tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") #%>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
 # tmpRecs %>% filter(as.integer(txnLength) == horizon & horizon == 11) %>% pull(success) %>% mean()
 grpRecs <- tmpRecs %>% 
-  group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
+  group_by(regressors, transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
   filter(horizon==7)
 grpRecs%>% arrange(desc(Mean_success))

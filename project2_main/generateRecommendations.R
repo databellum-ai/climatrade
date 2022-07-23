@@ -92,10 +92,14 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     xTrain <- dataDailyPastRefDate[,(3:length(dataDailyPastRefDate))]  # remove date and VIX
     print(paste("Regressors used by NN:")); print(paste(names(xTrain)))
     print(paste("yTrain:", length(yTrain), "frequency: ", frequencyNN))
-    fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain)
+    
+    # fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain)
+    fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain, lambda = "auto", scale.inputs = TRUE)
+    
     # forecast
     xFuture <- futureData[,-1] # remove date
     fc6 <- forecast(fit6, h = nLags, xreg = xFuture, PI = F)
+    
     # store
     VIX_forecasted <- fc6$mean
     # calculate accuracy details

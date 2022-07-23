@@ -11,7 +11,6 @@ library(fpp3)
 
 # ------------------------------------------------------
 # HYPERPARAMETERS AND CONSTANTS
-transformation <- "NuevoExtractMultihorizonte"
 # regressors_set <- "VX+C1" # ("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
 frequencyNN <- 365  # daily frequency for our data (time series use year as base unit)
 
