@@ -1,10 +1,10 @@
 # JES!: MODELO1... EDA para decidir sólo con regresores de YahooFinance e ir incorporándolos cuando el proceso esté montado
-  # decidir daysToForecast = ¿2/!3/4/!5/7/9/10/14?
+  # decidir daysToForecast = ¿1/2/!3/4/!5/7/9/10/14?
   # probar transformations: log(), scale(), diff()
   # añadir month(), dayInMonth()
+  # probar length desde "2015-01-01" ¿velocidad&accuracy? (parámetro "startDateDataset")
 # JES!: EXTRACT...
   # OJO!: comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
-  # probar length desde "2015-01-01" ¿velocidad&accuracy?
   # quitar warnings de Extract
 # JES!: MODELO2...
   # crear modelo lm/tree básico añadiendo weekday(), month(), dayInMonth(), weekInYear()
@@ -35,7 +35,7 @@ library(fpp3)
 # ------------------------------------------------------
 # HYPERPARAMETERS
 daysToForecast <- 9  # horizon for forecast
-transformation <- ""
+transformation <- "NuevoExtractAutomatico"
 # regressors_set <- "VX+C1" # ("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
 
 # ------------------------------------------------------
@@ -61,23 +61,17 @@ saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fr
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
 
-
-
 # run the NN to generate recommendations based in a forecast:
-daysToForecast <- 1  # horizon for forecast
-recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-daysToForecast <- 3  # horizon for forecast
-recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-daysToForecast <- 5  # horizon for forecast
-recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-daysToForecast <- 8  # horizon for forecast
-recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-daysToForecast <- 11  # horizon for forecast
-recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-daysToForecast <- 12  # horizon for forecast
-recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-daysToForecast <- 13  # horizon for forecast
-recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+
+# recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+
+
+
+for (j in c(1,3,5,8,11,12,13)) {
+  print (paste("Horizon:",j))
+  daysToForecast <- j  # horizon for forecast
+  recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+}
 
 
 
