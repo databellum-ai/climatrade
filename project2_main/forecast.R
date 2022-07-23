@@ -39,7 +39,7 @@ transformation <- "NuevoExtractMultihorizonte"
 
 # ------------------------------------------------------
 # CONSTANTS
-examplesToGenerate <- 3  # 0 means TODAY
+examplesToGenerate <- 300  # 0 means TODAY
 frequencyNN <- 365  # daily frequency for our data (time series use year as base unit)
 lagToApply <- daysToForecast
 
