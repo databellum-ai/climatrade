@@ -72,7 +72,9 @@ extractDataUptodate <- function() {
     select(date, 
            selectedVbles, 
            month, dayInMonth, wkDay, yrWeek) %>% 
-    arrange(desc(date))
+    arrange(date)
+  names(stocksData) <- c("date", "VIX", "VVIX", "VIX3M", "VIXNsdq", "GoldVlty", "month", "dayInMonth", "wkDay", "yrWeek")
   return(stocksData)
 }
+
 

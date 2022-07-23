@@ -34,13 +34,13 @@ library(fpp3)
 
 # ------------------------------------------------------
 # HYPERPARAMETERS
-daysToForecast <- 9  # horizon for forecast
-transformation <- "NuevoExtractAutomatico"
+daysToForecast <- 14  # horizon for forecast
+transformation <- "NuevoExtractMultihorizonte"
 # regressors_set <- "VX+C1" # ("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
 
 # ------------------------------------------------------
 # CONSTANTS
-examplesToGenerate <- 300  # 0 means TODAY
+examplesToGenerate <- 3  # 0 means TODAY
 frequencyNN <- 365  # daily frequency for our data (time series use year as base unit)
 lagToApply <- daysToForecast
 
@@ -55,29 +55,30 @@ dataUptodate <- extractDataUptodate()
 head(dataUptodate)
 saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
 
-
 # ------------------------------------------------------
 # generate recommendations based in the forecast using NNETAR with regressors
 # all recommendations generated are consolidated in a RDS for further analysis
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
 
+
 # run the NN to generate recommendations based in a forecast:
-
 # recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-
-
-
-for (j in c(1,3,5,8,11,12,13)) {
+# 
+# for (j in c(3,13,5,8,11,12)) {
+#   print (paste("Horizon:",j))
+#   daysToForecast <- j  # horizon for forecast
+#   recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
+# }
+for (j in c(3,13)) {
   print (paste("Horizon:",j))
   daysToForecast <- j  # horizon for forecast
   recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
 }
 
 
-
 recommendationsNN
 # analyze results
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS")# %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
 grpRecs <- tmpRecs %>% 
   group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
@@ -85,6 +86,7 @@ grpRecs <- tmpRecs %>%
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 view(grpRecs)
+
 
 # ------------------------------------------------------
 # train a regression model to optimize selection of recommendations to implement

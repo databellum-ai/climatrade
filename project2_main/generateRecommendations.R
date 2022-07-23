@@ -22,7 +22,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     # *****
     # >>SET "VX+C1"
     laggedVbles <- c("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
-    calendarVbles <- c("WkDay", "YrWeek")
+    calendarVbles <- c("wkDay", "yrWeek")
     dataDaily <- dataDaily %>% mutate(
       VIX_n = lag(VIX, n=nLags),
       VVIX_n = lag(VVIX, n=nLags),
@@ -65,7 +65,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     # *******************
     # >>SET "VX+V1+C1"
     # laggedVbles <- c("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n", "DAI3_n", "CCI_n")
-    # calendarVbles <- c("WkDay", "YrWeek")
+    # calendarVbles <- c("wkDay", "yrWeek")
     # dataDaily <- dataDaily %>% mutate(
     #   VIX_n = lag(VIX, n=nLags),
     #   VVIX_n = lag(VVIX, n=nLags),
