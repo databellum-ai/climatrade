@@ -38,7 +38,7 @@ for (j in c(7)) {
 
 recommendationsNN
 # analyze results
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") #%>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
 # tmpRecs %>% filter(as.integer(txnLength) == horizon & horizon == 11) %>% pull(success) %>% mean()
 grpRecs <- tmpRecs %>% 
   group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
@@ -46,8 +46,8 @@ grpRecs <- tmpRecs %>%
   filter(horizon==7)
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
-view(grpRecs)
 
+view(grpRecs)
 tmpRecs %>% group_by(horizon) %>% summarise(n())
 
 
