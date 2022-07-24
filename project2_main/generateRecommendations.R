@@ -46,7 +46,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
     print(paste("Regressors used by NN:")); print(paste(names(xTrain)))
     print(paste("yTrain:", length(yTrain), "frequency: ", frequencyNN))
     
-    fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain)
+    fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain, MaxNWts=2000)
     # forecast
     xFuture <- futureData[,-1] # remove date
     fc6 <- forecast(fit6, h = nLags, xreg = xFuture, PI = F)

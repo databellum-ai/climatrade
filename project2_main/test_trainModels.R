@@ -1,14 +1,19 @@
-# !!! error NN Max... horixonte 5 y 100 ejemplos
-# !!! duda de núm de lags como regressors ¿me estoy pasando en uno al hacer _n? (VER FOTO)
-# !! con EDA ¿confirmar multiHorizon?
-# !! MODELO2... crear llamada básica de "filtrado" añadiendo length, weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VVIX, ¿IAI?)
-# !! quitar warnings de Extract (YahooFinance)
+# !!! duda de núm de lags como regressors ¿me estoy pasando en uno al hacer _n? (VER FOTO + IMAGINAR CON SÓLO LAG=1)
+# !!! probar con regressors "n-1"
+# !! MODELO2... con EDA crear llamada básica de "filtrado" añadiendo length, weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VIX_+-30, VVIX, ¿IAI?)
 # ! montar proceso integral (ETL + forecast + prediction + publish) + comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
+# ! quitar warnings de Extract (YahooFinance) (..."silence()")
 # crear modelo lm/tree a partir de la llamada básica de filtrado de recomendaciones
 # probar AWS para programar diariamente y enviar mail
 # crear shinnyApp
+# conn EDA ¿confirmar multiHorizon? ¡descartar algún horizonte?
 # jugar con más parámetros de nnetar y de forecast + probar transformations (scale(), log(), BoxCox-lambda)
 # refinar más vblesPlanetMood (movingAverage/diff/log/smooth) para meter en MODELO1 y/o MODELO2
+# quitar warnings de nnetar()
+    # WARNING messages:
+    # 1: In nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain) :
+    # Missing values in xreg, omitting rows
+
 
 source("project2_main/initialize.R")
 
@@ -26,7 +31,7 @@ dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available
 # generate recommendations based in the forecast using NNETAR with regressors
 # run the NN to generate recommendations:
 examplesToGenerate <- 100  # 0 means TODAY
-for (j in c(5:14)) {
+for (j in c(1,7)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
   lagToApply <- daysToForecast
@@ -35,22 +40,25 @@ for (j in c(5:14)) {
 
 recommendationsNN
 # analyze results
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") # %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") # %>% filter(length>=1904)    # as_date("2015-01-01") + 2616 = "2022-03-20"
 
 grpRecs <- tmpRecs %>%
   group_by(
-    # transformations, 
-    # regressors,
-    # action, volatility = (VIX_txn>30),
+    transformations,
+    regressors,
+    action, 
+    volatility = (VIX_txn>30),
     horizon, txnLength = as.integer(txnLength)) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>%
   filter()
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 
-tmpRecs %>%
-  group_by(horizon, transformations) %>%
-  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% filter(transformations == ">=2015")
+tmpRecs %>% filter() %>% 
+  group_by(transformations, horizon) %>%
+  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
+  arrange(desc(Mean_success))
+  
 
 
 
@@ -58,6 +66,9 @@ tmpRecs %>%
 
 # --------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
+
 # train a regression model (or tree etc.) to optimize selection of recommendations to implement
 # https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
 # training data

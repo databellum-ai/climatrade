@@ -1,7 +1,7 @@
 dataDaily <- dataUptodate
 nExamples <- examplesToGenerate
 nLags <- lagToApply
-nLags <- 4
+nLags <- 14
 i <- 1
 testDateStart <- as_date("2021-01-01")  # oldest date we assume to avoid too old simulations
 startDateDataset <- as_date("2015-01-01")  # oldest available date for training
@@ -43,7 +43,7 @@ print(paste("Regressors used by NN:")); print(paste(names(xTrain)))
 print(paste("yTrain:", length(yTrain), "frequency: ", frequencyNN))
 
 # fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain)
-fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain)
+fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain, MaxNWts=2000)
 summary(fit6)
 # forecast
 xFuture <- futureData[,-1] # remove date
