@@ -2,9 +2,6 @@
 # Extract stock data
 # ================================
 
-library(tidyquant)
-library(tidyverse)
-
 #============ Prices parameters to extract (Yahoo! Finance):
 print("Loading seed")
 head(seedFeatures_df)

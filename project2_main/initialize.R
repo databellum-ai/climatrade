@@ -8,6 +8,8 @@ library(tidyverse)
 library(forecast)
 library(fpp3)
 # library(GGally)
+library(tidyquant)  # extraction from YahooFinance
+library(imputeTS)  # interpolation function (na_interpolation()) during data extraction
 
 # ------------------------------------------------------
 # HYPERPARAMETERS AND CONSTANTS

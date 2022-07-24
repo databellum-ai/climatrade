@@ -1,14 +1,17 @@
 extractDataUptodate <- function() {
   selectedVbles <- c("^VIX", "^VVIX", "^VIX3M", "^VXN", "^GVZ")
-  endDateTicker <- today()
+  endDateTicker <- as.character(today())
   startingDateTicker <- "2015-01-01"  
   
   print("Extracting stocks")
   # read datafrom source
+
   stocksData <- tq_get(selectedVbles,
                        from = startingDateTicker,
                        to = endDateTicker,
-                       get = "stock.prices")
+                       get = "stock.prices"
+                       , verbose = TRUE)
+
   # format dataframe
   stocksData <- stocksData %>% 
     select(date, symbol, close) %>% 

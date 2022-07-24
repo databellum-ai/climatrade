@@ -1,5 +1,6 @@
-# !!! quitar warnings de nnetar()
-# !! con EDA decidir multiHorizon? / daysToForecast = ¿1/2/!3/4/!5/7/9/10/14?
+# !!! error NN Max... horixonte 5 y 100 ejemplos
+# !!! duda de núm de lags como regressors ¿me estoy pasando en uno al hacer _n? (VER FOTO)
+# !! con EDA ¿confirmar multiHorizon?
 # !! MODELO2... crear llamada básica de "filtrado" añadiendo length, weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VVIX, ¿IAI?)
 # !! quitar warnings de Extract (YahooFinance)
 # ! montar proceso integral (ETL + forecast + prediction + publish) + comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
@@ -11,25 +12,21 @@
 
 source("project2_main/initialize.R")
 
-transformation <- "NuevoExtractMultihorizonte + >=2015"
+transformation <- ">=2015"
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
 dataUptodate <- extractDataUptodate()
-
 head(dataUptodate)
+# all recommendations generated are consolidated in a RDS for further analysis
 saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
+dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
 
 # ------------------------------------------------------
 # generate recommendations based in the forecast using NNETAR with regressors
-# all recommendations generated are consolidated in a RDS for further analysis
-dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
-
-# run the NN to generate recommendations based in a forecast:
-# recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-
+# run the NN to generate recommendations:
 examplesToGenerate <- 100  # 0 means TODAY
-for (j in c(2:14)) {
+for (j in c(5:14)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
   lagToApply <- daysToForecast
@@ -38,20 +35,22 @@ for (j in c(2:14)) {
 
 recommendationsNN
 # analyze results
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") #%>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
-tmpRecs %>% filter(as.integer(txnLength) == horizon & horizon == 11) %>% pull(success) %>% mean()
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") # %>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
+
 grpRecs <- tmpRecs %>%
-  group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>%
+  group_by(
+    # transformations, 
+    # regressors,
+    # action, volatility = (VIX_txn>30),
+    horizon, txnLength = as.integer(txnLength)) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>%
-  filter(horizon == txnLength)
+  filter()
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 
-unique(grpRecs$transformations)
-
-view(grpRecs)
-tmpRecs %>% group_by(horizon) %>% summarise(n())
-
+tmpRecs %>%
+  group_by(horizon, transformations) %>%
+  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% filter(transformations == ">=2015")
 
 
 
