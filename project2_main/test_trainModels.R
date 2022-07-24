@@ -1,6 +1,5 @@
-# !!! duda de núm de lags como regressors ¿me estoy pasando en uno al hacer _n? (VER FOTO + IMAGINAR CON SÓLO LAG=1)
-# !!! probar con regressors "n-1"
-# !! MODELO2... con EDA crear llamada básica de "filtrado" añadiendo length, weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VIX_+-30, VVIX, ¿IAI?)
+# !!! confirmar/descartar con regressors "n-1"
+# !! MODELO2... con EDA crear llamada básica de "filtrado" añadiendo length(!), weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VIX_+-30, VVIX, ¿IAI?)
 # ! montar proceso integral (ETL + forecast + prediction + publish) + comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
 # ! quitar warnings de Extract (YahooFinance) (..."silence()")
 # crear modelo lm/tree a partir de la llamada básica de filtrado de recomendaciones
@@ -17,7 +16,7 @@
 
 source("project2_main/initialize.R")
 
-transformation <- ">=2015"
+transformation <- ""
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
@@ -31,7 +30,8 @@ dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available
 # generate recommendations based in the forecast using NNETAR with regressors
 # run the NN to generate recommendations:
 examplesToGenerate <- 100  # 0 means TODAY
-for (j in c(1,7)) {
+
+for (j in c(2,3,4,5,6,8,9,10,11,12,13,7,14)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
   lagToApply <- daysToForecast
@@ -44,9 +44,8 @@ tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") # %>% filter(lengt
 
 grpRecs <- tmpRecs %>%
   group_by(
-    transformations,
     regressors,
-    action, 
+    # action, 
     # volatility = (VIX_txn>30),
     horizon, txnLength = as.integer(txnLength)) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>%
@@ -54,10 +53,10 @@ grpRecs <- tmpRecs %>%
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 
-tmpRecs %>% filter(transformations == ">=2015") %>% 
-  group_by(txnLength, horizon) %>%
+tmpRecs %>% filter() %>% 
+  group_by(regressors, horizon, txnLength) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
-  arrange(desc(Mean_success))
+  arrange(desc(Mean_success)) %>% tail(20)
 
 
 

@@ -1,7 +1,6 @@
 dataDaily <- dataUptodate
 nExamples <- examplesToGenerate
-nLags <- lagToApply
-nLags <- 14
+nLags <- 4
 i <- 1
 testDateStart <- as_date("2021-01-01")  # oldest date we assume to avoid too old simulations
 startDateDataset <- as_date("2015-01-01")  # oldest available date for training
@@ -15,18 +14,24 @@ lastDateAvailable <- as_date(i) # last date available for training observations
 firstDateToForecast <- lastDateAvailable + 1
 lastDateToForecast <- firstDateToForecast + nLags - 1
 
-
-# *****
-laggedVbles <- c("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n")
+laggedVbles <- c("VIX_n", "VVIX_n", "VIX3M_n", "VIXNsdq_n", "GoldVlty_n", 
+                 "VIX_n2", "VVIX_n2", "VIX3M_n2", "VIXNsdq_n2", "GoldVlty_n2")
 calendarVbles <- c("month", "dayInMonth", "wkDay", "yrWeek")
 dataDaily <- dataDaily %>% mutate(
   VIX_n = lag(VIX, n=nLags),
   VVIX_n = lag(VVIX, n=nLags),
   VIX3M_n = lag(VIX3M, n=nLags),
   VIXNsdq_n = lag(VIXNsdq, n=nLags),
-  GoldVlty_n = lag(GoldVlty, n=nLags)
+  GoldVlty_n = lag(GoldVlty, n=nLags),
+  VIX_n2 = lag(VIX, n=nLags+1),
+  VVIX_n2 = lag(VVIX, n=nLags+1),
+  VIX3M_n2 = lag(VIX3M, n=nLags+1),
+  VIXNsdq_n2 = lag(VIXNsdq, n=nLags+1),
+  GoldVlty_n2 = lag(GoldVlty, n=nLags+1)
 )
-text_regressors <- "VX+C2"
+text_regressors <- "VX+VN2+C2"
+
+
 # prepare training dataset (past)
 dataDailyPastRefDate <- dataDaily %>%
   select(date, VIX, all_of(laggedVbles), all_of(calendarVbles)) %>%
@@ -47,6 +52,9 @@ fit6 <- nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain, MaxNWts=2000)
 summary(fit6)
 # forecast
 xFuture <- futureData[,-1] # remove date
-# fc6 <- forecast(fit6, h = nLags, xreg = xFuture, PI = F)
 fc6 <- forecast(fit6, h = nLags, xreg = xFuture, PI = F)
 summary(fc6)
+
+
+
+

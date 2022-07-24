@@ -10,7 +10,7 @@ transf <- transf %>% mutate(
            "VX+C1"))
 )
 
-transf %>% mutate(transformations = if_else(transformations != "NuevoExtractMultihorizonte + >=2015", ">=2017", ">=2015"))
+transf %>% filter (transformations == ">=2015") %>% mutate(transformations = "")
 
 head(transf)
 # saveRDS(transf, "project2_main/recommendationsNN_all.RDS")
