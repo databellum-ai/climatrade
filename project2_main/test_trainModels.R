@@ -47,18 +47,17 @@ grpRecs <- tmpRecs %>%
     transformations,
     regressors,
     action, 
-    volatility = (VIX_txn>30),
+    # volatility = (VIX_txn>30),
     horizon, txnLength = as.integer(txnLength)) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>%
   filter()
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 
-tmpRecs %>% filter() %>% 
-  group_by(transformations, horizon) %>%
+tmpRecs %>% filter(transformations == ">=2015") %>% 
+  group_by(txnLength, horizon) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
   arrange(desc(Mean_success))
-  
 
 
 
