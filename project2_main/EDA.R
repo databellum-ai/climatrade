@@ -1,3 +1,6 @@
+
+source("project2_main/initialize.R")
+
 # EDA of generated forecasts:
 data_all_d <- readRDS("project2_main/recommendationsNN_all.rds")
 

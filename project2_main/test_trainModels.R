@@ -1,10 +1,22 @@
+# !!! quitar warnings de nnetar()
+# !! con EDA decidir multiHorizon? / daysToForecast = ¿1/2/!3/4/!5/7/9/10/14?
+# !! MODELO2... crear llamada básica de "filtrado" añadiendo length, weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VVIX, ¿IAI?)
+# !! quitar warnings de Extract (YahooFinance)
+# ! montar proceso integral (ETL + forecast + prediction + publish) + comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
+# crear modelo lm/tree a partir de la llamada básica de filtrado de recomendaciones
+# probar AWS para programar diariamente y enviar mail
+# crear shinnyApp
+# jugar con más parámetros de nnetar y de forecast + probar transformations (scale(), log(), BoxCox-lambda)
+# refinar más vblesPlanetMood (movingAverage/diff/log/smooth) para meter en MODELO1 y/o MODELO2
 
 source("project2_main/initialize.R")
-transformation <- "NuevoExtractMultihorizonte + lambdaAuto+scale"
+
+transformation <- "NuevoExtractMultihorizonte + >=2015"
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
 dataUptodate <- extractDataUptodate()
+
 head(dataUptodate)
 saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
 
@@ -15,33 +27,39 @@ dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available
 
 # run the NN to generate recommendations based in a forecast:
 # recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
-# 
-examplesToGenerate <- 3  # 0 means TODAY
-for (j in c(7)) {
+
+examplesToGenerate <- 100  # 0 means TODAY
+for (j in c(2:14)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
   lagToApply <- daysToForecast
   recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
 }
 
-
 recommendationsNN
 # analyze results
 tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") #%>% filter(length>=1904)    # as_date("2017-01-01") + 1904 = "2022-03-20"
-# tmpRecs %>% filter(as.integer(txnLength) == horizon & horizon == 11) %>% pull(success) %>% mean()
-grpRecs <- tmpRecs %>% 
-  group_by(regressors, transformations, action, horizon, txnLength = as.integer(txnLength)) %>% 
-  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
-  filter(horizon==7)
+tmpRecs %>% filter(as.integer(txnLength) == horizon & horizon == 11) %>% pull(success) %>% mean()
+grpRecs <- tmpRecs %>%
+  group_by(transformations, action, horizon, txnLength = as.integer(txnLength)) %>%
+  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>%
+  filter(horizon == txnLength)
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
+
+unique(grpRecs$transformations)
 
 view(grpRecs)
 tmpRecs %>% group_by(horizon) %>% summarise(n())
 
 
-# ------------------------------------------------------
-# train a regression model to optimize selection of recommendations to implement
+
+
+
+
+# --------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
+# train a regression model (or tree etc.) to optimize selection of recommendations to implement
 # https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
 # training data
 dataset_glm <- 
