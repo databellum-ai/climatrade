@@ -29,9 +29,9 @@ dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available
 # ------------------------------------------------------
 # generate recommendations based in the forecast using NNETAR with regressors
 # run the NN to generate recommendations:
-examplesToGenerate <- 100  # 0 means TODAY
+examplesToGenerate <- 50  # 0 means TODAY
 
-for (j in c(2,3,4,5,6,8,9,10,11,12,13,7,14)) {
+for (j in c(7,14)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
   lagToApply <- daysToForecast
@@ -53,10 +53,13 @@ grpRecs <- tmpRecs %>%
 grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 
-tmpRecs %>% filter() %>% 
+tmpRecs %>% 
+  filter(horizon == 7) %>% 
   group_by(regressors, horizon, txnLength) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
-  arrange(desc(Mean_success)) %>% tail(20)
+  arrange(desc(Mean_success)) %>% 
+  arrange(horizon, desc(txnLength)) %>% 
+  head(20)
 
 
 
