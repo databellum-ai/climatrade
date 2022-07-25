@@ -19,7 +19,9 @@
 source("project2_main/initialize.R")
 
 transformation <- ""
-
+readRDS("project2_main/data_stocksClose.rds")
+readRDS("project2_main/data_stocks.rds")
+readRDS("project2_main/accuracies_dataset.rds")
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
 dataUptodate <- extractDataUptodate()
