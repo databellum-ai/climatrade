@@ -4,25 +4,16 @@ source("project2_main/initialize.R")
 data_all_d <- readRDS("project2_main/recommendationsNN_all.rds")
 
 # analyze recommendations
-tmpRecs <- data_all_d #%>% filter(length>=1904)    # as_date("2015-01-01") + 2616 = "2022-03-20"
-grpRecs <- tmpRecs %>%
-  group_by(
-    regressors,
-    # action, 
-    # volatility = (VIX_txn>30),
-    horizon, txnLength = as.integer(txnLength)) %>%
-  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>%
-  filter()
-grpRecs%>% arrange(desc(Mean_success))
-grpRecs%>% arrange(desc(Mean_TxnEarning))
-
-tmpRecs %>% 
-  filter(horizon == 14) %>% 
-  group_by(regressors, horizon, txnLength) %>%
+data_all_d %>% 
+  # filter(length>=1904) %>%    # as_date("2015-01-01") + 2616 = "2022-03-20"
+  filter(
+    horizon == txnLength & 
+      regressors == "VX+C2"
+  ) %>%
+  group_by(regressors, action, volatility = (VIX_txn>30), horizon, txnLength) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
-  arrange(desc(Mean_success)) %>% 
-  arrange(horizon, desc(txnLength)) %>% 
-  head(20)
+  arrange(desc(horizon), (txnLength)) %>% 
+  arrange((Mean_success))
 
 
 
