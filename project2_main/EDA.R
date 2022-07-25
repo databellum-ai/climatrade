@@ -13,9 +13,7 @@ data_all_d %>%
   group_by(regressors, action, volatility = (VIX_txn>30), horizon, txnLength) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
   arrange(desc(horizon), (txnLength)) %>% 
-  arrange((Mean_success))
-
-
+  arrange(desc(Mean_success))
 
 
 # grouped 2D chart:
