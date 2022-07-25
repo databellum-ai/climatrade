@@ -1,4 +1,6 @@
 # !!! confirmar/descartar con regressors "n-1"
+# valorar LM (n-2) ó VAR
+# probar de nuevo scale
 # !! MODELO2... con EDA crear llamada básica de "filtrado" añadiendo length(!), weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VIX_+-30, VVIX, ¿IAI?)
 # ! montar proceso integral (ETL + forecast + prediction + publish) + comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
 # ! quitar warnings de Extract (YahooFinance) (..."silence()")
@@ -29,18 +31,20 @@ dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available
 # ------------------------------------------------------
 # generate recommendations based in the forecast using NNETAR with regressors
 # run the NN to generate recommendations:
-examplesToGenerate <- 50  # 0 means TODAY
+examplesToGenerate <- 100  # 0 means TODAY
 
-for (j in c(7,14)) {
+for (j in c(2:14)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
   lagToApply <- daysToForecast
   recommendationsNN <- generateRecommendations(dataUptodate, examplesToGenerate, lagToApply)
 }
 
-recommendationsNN
-# analyze results
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") # %>% filter(length>=1904)    # as_date("2015-01-01") + 2616 = "2022-03-20"
+head(recommendationsNN)
+tail(recommendationsNN)
+
+# analyze recommendations
+tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") %>% filter(length>=1904)    # as_date("2015-01-01") + 2616 = "2022-03-20"
 
 grpRecs <- tmpRecs %>%
   group_by(
@@ -54,7 +58,7 @@ grpRecs%>% arrange(desc(Mean_success))
 grpRecs%>% arrange(desc(Mean_TxnEarning))
 
 tmpRecs %>% 
-  filter(horizon == 7) %>% 
+  filter(horizon == 14) %>% 
   group_by(regressors, horizon, txnLength) %>%
   summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
   arrange(desc(Mean_success)) %>% 
