@@ -35,7 +35,7 @@ plot_ly(dt1, x = ~horizon, y = ~txnLength, z = ~SuccessPerc, color = ~EarningsPe
                                    yaxis = list(title = '# days open'),
                                  zaxis = list(title = '% Success')))
 
-head(data_all_d)
+head(dt1)
 
 
 

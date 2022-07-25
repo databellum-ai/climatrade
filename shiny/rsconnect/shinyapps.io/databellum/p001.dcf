@@ -1,0 +1,12 @@
+name: p001
+title: p001
+username:
+account: databellum
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6691360
+bundleId: 6131696
+url: https://databellum.shinyapps.io/p001/
+when: 1658775976.58584
+asMultiple: FALSE
+asStatic: FALSE

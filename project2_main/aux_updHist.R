@@ -1,6 +1,6 @@
 
 # CAMBIAR HISTORICO DE RECOMENDACIONES
-transf <- readRDS("project2_main/recommendationsNN_all.RDS")
+transf <- readRDS("project2_main/recommendationsNN_all.rds")
 transf <- transf %>% mutate(
   regressors = ifelse(
     regressors == "VIX_n, VVIX_n, VIX3M_n, VIXNsdq_n, GoldVlty_n, + DAI3_n, CCI_n", 
@@ -13,4 +13,4 @@ transf <- transf %>% mutate(
 transf %>% filter (transformations == ">=2015") %>% mutate(transformations = "")
 
 head(transf)
-# saveRDS(transf, "project2_main/recommendationsNN_all.RDS")
+# saveRDS(transf, "project2_main/recommendationsNN_all.rds")

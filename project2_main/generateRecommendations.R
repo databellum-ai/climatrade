@@ -88,7 +88,7 @@ generateRecommendations <- function(dataDaily, nExamples, nLags) {
   }
   print("PROCESS FINISHED. Recommended actions generated based in all past values until run date")
   # consolidate new generated observations for history
-  saveRDS((rbind(readRDS("project2_main/recommendationsNN_all.RDS"), recommendationsConsolidated)), "project2_main/recommendationsNN_all.RDS")
+  saveRDS((rbind(readRDS("project2_main/recommendationsNN_all.rds"), recommendationsConsolidated)), "project2_main/recommendationsNN_all.rds")
   return(recommendationsConsolidated)
 }
 
