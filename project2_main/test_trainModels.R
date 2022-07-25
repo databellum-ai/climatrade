@@ -19,9 +19,7 @@
 source("project2_main/initialize.R")
 
 transformation <- ""
-readRDS("project2_main/data_stocksClose.rds")
-readRDS("project2_main/data_stocks.rds")
-readRDS("project2_main/accuracies_dataset.rds")
+
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
 dataUptodate <- extractDataUptodate()
@@ -45,37 +43,12 @@ for (j in c(2:14)) {
 head(recommendationsNN)
 tail(recommendationsNN)
 
-# analyze recommendations
-tmpRecs <- readRDS("project2_main/recommendationsNN_all.RDS") %>% filter(length>=1904)    # as_date("2015-01-01") + 2616 = "2022-03-20"
-
-grpRecs <- tmpRecs %>%
-  group_by(
-    regressors,
-    # action, 
-    # volatility = (VIX_txn>30),
-    horizon, txnLength = as.integer(txnLength)) %>%
-  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>%
-  filter()
-grpRecs%>% arrange(desc(Mean_success))
-grpRecs%>% arrange(desc(Mean_TxnEarning))
-
-tmpRecs %>% 
-  filter(horizon == 14) %>% 
-  group_by(regressors, horizon, txnLength) %>%
-  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
-  arrange(desc(Mean_success)) %>% 
-  arrange(horizon, desc(txnLength)) %>% 
-  head(20)
-
-
-
-
 
 # --------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------
-
+# MODEL 2
 # train a regression model (or tree etc.) to optimize selection of recommendations to implement
 # https://www.r-bloggers.com/2015/09/how-to-perform-a-logistic-regression-in-r/
 # training data

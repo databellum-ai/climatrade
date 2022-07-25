@@ -1,15 +1,32 @@
-
 source("project2_main/initialize.R")
 
 # EDA of generated forecasts:
 data_all_d <- readRDS("project2_main/recommendationsNN_all.rds")
 
-# -------------------------------------------
-# Hyperparameter: calendarHorizon (= 14 days)
-# -------------------------------------------
-# we have generated forecast examples with horizons (days to schudule in the future) of 7, 14 and 21 days
-# looking at the scattered charts it seems there are good high number of Success cases, as well as high Earnings using 21 days
-# however, it still requires a to be refined later by a regression model
+# analyze recommendations
+tmpRecs <- data_all_d #%>% filter(length>=1904)    # as_date("2015-01-01") + 2616 = "2022-03-20"
+grpRecs <- tmpRecs %>%
+  group_by(
+    regressors,
+    # action, 
+    # volatility = (VIX_txn>30),
+    horizon, txnLength = as.integer(txnLength)) %>%
+  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>%
+  filter()
+grpRecs%>% arrange(desc(Mean_success))
+grpRecs%>% arrange(desc(Mean_TxnEarning))
+
+tmpRecs %>% 
+  filter(horizon == 14) %>% 
+  group_by(regressors, horizon, txnLength) %>%
+  summarise(n = n(), Mean_TxnEarning = mean(earningsPercent), Mean_success = mean(success)) %>% 
+  arrange(desc(Mean_success)) %>% 
+  arrange(horizon, desc(txnLength)) %>% 
+  head(20)
+
+
+
+
 # grouped 2D chart:
 dt1 <- data_all_d %>% 
   group_by(horizon, txnLength) %>% 
@@ -18,6 +35,10 @@ dt1 <- data_all_d %>%
 dt1 %>% 
   ggplot(aes(txnLength, SuccessPerc, color = as.factor(horizon), size = EarningsPerc)) +
   geom_point()
+
+
+
+
 # grouped 3D chart:
 # https://plotly.com/r/3d-scatter-plots/
 library(plotly)
@@ -30,9 +51,9 @@ head(data_all_d)
 
 
 
-# -------------------------------------------
+
 # Show VIX components (year and week seasonalities)
-# -------------------------------------------
+dataUptodate <- readRDS("project2_main/dataUptodate.rds")
 as_tsibble(dataUptodate, index = date) %>%
   model(
     STL(VIX ~ trend(window = 7) + season(window = "periodic"), robust = TRUE)) %>% 
