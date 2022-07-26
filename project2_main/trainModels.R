@@ -16,17 +16,9 @@
     # Missing values in xreg, omitting rows
 
 
+source("project2_main/extractDataUptodate.R")
+
 source("project2_main/initialize.R")
-
-transformation <- ""
-
-# ------------------------------------------------------
-# extract daily data from live sources from history until last close
-dataUptodate <- extractDataUptodate()
-head(dataUptodate)
-tail(dataUptodate)
-# all recommendations generated are consolidated in a RDS for further analysis
-saveRDS(dataUptodate,"project2_main/dataUptodate.rds") #  save last available fresh daily data
 dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
 
 # ------------------------------------------------------

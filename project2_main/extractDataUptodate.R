@@ -1,3 +1,9 @@
+
+source("/home/rstudio/R/climatrade/project2_main/initialize.R")
+
+# ------------------------------------------------------
+# extract daily data from live sources from history until last close
+
 extractDataUptodate <- function() {
   selectedVbles <- c("^VIX", "^VVIX", "^VIX3M", "^VXN", "^GVZ")
   endDateTicker <- as.character(today())
@@ -80,4 +86,12 @@ extractDataUptodate <- function() {
   return(stocksData)
 }
 
+
+transformation <- ""
+
+dataUptodate <- extractDataUptodate()
+head(dataUptodate)
+tail(dataUptodate)
+# all recommendations generated are consolidated in a RDS for further analysis
+saveRDS(dataUptodate,"/home/rstudio/R/climatrade/project2_main/dataUptodate.rds") #  save last available fresh daily data
 
