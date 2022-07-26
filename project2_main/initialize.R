@@ -27,3 +27,4 @@ frequencyNN <- 365  # daily frequency for our data (time series use year as base
 # INCLUDED FUNCTIONS
 source("project2_main/extractDataUptodate.R")  # function to generate recommendations using NN forecast
 source("project2_main/generateRecommendations.R")  # function to generate recommendations using NN forecast
+
