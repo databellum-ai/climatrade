@@ -1,6 +1,3 @@
-## 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
-## --------
-
 # ! CRON: rematar + quitar email (password) 
 # ! MODELO1... confirmar/descartar NN con regressors "n-1"
 # ! MODELO1... con EDA ¿confirmar multiHorizon? ¡descartar algún horizonte?
