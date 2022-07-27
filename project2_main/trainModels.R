@@ -1,4 +1,4 @@
-## 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
+## rstudio // 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
 ## --------
 
 # ! CRON: rematar + quitar email (password) 
