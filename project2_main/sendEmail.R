@@ -1,8 +1,8 @@
 #!/usr/bin/env Rscript
 
-source("./project2_main/initialize.R")
+source("~/R/climatrade/project2_main/initialize.R")
 
-freshData <- readRDS("./project2_main/dataUptodate.rds")
+freshData <- readRDS("~/R/climatrade/project2_main/dataUptodate.rds")
 lastValue <- paste("Last retrieved value:",round(freshData[nrow(freshData),2],2), "on", freshData[nrow(freshData),1])
 
 library(mailR)

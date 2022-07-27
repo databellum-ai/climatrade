@@ -1,5 +1,5 @@
 
-source("./project2_main/initialize.R")
+source("~/R/climatrade/project2_main/initialize.R")
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
@@ -93,5 +93,6 @@ dataUptodate <- extractDataUptodate()
 head(dataUptodate)
 tail(dataUptodate)
 # all recommendations generated are consolidated in a RDS for further analysis
-saveRDS(dataUptodate,"./project2_main/dataUptodate.rds") #  save last available fresh daily data
+saveRDS(dataUptodate,"~/R/climatrade/project2_main/dataUptodate.rds") #  save last available fresh daily data
 
+print("Data extraction FINISHED")

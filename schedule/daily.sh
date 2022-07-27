@@ -1,7 +1,7 @@
 #!/bin/bash
-
 Rscript ~/R/climatrade/project2_main/extractDataUptodate.R
 Rscript ~/R/climatrade/project2_main/sendEmail.R
+exit 0
 
 ## OTRAS FORMAS DE LLAMAR DESDE $:
 # < a.R --no-save
@@ -15,13 +15,13 @@ Rscript ~/R/climatrade/project2_main/sendEmail.R
 # -View current tasks scheduled:
 # $ crontab -l
 # 
-# -View current tasks scheduled for a user:
-# $ crontab -u [user] -l
-#   (view other commands: https://phoenixnap.com/kb/how-to-list-display-view-all-cron-jobs-linux)
-# 
 # -Edit crontab configuration for current user:
 # $ crontab -e
 #   (this opens editor vim (see commands: https://cambiatealinux.com/comandos-basicos-para-sobrevivir-al-editor-vim)
+# 
+# -View current tasks scheduled for a user:
+# $ crontab -u [user] -l
+#   (view other commands: https://phoenixnap.com/kb/how-to-list-display-view-all-cron-jobs-linux)
 # 
 # -The /etc/crontab file (root user) can be edited using a text editor like nano (easier):
 # $ sudo nano /etc/crontab

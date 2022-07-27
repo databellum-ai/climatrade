@@ -26,6 +26,6 @@ frequencyNN <- 365  # daily frequency for our data (time series use year as base
 # ===============
 # KEYS
 # ---------------
-source("keys_APIs.R")
+source("~/R/climatrade/keys_APIs.R")
 
 
