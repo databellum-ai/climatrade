@@ -4,15 +4,16 @@
 # =====================================
 
 
-source("project2_main/extractDataUptodate.R")
-
-source("project2_main/initialize.R")
-dataUptodate <- readRDS("project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
+source("./project2_main/initialize.R")
+source("./project2_main/extractDataUptodate.R")
+dataUptodate <- readRDS("./project2_main/dataUptodate.rds") #  load last available fresh daily data (prescriptors)
 
 # ------------------------------------------------------
 # generate recommendations based in the forecast using NNETAR with regressors
 # run the NN to generate recommendations:
-examplesToGenerate <- 0  # 0 means TODAY
+
+source("./project2_main/generateRecommendations.R")  # FUNCTION to generate recommendations using NN forecast
+examplesToGenerate <- 1  # 0 means TODAY
 for (j in c(2:14)) {
   print (paste("=====> HORIZON:",j))
   daysToForecast <- j  # horizon for forecast
@@ -26,7 +27,7 @@ recommendationsNN
 # predict on real data
 # prepare newdata (recommendations just obtained)
 freshRecommendations <-
-  readRDS("project2_main/recommendationsNN_all.rds") %>%
+  readRDS("./project2_main/recommendationsNN_all.rds") %>%
   select("VIX_txn", "VIX_forecasted", "predChangePercent", "txnLength", "success")
 
 testREV <- cbind(

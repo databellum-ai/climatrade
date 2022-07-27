@@ -1,20 +1,20 @@
 #!/usr/bin/env Rscript
 
-freshData <- readRDS("/home/rstudio/R/climatrade/project2_main/dataUptodate.rds")
+source("./project2_main/initialize.R")
+
+freshData <- readRDS("./project2_main/dataUptodate.rds")
 lastValue <- paste("Last retrieved value:",freshData[nrow(freshData),2], "on", freshData[nrow(freshData),1])
 
 library(mailR)
-sender <- "datebellum ...the magicians <JES@databellum-ai.com>"
-recipients <- c("Eloy <prof02@yahoo.com>")
-send.mail(from = sender, 
-          to = recipients, 
-          cc = c("Eloy2 <jeloysuarez@gmail.com>"),
-          bcc = c("Eloy3 <Juan-Eloy.Suarez@dupont.com>"),
+send.mail(from = senderMail, 
+          to = c("JuanE <prof02@yahoo.com>"), 
+          cc = c("JuanE2 <jeloysuarez@gmail.com>"),
+          # bcc = c("JuanE3 <Juan-Eloy.Suarez@dupont.com>"),
           subject = paste0("Mensaje de databellum ", "a las ", Sys.time(), ": ",lastValue), 
           body = "<P>Esta es una prueba de envía de email desde la cuenta de <B>databellum</B>, donde se pueden poner varios p&aacute;rrafos e incluir gráficos, etc.</P> <IMG SRC='https://databellum-ai.com/db/img/navbar-logo.png' WIDTH=200 ALIGN='left'> Por ejemplo en este caso.",
-          smtp = list(host.name = "mx5.servidormx.es", port = 25, 
-                      user.name = "JES@databellum-ai.com",            
-                      passwd = "", 
+          smtp = list(host.name = hostMail, port = 25, 
+                      user.name = userMail,            
+                      passwd = passwordMail, 
                       ssl = TRUE), 
           authenticate = TRUE, 
           send = TRUE, 

@@ -23,7 +23,9 @@ filter <- dplyr::filter # conflict
 # HYPERPARAMETERS AND CONSTANTS
 frequencyNN <- 365  # daily frequency for our data (time series use year as base unit)
 
-# ------------------------------------------------------
-# INCLUDED FUNCTIONS
-source("/home/rstudio/R/climatrade/project2_main/generateRecommendations.R")  # function to generate recommendations using NN forecast
+# ===============
+# KEYS
+# ---------------
+source("keys_APIs.R")
+
 

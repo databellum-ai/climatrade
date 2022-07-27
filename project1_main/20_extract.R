@@ -6,7 +6,7 @@
 # PTE: probar/automatizar proceso Extract RSellenium (última versión compatible de Chrome)
 
 
-source("10_initialize.R")
+source("project1_main//10_initialize.R")
 
 library(tidyverse)
 library(openxlsx)
