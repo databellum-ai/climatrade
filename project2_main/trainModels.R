@@ -1,19 +1,28 @@
-# !!! confirmar/descartar con regressors "n-1"
-# valorar LM (n-2) ó VAR
-# probar de nuevo scale
-# !! MODELO2... con EDA crear llamada básica de "filtrado" añadiendo length(!), weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VIX_+-30, VVIX, ¿IAI?)
-# ! montar proceso integral (ETL + forecast + prediction + publish) + comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
-# ! quitar warnings de Extract (YahooFinance) (..."silence()")
-# crear modelo lm/tree a partir de la llamada básica de filtrado de recomendaciones
-# probar AWS para programar diariamente y enviar mail
-# crear shinnyApp
-# conn EDA ¿confirmar multiHorizon? ¡descartar algún horizonte?
-# jugar con más parámetros de nnetar y de forecast + probar transformations (scale(), log(), BoxCox-lambda)
-# refinar más vblesPlanetMood (movingAverage/diff/log/smooth) para meter en MODELO1 y/o MODELO2
-# quitar warnings de nnetar()
+## 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
+## --------
+
+# ! CRON: rematar + quitar email (password) 
+# ! MODELO1... confirmar/descartar NN con regressors "n-1"
+# ! MODELO1... con EDA ¿confirmar multiHorizon? ¡descartar algún horizonte?
+# ! MODELO1... valorar: LM_n-2 vs. NN+tree vs. VAR
+# ! MODELO1... probar de nuevo scale/log con NN (y otros posible métodos)
+# MODELO1... jugar con más parámetros de nnetar() y de forecast() + probar transformations (scale(), log(), BoxCox-lambda)
+# MODELO1 y/o MODELO2... refinar más vblesPlanetMood (movingAverage/diff/log/smooth)
+# ! MODELO2... con EDA crear llamada básica de "filtrado" añadiendo length(!), weekday(), month(), dayInMonth(), weekInYear() y algún indicador de "sensibilidad instantánea" (VIX_+-30, VVIX, ¿IAI?)
+# ! MONTAR PROCESO INTEGRAL... (ETL + forecast + prediction + .rds + shiny + email) + comprobar valor última fecha cargada (Imputation + Hora exacta cierre)
+# PTE: depurar paso final (y lentitud + warnings) de la extracción de datos de Yahoo:
+# `summarise()` regrouping output by 'date' (override with `.groups` argument)
+# Note: Using an external vector in selections is ambiguous.
+# ℹ Use `all_of(selectedVbles)` instead of `selectedVbles` to silence this message.
+# ℹ See <https://tidyselect.r-lib.org/reference/faq-external-vector.html>.
+# This message is displayed once per session.
+# PTE: quitar warnings de nnetar()
     # WARNING messages:
     # 1: In nnetar(ts(yTrain, frequency = frequencyNN), xreg = xTrain) :
     # Missing values in xreg, omitting rows
+# PTE: en AWS, instalar KeyPair para SSH (terminal) de EC2/AMI, para que no pida password al hacer $sudo
+# PTE: en AWS, instalar SSH RSA en el enlace de GIT con RStudioServer reemplazando a PERSONALAccessToken para que no lo pida siempre que se hace $git push
+
 
 source("./project2_main/initialize.R")
 source("./project2_main/extractDataUptodate.R")

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-Rscript ../project2_main/extractDataUptodate.R
-Rscript ../project2_main/sendEmail.R
+Rscript ~/R/climatrade/project2_main/extractDataUptodate.R
+Rscript ~/R/climatrade/project2_main/sendEmail.R
 
 ## OTRAS FORMAS DE LLAMAR DESDE $:
 # < a.R --no-save
@@ -11,6 +11,7 @@ Rscript ../project2_main/sendEmail.R
 
 # CRONTAB FOR SCHEDULING TASKS:
 # =============================
+# -Ayuda general sobre CRON: https://help.dreamhost.com/hc/es/articles/215767047-Crear-un-Cron-Job-personalizado
 # -View current tasks scheduled:
 # $ crontab -l
 # 
