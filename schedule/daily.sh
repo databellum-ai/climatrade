@@ -1,4 +1,5 @@
 #!/bin/bash
+Rscript ~/R/climatrade/project2_main/initialize.R
 Rscript ~/R/climatrade/project2_main/extractDataUptodate.R
 Rscript ~/R/climatrade/project2_main/sendEmail.R
 exit 0
