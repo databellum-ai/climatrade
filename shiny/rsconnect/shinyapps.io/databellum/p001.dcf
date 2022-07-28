@@ -5,8 +5,9 @@ account: databellum
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6691360
-bundleId: 6136297
+bundleId: 6140252
 url: https://databellum.shinyapps.io/p001/
-when: 1658874653.04216
+when: 1658967897.34907
+lastSyncTime: 1658967897.34907
 asMultiple: FALSE
 asStatic: FALSE
