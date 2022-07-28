@@ -29,19 +29,7 @@ frequencyNN <- 365  # daily frequency for our data (time series use year as base
 # source("~/R/climatrade/keys_APIs.R")
 source(getFullPath("keys_APIs.R"))
 
-# ===============
-# FUNCTION TO BUILD PATHS LOCAL/REMOTE
-# Check your system information, look for nodename
-print(Sys.info())
-# Function to create full path
-getFullPath <- function(localName) {
-  if(Sys.info()["nodename"]=="ip-172-31-45-184") {
-    fPath <- "~/R/climatrade/"
-  } else {
-    fPath <- ""
-  }
-  return(paste0(fPath, localName))
-}
+
 
 
 

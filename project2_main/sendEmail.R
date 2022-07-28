@@ -1,8 +1,23 @@
 #!/usr/bin/env Rscript
 
-source("~/R/climatrade/project2_main/initialize.R")
+# source("~/R/climatrade/project2_main/initialize.R")
+# ===============
+# FUNCTION TO BUILD PATHS LOCAL/REMOTE
+# Check your system information, look for nodename
+print(Sys.info())
+# Function to create full path
+getFullPath <- function(localName) {
+  if(Sys.info()[4]=="ip-172-31-45-184") {
+    fPath <- "~/R/climatrade/"
+  } else {
+    fPath <- ""
+  }
+  return(paste0(fPath, localName))
+}
+source(getFullPath("project2_main/initialize.R"))
 
-freshData <- readRDS("~/R/climatrade/project2_main/dataUptodate.rds")
+# freshData <- readRDS("~/R/climatrade/project2_main/dataUptodate.rds")
+freshData <- readRDS(getFullPath("project2_main/dataUptodate.rds"))
 lastValue <- paste("Last retrieved value:",round(freshData[nrow(freshData),2],2), "on", freshData[nrow(freshData),1])
 
 library(mailR)

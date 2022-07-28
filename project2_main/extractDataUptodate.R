@@ -1,5 +1,21 @@
 
 # source("~/R/climatrade/project2_main/initialize.R")
+# ===============
+# FUNCTION TO BUILD PATHS LOCAL/REMOTE
+# Check your system information, look for nodename
+print(Sys.info())
+# Function to create full path
+getFullPath <- function(localName) {
+  if(Sys.info()[4]=="ip-172-31-45-184") {
+    fPath <- "~/R/climatrade/"
+  } else {
+    fPath <- ""
+  }
+  return(paste0(fPath, localName))
+}
+source(getFullPath("project2_main/initialize.R"))
+
+
 
 # ------------------------------------------------------
 # extract daily data from live sources from history until last close
