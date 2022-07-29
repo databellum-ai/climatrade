@@ -51,11 +51,11 @@ ui <- fluidPage(
 
 # Define server logic to summarize and view selected dataset ----
 server <- function(input, output) {
-  tmpRecomms <- readRDS(getFullPath("project2_main/recommendationsNN_all.rds")) %>% arrange(desc(date))# %>% filter(date_txn == max(date_txn))
+  tmpRecomms <- readRDS(getFullPath("recommendationsNN_all.rds")) %>% arrange(desc(date))# %>% filter(date_txn == max(date_txn))
   tmpRecomms$date_txn <- format(tmpRecomms$date_txn,'%d-%m-%Y')  
   tmpRecomms$date <- format(tmpRecomms$date,'%d-%m-%Y') 
   tmpRecomms <- tmpRecomms %>% select("Open on" = date_txn, "Open at" = VIX_txn, Action = action, "Close on" = date)
-  tmpClosePrices <- readRDS(getFullPath("project2_main/dataUptodate.rds")) %>% select(date, "Close Price" = VIX) %>% arrange(desc(date))
+  tmpClosePrices <- readRDS(getFullPath("dataUptodate.rds")) %>% select(date, "Close Price" = VIX) %>% arrange(desc(date))
 
   tmpClosePrices$date <- format(tmpClosePrices$date,'%d-%m-%Y')
   # Return the requested dataset ----

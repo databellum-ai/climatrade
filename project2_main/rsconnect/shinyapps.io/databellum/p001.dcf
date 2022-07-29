@@ -1,0 +1,14 @@
+name: p001
+title: p001
+username:
+account: databellum
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 6691360
+bundleId: 6145390
+url: https://databellum.shinyapps.io/p001/
+when: 1659094041.13878
+lastSyncTime: 1659094041.13878
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: aux_testNN.R|aux_updHist.R|EDA.R|extractDataUptodate.R|generateRecommendations.R|initialize.R|realProcess.R|sendEmail.R|trainModels.R
