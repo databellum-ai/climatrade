@@ -1,6 +1,3 @@
-
-# source("~/R/climatrade/project2_main/initialize.R")
-# ===============
 # FUNCTION TO BUILD PATHS LOCAL/REMOTE
 # Check your system information, look for nodename
 print(Sys.info())
@@ -13,8 +10,10 @@ getFullPath <- function(localName) {
   }
   return(paste0(fPath, localName))
 }
-source(getFullPath("project2_main/initialize.R"))
 
+
+# source("~/R/climatrade/project2_main/initialize.R")
+source(getFullPath("project2_main/initialize.R"))
 
 
 # ------------------------------------------------------
